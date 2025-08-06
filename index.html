@@ -156,10 +156,21 @@
   <button id="factButton">Show Me a Random Fact</button>
 
   <audio id="clickSound" preload="auto">
-    <source src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_4590b64ef4.mp3?filename=mouse-click-125943.mp3" type="audio/mpeg" />
-  </audio>
+  <source src="https://cdn.pixabay.com/download/audio/2022/03/27/audio_2a4d4f23c0.mp3?filename=pop-6187.mp3" type="audio/mpeg" />
+</audio>
+<script>
+  
+  // Inside your getRandomFact() function:
+  try {
+    clickSound.volume = 0.15; // 15% volume
+    clickSound.currentTime = 0;
+    clickSound.play();
+  } catch (e) {
+    console.warn('Sound play failed:', e);
+  }
+  // ... rest of your code
+</script>
 
-  <script>
     const facts = [
       "A day on Venus is longer than its year.",
       "Neutron stars can spin at 600+ rotations per second.",
@@ -222,3 +233,4 @@
   </script>
 </body>
 </html>
+
