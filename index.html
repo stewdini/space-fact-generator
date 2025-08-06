@@ -4,10 +4,6 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Random Space Fact Generator | Space Simplified</title>
-<meta name="description" content="Discover fascinating facts about space with our free, random space fact generator. Instantly learn something cool about the cosmos." />
-
-<!-- Favicon and manifest here (keep your current ones) -->
-
 <style>
   body {
     margin: 0;
@@ -34,62 +30,35 @@
     pointer-events: none;
   }
 
-  .planet, .comet {
+  .space-object {
     position: fixed;
     border-radius: 50%;
-    opacity: 0.6;
+    opacity: 0.7;
     pointer-events: none;
     z-index: 0;
+    will-change: transform;
   }
 
   .planet {
     background: radial-gradient(circle, #6ab0f3, #08315a);
-    width: 40px;
-    height: 40px;
-    animation: driftPlanet linear infinite;
   }
 
   .comet {
     background: linear-gradient(90deg, #fff, #66fcf1);
-    width: 8px;
-    height: 8px;
     filter: drop-shadow(0 0 5px #66fcf1);
-    animation: driftComet linear infinite;
   }
 
-  @keyframes driftPlanet {
-    from { transform: translateY(-60px) translateX(0); }
-    to { transform: translateY(calc(100vh + 60px)) translateX(30px); }
+  .asteroid {
+    background: radial-gradient(circle, #a48a5c, #3f341c);
+    border-radius: 30% 50% 40% 50% / 60% 30% 50% 40%;
   }
 
-  @keyframes driftComet {
-    from { transform: translateX(-50px) translateY(0) rotate(45deg); }
-    to { transform: translateX(calc(100vw + 50px)) translateY(20px) rotate(45deg); }
-  }
-
-  /* Your existing styles for headings, fact display, buttons etc. come here */
-  /* ... Copy them from your existing code, unchanged ... */
   h1 {
     font-size: 3rem;
     margin-bottom: 1rem;
     position: relative;
     z-index: 1;
     text-shadow: 0 0 8px #66fcf1;
-  }
-
-  .sparkle {
-    display: inline-block;
-    animation: sparkleAnim 2s linear infinite;
-    font-size: 2.2rem;
-    color: #66fcf1;
-    margin-left: 0.3em;
-    position: relative;
-    top: 5px;
-  }
-
-  @keyframes sparkleAnim {
-    0%, 100% { opacity: 1; transform: rotate(0deg) scale(1); }
-    50% { opacity: 0.5; transform: rotate(20deg) scale(1.3); }
   }
 
   #factWrapper {
@@ -125,170 +94,30 @@
     to { opacity: 1; }
   }
 
-  #copyButton {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    margin-left: 4px;
-    display: none; /* hide initially */
-    color: #ccc; /* light grey */
-    transition: color 0.2s ease, transform 0.2s ease;
-    width: 24px;
-    height: 24px;
-    flex-shrink: 0;
-  }
-
-  #copyButton:hover {
-    color: #fff; /* white on hover */
-    transform: scale(1.2);
-  }
-
-  #copyFeedback {
-    font-size: 1.5rem;
-    color: #66fcf1;
-    margin-left: 8px;
-    user-select: none;
-    display: none;
-    align-self: center;
-  }
-
-  .buttons-container {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 1rem;
-    position: relative;
-    z-index: 2;
-  }
-
-  #factButton {
-    padding: 14px 35px;
-    font-size: 1.3rem;
-    border: none;
-    border-radius: 10px;
-    background-color: #1f2833;
-    color: #66fcf1;
-    cursor: pointer;
-    transition: background-color 0.4s ease, box-shadow 0.4s ease, transform 0.2s ease;
-    box-shadow: 0 0 12px #45a29e99;
-    animation: pulseGlow 2.5s ease-in-out infinite;
-  }
-
-  #factButton:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-    animation: none;
-    box-shadow: none;
-    background-color: #0a141b;
-    color: #444;
-  }
-
-  @keyframes pulseGlow {
-    0%, 100% { box-shadow: 0 0 12px #45a29e99, 0 0 20px #66fcf1cc; }
-    50% { box-shadow: 0 0 20px #45a29ecc, 0 0 30px #66fcf1ff; }
-  }
-
-  #factButton:hover:not(:disabled) {
-    background-color: #45a29e;
-    box-shadow: 0 0 30px #66fcf1ff;
-    transform: scale(1.05);
-    animation: none;
-  }
-
-  #factButton:active:not(:disabled) {
-    transform: scale(0.95);
-    box-shadow: 0 0 10px #45a29e99;
-  }
-
-  #muteToggle {
-    background: none;
-    border: none;
-    font-size: 1.4rem;
-    cursor: pointer;
-    color: #66fcf1;
-    padding: 0;
-    margin: 0 0 0 12px;
-    line-height: 1;
-    user-select: none;
-    transition: transform 0.2s ease;
-  }
-
-  #muteToggle:hover {
-    transform: scale(1.2);
-  }
-
-  #sparkleContainer {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-    z-index: 2;
-    width: 200px;
-    height: 100px;
-  }
-
-  .sparkleParticle {
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    background: radial-gradient(circle, #66fcf1, transparent);
-    border-radius: 50%;
-    opacity: 1;
-    animation: sparkleParticleAnim 1s forwards;
-  }
-
-  @keyframes sparkleParticleAnim {
-    0% { opacity: 1; transform: translate(0, 0) scale(1); }
-    100% { opacity: 0; transform: translate(var(--move-x), var(--move-y)) scale(0.2); }
-  }
+  /* Button and other UI styling here - keep as before... */
+  /* For brevity, omitted here but you can reuse from your existing CSS */
 </style>
 </head>
 <body>
   <canvas id="starfield"></canvas>
 
-  <!-- Example planets and comets -->
-  <div class="planet" style="top: 20%; left: 15%; animation-duration: 60s;"></div>
-  <div class="planet" style="top: 75%; left: 80%; width: 30px; height: 30px; animation-duration: 90s; background: radial-gradient(circle, #f3c06a, #5a4408);"></div>
-  <div class="comet" style="top: 40%; left: -5%; animation-duration: 15s;"></div>
-  <div class="comet" style="top: 65%; left: -10%; animation-duration: 20s;"></div>
+  <!-- Space objects container -->
+  <div id="spaceObjectsContainer"></div>
 
   <h1>🔭 Random Space Fact Generator<span class="sparkle">✨</span></h1>
 
   <div id="factWrapper" style="display:flex; align-items:center; justify-content:center; gap: 6px; flex-wrap:wrap; max-width:700px;">
-    <p id="factDisplay">Loading facts, please wait...</p>
-
-    <button id="copyButton" title="Copy to clipboard" aria-label="Copy fact">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        viewBox="0 0 24 24"
-        width="24"
-        height="24"
-        aria-hidden="true"
-      >
-        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-      </svg>
-    </button>
-
-    <span id="copyFeedback" aria-hidden="true">✅</span>
-
-    <div id="sparkleContainer"></div>
+    <p id="factDisplay">Click the button below to learn a cool space fact!</p>
+    <!-- Copy button etc... -->
   </div>
 
   <div class="buttons-container">
-    <button id="factButton" disabled>Show Me a Random Fact</button>
+    <button id="factButton">Show Me a Random Fact</button>
     <button id="muteToggle" title="Toggle sound">🔊</button>
   </div>
 
 <script>
-  // Starfield canvas setup
+  // Starfield code unchanged (same as before)
   const canvas = document.getElementById('starfield');
   const ctx = canvas.getContext('2d');
   let stars = [];
@@ -304,8 +133,6 @@
         x: Math.random() * width,
         y: Math.random() * height,
         radius: Math.random() * 1.3 + 0.3,
-        baseX: 0, // relative movement base
-        baseY: 0,
       });
     }
   }
@@ -341,113 +168,96 @@
     mouseY = e.clientY;
   });
 
-  function animate() {
+  function animateStarfield() {
     drawStars();
-    requestAnimationFrame(animate);
+    requestAnimationFrame(animateStarfield);
   }
 
   resize();
-  animate();
+  animateStarfield();
 
-  // Your existing JS for facts and buttons below
+  // Random drifting space objects
 
-  const factDisplay = document.getElementById('factDisplay');
-  const copyButton = document.getElementById('copyButton');
-  const copyFeedback = document.getElementById('copyFeedback');
-  const sparkleContainer = document.getElementById('sparkleContainer');
-  const factButton = document.getElementById('factButton');
-  const muteToggle = document.getElementById('muteToggle');
+  const spaceObjectsContainer = document.getElementById('spaceObjectsContainer');
 
-  let facts = [];
-  let remainingFacts = [];
-  let soundEnabled = true;
+  const objectTypes = ['planet', 'comet', 'asteroid'];
 
-  muteToggle.addEventListener('click', () => {
-    soundEnabled = !soundEnabled;
-    muteToggle.textContent = soundEnabled ? "🔊" : "🔇";
-  });
+  class SpaceObject {
+    constructor(type) {
+      this.type = type;
+      this.el = document.createElement('div');
+      this.el.classList.add('space-object', type);
 
-  copyButton.addEventListener('click', () => {
-    const factText = factDisplay.innerText;
-    navigator.clipboard.writeText(factText).then(() => {
-      copyButton.style.display = 'none';
-      copyFeedback.style.display = 'inline';
+      // Size based on type
+      if(type === 'planet') {
+        this.size = 30 + Math.random() * 30; // 30-60px
+      } else if(type === 'comet') {
+        this.size = 6 + Math.random() * 6;  // 6-12px
+      } else if(type === 'asteroid') {
+        this.size = 15 + Math.random() * 20; // 15-35px
+      }
+      this.el.style.width = this.size + 'px';
+      this.el.style.height = this.size + 'px';
 
-      setTimeout(() => {
-        copyFeedback.style.display = 'none';
-        copyButton.style.display = 'inline';
-      }, 1200);
-    }).catch(err => {
-      console.error("Copy failed:", err);
-    });
-  });
+      // Initial position (random inside viewport)
+      this.x = Math.random() * window.innerWidth;
+      this.y = Math.random() * window.innerHeight;
 
-  factButton.disabled = true;
-  factDisplay.innerText = "Loading facts, please wait...";
-  copyButton.style.display = "none";
-  copyFeedback.style.display = "none";
+      // Speed and direction (pixels per frame)
+      this.speedX = (Math.random() - 0.5) * 0.3; // -0.15 to 0.15 px/frame
+      this.speedY = (Math.random() - 0.5) * 0.3;
 
-  fetch('https://raw.githubusercontent.com/stewdini/space-fact-generator/main/facts.json')
-    .then(res => {
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      return res.json();
-    })
-    .then(data => {
-      facts = data;
-      remainingFacts = [...facts];
-      factButton.disabled = false;
-      factDisplay.innerText = "Click the button below to learn a cool space fact!";
-      copyButton.style.display = "none";
-    })
-    .catch(err => {
-      console.error('Failed to load facts:', err);
-      facts = ["Oops! Could not load facts right now."];
-      remainingFacts = [...facts];
-      factButton.disabled = false;
-      factDisplay.innerText = facts[0];
-      copyButton.style.display = "none";
-    });
+      // Rotation for planets and asteroids
+      this.rotation = Math.random() * 360;
+      this.rotationSpeed = (Math.random() - 0.5) * 0.1; // degrees per frame
 
-  function createSparkle() {
-    const sparkle = document.createElement('div');
-    sparkle.classList.add('sparkleParticle');
-    const moveX = (Math.random() * 100 - 50).toFixed(2) + 'px';
-    const moveY = (Math.random() * 100 - 50).toFixed(2) + 'px';
-    sparkle.style.setProperty('--move-x', moveX);
-    sparkle.style.setProperty('--move-y', moveY);
-    sparkle.style.left = (Math.random() * 180) + 'px';
-    sparkle.style.top = (Math.random() * 80) + 'px';
-    sparkleContainer.appendChild(sparkle);
-    sparkle.addEventListener('animationend', () => sparkle.remove());
-  }
-
-  function getRandomFact() {
-    if (remainingFacts.length === 0) {
-      remainingFacts = [...facts];
+      spaceObjectsContainer.appendChild(this.el);
     }
 
-    const randomIndex = Math.floor(Math.random() * remainingFacts.length);
-    const fact = remainingFacts.splice(randomIndex, 1)[0];
+    update() {
+      // Update position
+      this.x += this.speedX;
+      this.y += this.speedY;
 
-    if (soundEnabled) {
-      const clickSound = new Audio('pop.mp3');
-      clickSound.volume = 0.2;
-      clickSound.play().catch(e => console.warn('Sound play failed:', e));
+      // Bounce off edges (wrap around)
+      if(this.x < -this.size) this.x = window.innerWidth + this.size;
+      else if(this.x > window.innerWidth + this.size) this.x = -this.size;
+
+      if(this.y < -this.size) this.y = window.innerHeight + this.size;
+      else if(this.y > window.innerHeight + this.size) this.y = -this.size;
+
+      // Update rotation
+      this.rotation += this.rotationSpeed;
+      if(this.rotation > 360) this.rotation -= 360;
+      if(this.rotation < 0) this.rotation += 360;
+
+      // Apply styles
+      this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rotation}deg)`;
     }
-
-    factDisplay.classList.remove('show');
-    void factDisplay.offsetWidth;
-
-    for (let i = 0; i < 15; i++) createSparkle();
-
-    factDisplay.innerText = fact;
-    factDisplay.classList.add('show');
-
-    copyButton.style.display = "inline";
-    copyFeedback.style.display = "none";
   }
 
-  factButton.addEventListener('click', getRandomFact);
+  // Create multiple objects
+  const spaceObjects = [];
+  for(let i=0; i<25; i++) {
+    // Random type weighted more toward planets and asteroids, fewer comets
+    let r = Math.random();
+    let type;
+    if(r < 0.5) type = 'planet';
+    else if(r < 0.8) type = 'asteroid';
+    else type = 'comet';
+
+    spaceObjects.push(new SpaceObject(type));
+  }
+
+  function animateSpaceObjects() {
+    spaceObjects.forEach(obj => obj.update());
+    requestAnimationFrame(animateSpaceObjects);
+  }
+
+  animateSpaceObjects();
+
+  // Your existing JS for facts and buttons here (reuse from your code)...
+
 </script>
 </body>
 </html>
