@@ -74,33 +74,33 @@
       from { opacity: 0; }
       to { opacity: 1; }
     }
-    button {
-      padding: 14px 35px;
-      font-size: 1.3rem;
+    .button-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+      z-index: 2;
+    }
+    .btn {
+      padding: 14px 30px;
+      font-size: 1.2rem;
       border: none;
       border-radius: 10px;
       background-color: #1f2833;
       color: #66fcf1;
       cursor: pointer;
-      transition: background-color 0.4s ease, box-shadow 0.4s ease, transform 0.2s ease;
-      position: relative;
-      z-index: 1;
+      transition: background-color 0.4s, box-shadow 0.4s, transform 0.2s;
       box-shadow: 0 0 12px #45a29e99;
-      animation: pulseGlow 2.5s ease-in-out infinite;
     }
-    @keyframes pulseGlow {
-      0%, 100% { box-shadow: 0 0 12px #45a29e99, 0 0 20px #66fcf1cc; }
-      50% { box-shadow: 0 0 20px #45a29ecc, 0 0 30px #66fcf1ff; }
-    }
-    button:hover {
+    .btn:hover {
       background-color: #45a29e;
       box-shadow: 0 0 30px #66fcf1ff;
       transform: scale(1.05);
-      animation: none;
     }
-    button:active {
+    .btn:active {
       transform: scale(0.95);
-      box-shadow: 0 0 10px #45a29e99;
     }
     #sparkleContainer {
       position: absolute;
@@ -122,27 +122,13 @@
       animation: sparkleParticleAnim 1s forwards;
     }
     @keyframes sparkleParticleAnim {
-      0% {
-        opacity: 1;
-        transform: translate(0, 0) scale(1);
-      }
-      100% {
-        opacity: 0;
-        transform: translate(var(--move-x), var(--move-y)) scale(0.2);
-      }
+      0% { opacity: 1; transform: translate(0, 0) scale(1); }
+      100% { opacity: 0; transform: translate(var(--move-x), var(--move-y)) scale(0.2); }
     }
     @media (max-width: 480px) {
-      h1 {
-        font-size: 2.2rem;
-      }
-      #factDisplay {
-        font-size: 1rem;
-        min-height: 80px;
-      }
-      button {
-        font-size: 1.1rem;
-        padding: 12px 28px;
-      }
+      h1 { font-size: 2.2rem; }
+      #factDisplay { font-size: 1rem; min-height: 80px; }
+      .btn { font-size: 1rem; padding: 12px 24px; }
     }
   </style>
 </head>
@@ -152,7 +138,11 @@
     <p id="factDisplay">Click the button below to learn a cool space fact!</p>
     <div id="sparkleContainer"></div>
   </div>
-  <button id="factButton">Show Me a Random Fact</button>
+
+  <div class="button-row">
+    <button class="btn" id="factButton">Show Me a Random Fact</button>
+    <button class="btn" id="muteToggle" title="Toggle sound">🔊</button>
+  </div>
 
   <script>
     const facts = [
@@ -171,6 +161,14 @@
     const factDisplay = document.getElementById('factDisplay');
     const sparkleContainer = document.getElementById('sparkleContainer');
     const factButton = document.getElementById('factButton');
+    const muteToggle = document.getElementById('muteToggle');
+
+    let soundEnabled = true;
+
+    muteToggle.addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      muteToggle.textContent = soundEnabled ? "🔊" : "🔇";
+    });
 
     function createSparkle() {
       const sparkle = document.createElement('div');
@@ -186,17 +184,16 @@
     }
 
     function getRandomFact() {
-      // ✅ Self-hosted audio file
-      const clickSound = new Audio('pop.mp3');
-      clickSound.volume = 0.2;
-      clickSound.play().catch(e => console.warn('Sound play failed:', e));
+      if (soundEnabled) {
+        const clickSound = new Audio('pop.mp3');
+        clickSound.volume = 0.2;
+        clickSound.play().catch(e => console.warn('Sound error:', e));
+      }
 
       factDisplay.classList.remove('show');
       void factDisplay.offsetWidth;
 
-      for (let i = 0; i < 15; i++) {
-        createSparkle();
-      }
+      for (let i = 0; i < 15; i++) createSparkle();
 
       const randomFact = facts[Math.floor(Math.random() * facts.length)];
       factDisplay.innerText = randomFact;
