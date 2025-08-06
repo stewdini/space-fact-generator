@@ -111,6 +111,37 @@
     box-shadow: 0 0 10px #45a29e99;
   }
 
+  /* Sparkle container */
+  #sparkleContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+  }
+
+  .sparkleParticle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle, #66fcf1, transparent);
+    border-radius: 50%;
+    opacity: 0;
+    animation: sparkleParticleAnim 1000ms forwards;
+  }
+
+  @keyframes sparkleParticleAnim {
+    0% {
+      opacity: 1;
+      transform: translate(0,0) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(var(--x), var(--y)) scale(0.2);
+    }
+  }
+
   /* Responsive adjustments */
   @media (max-width: 480px) {
     h1 {
@@ -129,8 +160,13 @@
 </head>
 <body>
   <h1>🔭 Random Space Fact Generator<span class="sparkle">✨</span></h1>
-  <p id="factDisplay">Click the button below to learn a cool space fact!</p>
-  <button onclick="getRandomFact()">Show Me a Random Fact</button>
+  <div id="factWrapper" style="position:relative;">
+    <p id="factDisplay">Click the button below to learn a cool space fact!</p>
+    <div id="sparkleContainer"></div>
+  </div>
+  <button id="factButton">Show Me a Random Fact</button>
+
+  <audio id="clickSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
 
   <script>
     const facts = [
@@ -146,14 +182,41 @@
       "There may be a planet made of diamonds — 55 Cancri e."
     ];
 
+    const factDisplay = document.getElementById('factDisplay');
+    const sparkleContainer = document.getElementById('sparkleContainer');
+    const clickSound = document.getElementById('clickSound');
+    const factButton = document.getElementById('factButton');
+
+    function createSparkle() {
+      const sparkle = document.createElement('div');
+      sparkle.classList.add('sparkleParticle');
+      sparkle.style.setProperty('--x', (Math.random() * 100 - 50) + 'px');
+      sparkle.style.setProperty('--y', (Math.random() * 100 - 50) + 'px');
+      sparkleContainer.appendChild(sparkle);
+      sparkle.addEventListener('animationend', () => sparkle.remove());
+    }
+
     function getRandomFact() {
-      const factDisplay = document.getElementById('factDisplay');
-      factDisplay.classList.remove('show'); // reset animation
-      void factDisplay.offsetWidth; // trigger reflow to restart animation
+      // Play sound
+      clickSound.currentTime = 0;
+      clickSound.play();
+
+      // Reset fade animation
+      factDisplay.classList.remove('show');
+      void factDisplay.offsetWidth;
+
+      // Show sparkle particles
+      for(let i=0; i<15; i++) {
+        createSparkle();
+      }
+
+      // Show random fact
       const randomFact = facts[Math.floor(Math.random() * facts.length)];
       factDisplay.innerText = randomFact;
       factDisplay.classList.add('show');
     }
+
+    factButton.addEventListener('click', getRandomFact);
   </script>
 </body>
 </html>
