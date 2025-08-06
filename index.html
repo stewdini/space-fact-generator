@@ -112,18 +112,16 @@
     }
     /* Mute toggle icon button */
     #muteToggle {
-    background: none;
-    border: none;
-    font-size: 1.4rem;
-    cursor: pointer;
-    color: #66fcf1;
-    padding: 0;
-    margin: 0 0 0 12px; /* margin-left: 12px */
-    line-height: 1;
-    user-select: none;
-    transition: transform 0.2s ease;
-    }
-
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: #66fcf1;
+      padding: 0;
+      margin: 0 0 0 12px;
+      line-height: 1;
+      user-select: none;
+      transition: transform 0.2s ease;
     }
     #muteToggle:hover {
       transform: scale(1.2);
@@ -202,6 +200,9 @@
 
     let soundEnabled = true;
 
+    // Track facts remaining in current cycle
+    let remainingFacts = [...facts];
+
     muteToggle.addEventListener('click', () => {
       soundEnabled = !soundEnabled;
       muteToggle.textContent = soundEnabled ? "🔊" : "🔇";
@@ -221,6 +222,14 @@
     }
 
     function getRandomFact() {
+      if (remainingFacts.length === 0) {
+        remainingFacts = [...facts];
+      }
+
+      const randomIndex = Math.floor(Math.random() * remainingFacts.length);
+      const fact = remainingFacts[randomIndex];
+      remainingFacts.splice(randomIndex, 1);
+
       if (soundEnabled) {
         const clickSound = new Audio('pop.mp3');
         clickSound.volume = 0.2;
@@ -232,8 +241,7 @@
 
       for (let i = 0; i < 15; i++) createSparkle();
 
-      const randomFact = facts[Math.floor(Math.random() * facts.length)];
-      factDisplay.innerText = randomFact;
+      factDisplay.innerText = fact;
       factDisplay.classList.add('show');
     }
 
@@ -241,4 +249,3 @@
   </script>
 </body>
 </html>
-
