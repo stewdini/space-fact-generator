@@ -94,17 +94,25 @@
       box-shadow: 0 0 12px #45a29e99;
       animation: pulseGlow 2.5s ease-in-out infinite;
     }
+    #factButton:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+      animation: none;
+      box-shadow: none;
+      background-color: #0a141b;
+      color: #444;
+    }
     @keyframes pulseGlow {
       0%, 100% { box-shadow: 0 0 12px #45a29e99, 0 0 20px #66fcf1cc; }
       50% { box-shadow: 0 0 20px #45a29ecc, 0 0 30px #66fcf1ff; }
     }
-    #factButton:hover {
+    #factButton:hover:not(:disabled) {
       background-color: #45a29e;
       box-shadow: 0 0 30px #66fcf1ff;
       transform: scale(1.05);
       animation: none;
     }
-    #factButton:active {
+    #factButton:active:not(:disabled) {
       transform: scale(0.95);
       box-shadow: 0 0 10px #45a29e99;
     }
@@ -167,12 +175,12 @@
 <body>
   <h1>🔭 Random Space Fact Generator<span class="sparkle">✨</span></h1>
   <div id="factWrapper" style="position:relative;">
-    <p id="factDisplay">Click the button below to learn a cool space fact!</p>
+    <p id="factDisplay">Loading facts, please wait...</p>
     <div id="sparkleContainer"></div>
   </div>
   
   <div class="buttons-container">
-    <button id="factButton">Show Me a Random Fact</button>
+    <button id="factButton" disabled>Show Me a Random Fact</button>
     <button id="muteToggle" title="Toggle sound">🔊</button>
   </div>
 
@@ -191,17 +199,26 @@
       muteToggle.textContent = soundEnabled ? "🔊" : "🔇";
     });
 
-    // Fetch facts JSON from your GitHub raw URL here:
+    // Disable button initially
+    factButton.disabled = true;
+
     fetch('https://raw.githubusercontent.com/stewdini/space-fact-generator/main/facts.json')
-      .then(response => response.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
       .then(data => {
         facts = data;
         remainingFacts = [...facts];
+        factButton.disabled = false;
+        factDisplay.innerText = "Click the button below to learn a cool space fact!";
       })
       .catch(err => {
         console.error('Failed to load facts:', err);
         facts = ["Oops! Could not load facts right now."];
         remainingFacts = [...facts];
+        factButton.disabled = false;
+        factDisplay.innerText = facts[0];
       });
 
     function createSparkle() {
@@ -244,5 +261,3 @@
   </script>
 </body>
 </html>
-
-
