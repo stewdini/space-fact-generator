@@ -199,11 +199,14 @@
       } catch (e) {
         console.warn('Sound play failed:', e);
       }
+
       factDisplay.classList.remove('show');
-      void factDisplay.offsetWidth; // trigger reflow
-      for (let i = 0; i < 15; i++) {
+      void factDisplay.offsetWidth;
+
+      for(let i=0; i<15; i++) {
         createSparkle();
       }
+
       const randomFact = facts[Math.floor(Math.random() * facts.length)];
       factDisplay.innerText = randomFact;
       factDisplay.classList.add('show');
