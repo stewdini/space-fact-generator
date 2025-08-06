@@ -21,7 +21,6 @@
     padding: 1rem;
     position: relative;
   }
-  /* Star twinkle background */
   body::before {
     content: '';
     position: fixed;
@@ -155,10 +154,6 @@
   </div>
   <button id="factButton">Show Me a Random Fact</button>
 
-  <audio id="clickSound" preload="auto">
-    <source src="https://cdn.pixabay.com/download/audio/2022/03/27/audio_2a4d4f23c0.mp3?filename=pop-6187.mp3" type="audio/mpeg" />
-  </audio>
-
   <script>
     const facts = [
       "A day on Venus is longer than its year.",
@@ -175,8 +170,11 @@
 
     const factDisplay = document.getElementById('factDisplay');
     const sparkleContainer = document.getElementById('sparkleContainer');
-    const clickSound = document.getElementById('clickSound');
     const factButton = document.getElementById('factButton');
+
+    // Create audio instance here
+    const clickSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/27/audio_2a4d4f23c0.mp3?filename=pop-6187.mp3');
+    clickSound.volume = 0.15; // Softer volume
 
     function createSparkle() {
       const sparkle = document.createElement('div');
@@ -193,11 +191,12 @@
 
     function getRandomFact() {
       try {
-        clickSound.volume = 0.15; // softer volume
         clickSound.currentTime = 0;
-        clickSound.play();
+        clickSound.play().catch(e => {
+          console.warn('Audio play rejected:', e);
+        });
       } catch (e) {
-        console.warn('Sound play failed:', e);
+        console.warn('Sound play error:', e);
       }
 
       factDisplay.classList.remove('show');
