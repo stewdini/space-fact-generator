@@ -191,8 +191,11 @@
       muteToggle.textContent = soundEnabled ? "🔊" : "🔇";
     });
 
-    // Fetch facts JSON from your GitHub raw URL here:
-    fetch('https://raw.githubusercontent.com/stewdini/space-fact-generator/main/facts.json')
+    // CORS proxy to bypass GitHub raw CORS restrictions
+    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+    const factsUrl = 'https://raw.githubusercontent.com/stewdini/space-fact-generator/main/facts.json';
+
+    fetch(corsProxy + factsUrl)
       .then(response => response.json())
       .then(data => {
         facts = data;
@@ -244,6 +247,3 @@
   </script>
 </body>
 </html>
-
-
-
