@@ -375,11 +375,35 @@
       this.el.style.width = this.size + 'px';
       this.el.style.height = this.size + 'px';
 
-      this.x = Math.random() * window.innerWidth;
-      this.y = Math.random() * window.innerHeight;
+      // Pick a random edge for the object to start outside the viewport
+      const edge = Math.floor(Math.random() * 4); // 0=top,1=right,2=bottom,3=left
 
-      this.speedX = (Math.random() - 0.5) * 0.3;
-      this.speedY = (Math.random() - 0.5) * 0.3;
+      switch(edge) {
+        case 0: // Top edge (x anywhere, y just above screen)
+          this.x = Math.random() * window.innerWidth;
+          this.y = -this.size - 10;
+          this.speedX = (Math.random() - 0.5) * 0.3;
+          this.speedY = Math.random() * 0.3 + 0.05; // move downward
+          break;
+        case 1: // Right edge (x just off right, y anywhere)
+          this.x = window.innerWidth + this.size + 10;
+          this.y = Math.random() * window.innerHeight;
+          this.speedX = -(Math.random() * 0.3 + 0.05); // move leftward
+          this.speedY = (Math.random() - 0.5) * 0.3;
+          break;
+        case 2: // Bottom edge (x anywhere, y just below screen)
+          this.x = Math.random() * window.innerWidth;
+          this.y = window.innerHeight + this.size + 10;
+          this.speedX = (Math.random() - 0.5) * 0.3;
+          this.speedY = -(Math.random() * 0.3 + 0.05); // move upward
+          break;
+        case 3: // Left edge (x just left off screen, y anywhere)
+          this.x = -this.size - 10;
+          this.y = Math.random() * window.innerHeight;
+          this.speedX = Math.random() * 0.3 + 0.05; // move rightward
+          this.speedY = (Math.random() - 0.5) * 0.3;
+          break;
+      }
 
       this.rotation = Math.random() * 360;
       this.rotationSpeed = (Math.random() - 0.5) * 0.1;
@@ -391,6 +415,7 @@
       this.x += this.speedX;
       this.y += this.speedY;
 
+      // Normal wrap-around behavior
       if (this.x < -this.size) this.x = window.innerWidth + this.size;
       else if (this.x > window.innerWidth + this.size) this.x = -this.size;
 
@@ -405,16 +430,17 @@
     }
   }
 
+  // Create space objects: mostly planets, some comets, asteroids, rockets (5% rockets)
   const spaceObjects = [];
-  const objectCount = 25;
+  const totalObjects = 20;
 
-  for(let i = 0; i < objectCount; i++) {
-    let r = Math.random();
+  for(let i=0; i<totalObjects; i++) {
     let type;
-    if (r < 0.45) type = 'planet';
-    else if (r < 0.8) type = 'asteroid';
-    else if (r < 0.95) type = 'comet';
-    else type = 'rocket';  // 5% chance for rocket
+    const rand = Math.random();
+    if (rand < 0.05) type = 'rocket';
+    else if (rand < 0.30) type = 'comet';
+    else if (rand < 0.55) type = 'asteroid';
+    else type = 'planet';
 
     spaceObjects.push(new SpaceObject(type));
   }
@@ -423,18 +449,13 @@
     spaceObjects.forEach(obj => obj.update());
     requestAnimationFrame(animateSpaceObjects);
   }
+
   animateSpaceObjects();
 
-  // Fact generator logic (simplified sample facts here)
-  const facts = [
-    "The Sun contains 99.86% of the mass in our solar system.",
-    "A day on Venus is longer than a year on Venus.",
-    "Neutron stars can spin up to 600 times per second.",
-    "Jupiter has 79 known moons.",
-    "Space is completely silent."
-  ];
-
+  // Fact generator logic - fetched from your JSON file (will be loaded later)
+  let facts = [];
   let previousIndex = -1;
+
   const factDisplay = document.getElementById('factDisplay');
   const factButton = document.getElementById('factButton');
   const copyButton = document.getElementById('copyButton');
@@ -447,6 +468,24 @@
   const popSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/26/audio_ebaf1f29de.mp3?filename=pop-6167.mp3');
   popSound.volume = 0.3;
 
+  // Load facts from JSON hosted on GitHub
+  fetch('https://raw.githubusercontent.com/stewdini/space-fact-generator/main/facts.json')
+    .then(response => {
+      if (!response.ok) throw new Error('Network response was not OK');
+      return response.json();
+    })
+    .then(data => {
+      if (Array.isArray(data) && data.length) {
+        facts = data;
+      } else {
+        factDisplay.textContent = "Oops! No facts found in the data.";
+      }
+    })
+    .catch(err => {
+      factDisplay.textContent = "Oops! Could not load facts right now.";
+      console.error('Failed to load facts:', err);
+    });
+
   function getRandomFactIndex() {
     let idx;
     do {
@@ -457,15 +496,22 @@
   }
 
   factButton.addEventListener('click', () => {
+    if (facts.length === 0) {
+      factDisplay.textContent = "No facts available. Try again later.";
+      copyButton.style.display = 'none';
+      return;
+    }
+
     if (!isMuted) popSound.play().catch(() => {});
+
     const idx = getRandomFactIndex();
     factDisplay.textContent = facts[idx];
 
-    // Show copy icon for new fact
+    // Show copy icon only if fact is not the initial text
     copyButton.style.display = 'inline-flex';
     copyFeedback.style.display = 'none';
 
-    // Add sparkle animation after fact
+    // Add sparkle animation after fact text
     const sparkle = document.createElement('span');
     sparkle.className = 'sparkle';
     factDisplay.appendChild(sparkle);
