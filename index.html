@@ -32,7 +32,6 @@
       position: relative;
     }
 
-    /* Starfield background using CSS gradients */
     body::after {
       content: '';
       position: fixed;
@@ -79,11 +78,19 @@
       50% { opacity: 0.5; transform: rotate(20deg) scale(1.3); }
     }
 
+    #factWrapper {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      max-width: 700px;
+    }
+
     #factDisplay {
       font-size: 1.4rem;
       margin: 2rem 0;
-      max-width: 600px;
-      min-height: 90px;
       line-height: 1.6;
       position: relative;
       z-index: 1;
@@ -99,6 +106,21 @@
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
+    }
+
+    #copyButton {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #66fcf1;
+      padding: 0;
+      margin-left: 4px;
+      transition: transform 0.2s ease;
+    }
+
+    #copyButton:hover {
+      transform: scale(1.2);
     }
 
     .buttons-container {
@@ -198,7 +220,6 @@
       }
       #factDisplay {
         font-size: 1rem;
-        min-height: 80px;
       }
       #factButton {
         font-size: 1.1rem;
@@ -212,11 +233,13 @@
 </head>
 <body>
   <h1>🔭 Random Space Fact Generator<span class="sparkle">✨</span></h1>
-  <div id="factWrapper" style="position:relative;">
+
+  <div id="factWrapper">
     <p id="factDisplay">Loading facts, please wait...</p>
+    <button id="copyButton" title="Copy to clipboard">📋</button>
     <div id="sparkleContainer"></div>
   </div>
-  
+
   <div class="buttons-container">
     <button id="factButton" disabled>Show Me a Random Fact</button>
     <button id="muteToggle" title="Toggle sound">🔊</button>
@@ -224,6 +247,7 @@
 
   <script>
     const factDisplay = document.getElementById('factDisplay');
+    const copyButton = document.getElementById('copyButton');
     const sparkleContainer = document.getElementById('sparkleContainer');
     const factButton = document.getElementById('factButton');
     const muteToggle = document.getElementById('muteToggle');
@@ -235,6 +259,18 @@
     muteToggle.addEventListener('click', () => {
       soundEnabled = !soundEnabled;
       muteToggle.textContent = soundEnabled ? "🔊" : "🔇";
+    });
+
+    copyButton.addEventListener('click', () => {
+      const factText = factDisplay.innerText;
+      navigator.clipboard.writeText(factText).then(() => {
+        copyButton.textContent = "✅";
+        setTimeout(() => {
+          copyButton.textContent = "📋";
+        }, 1000);
+      }).catch(err => {
+        console.error("Copy failed:", err);
+      });
     });
 
     factButton.disabled = true;
