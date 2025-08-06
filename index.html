@@ -74,7 +74,6 @@
       from { opacity: 0; }
       to { opacity: 1; }
     }
-    /* Buttons container */
     .buttons-container {
       display: inline-flex;
       align-items: center;
@@ -83,7 +82,6 @@
       position: relative;
       z-index: 2;
     }
-    /* Fact button styles */
     #factButton {
       padding: 14px 35px;
       font-size: 1.3rem;
@@ -110,7 +108,6 @@
       transform: scale(0.95);
       box-shadow: 0 0 10px #45a29e99;
     }
-    /* Mute toggle icon button */
     #muteToggle {
       background: none;
       border: none;
@@ -180,33 +177,32 @@
   </div>
 
   <script>
-    const facts = [
-      "A day on Venus is longer than its year.",
-      "Neutron stars can spin at 600+ rotations per second.",
-      "There are more stars in the universe than grains of sand on Earth.",
-      "Jupiter’s Great Red Spot is actually a giant storm.",
-      "The Moon is slowly drifting away from Earth.",
-      "Saturn’s rings are mostly ice particles.",
-      "One spoon of a neutron star weighs about a billion tons.",
-      "It rains diamonds on Neptune and Uranus.",
-      "The ISS orbits Earth every 90 minutes.",
-      "There may be a planet made of diamonds — 55 Cancri e."
-    ];
-
     const factDisplay = document.getElementById('factDisplay');
     const sparkleContainer = document.getElementById('sparkleContainer');
     const factButton = document.getElementById('factButton');
     const muteToggle = document.getElementById('muteToggle');
 
+    let facts = [];
+    let remainingFacts = [];
     let soundEnabled = true;
-
-    // Track facts remaining in current cycle
-    let remainingFacts = [...facts];
 
     muteToggle.addEventListener('click', () => {
       soundEnabled = !soundEnabled;
       muteToggle.textContent = soundEnabled ? "🔊" : "🔇";
     });
+
+    // Fetch facts JSON from your GitHub raw URL here:
+    fetch('https://raw.githubusercontent.com/stewdini/space-fact-generator/main/facts.json')
+      .then(response => response.json())
+      .then(data => {
+        facts = data;
+        remainingFacts = [...facts];
+      })
+      .catch(err => {
+        console.error('Failed to load facts:', err);
+        facts = ["Oops! Could not load facts right now."];
+        remainingFacts = [...facts];
+      });
 
     function createSparkle() {
       const sparkle = document.createElement('div');
@@ -227,8 +223,7 @@
       }
 
       const randomIndex = Math.floor(Math.random() * remainingFacts.length);
-      const fact = remainingFacts[randomIndex];
-      remainingFacts.splice(randomIndex, 1);
+      const fact = remainingFacts.splice(randomIndex, 1)[0];
 
       if (soundEnabled) {
         const clickSound = new Audio('pop.mp3');
