@@ -192,7 +192,7 @@
     });
 
     // Fetch facts JSON from your GitHub raw URL here:
-    fetch('https://raw.githubusercontent.com/stewdini/space-fact-generator/main/facts.json')
+    fetch('https://raw.githubusercontent.com/stewdini/space-fact-generator/refs/heads/main/facts.json')
       .then(response => response.json())
       .then(data => {
         facts = data;
@@ -244,3 +244,4 @@
   </script>
 </body>
 </html>
+
