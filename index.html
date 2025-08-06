@@ -74,33 +74,57 @@
       from { opacity: 0; }
       to { opacity: 1; }
     }
-    .button-row {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
+    /* Buttons container */
+    .buttons-container {
+      display: inline-flex;
       align-items: center;
-      flex-wrap: wrap;
+      gap: 8px;
       margin-top: 1rem;
+      position: relative;
       z-index: 2;
     }
-    .btn {
-      padding: 14px 30px;
-      font-size: 1.2rem;
+    /* Fact button styles */
+    #factButton {
+      padding: 14px 35px;
+      font-size: 1.3rem;
       border: none;
       border-radius: 10px;
       background-color: #1f2833;
       color: #66fcf1;
       cursor: pointer;
-      transition: background-color 0.4s, box-shadow 0.4s, transform 0.2s;
+      transition: background-color 0.4s ease, box-shadow 0.4s ease, transform 0.2s ease;
       box-shadow: 0 0 12px #45a29e99;
+      animation: pulseGlow 2.5s ease-in-out infinite;
     }
-    .btn:hover {
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 12px #45a29e99, 0 0 20px #66fcf1cc; }
+      50% { box-shadow: 0 0 20px #45a29ecc, 0 0 30px #66fcf1ff; }
+    }
+    #factButton:hover {
       background-color: #45a29e;
       box-shadow: 0 0 30px #66fcf1ff;
       transform: scale(1.05);
+      animation: none;
     }
-    .btn:active {
+    #factButton:active {
       transform: scale(0.95);
+      box-shadow: 0 0 10px #45a29e99;
+    }
+    /* Mute toggle icon button */
+    #muteToggle {
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: #66fcf1;
+      padding: 0;
+      margin: 0;
+      line-height: 1;
+      user-select: none;
+      transition: transform 0.2s ease;
+    }
+    #muteToggle:hover {
+      transform: scale(1.2);
     }
     #sparkleContainer {
       position: absolute;
@@ -126,9 +150,20 @@
       100% { opacity: 0; transform: translate(var(--move-x), var(--move-y)) scale(0.2); }
     }
     @media (max-width: 480px) {
-      h1 { font-size: 2.2rem; }
-      #factDisplay { font-size: 1rem; min-height: 80px; }
-      .btn { font-size: 1rem; padding: 12px 24px; }
+      h1 {
+        font-size: 2.2rem;
+      }
+      #factDisplay {
+        font-size: 1rem;
+        min-height: 80px;
+      }
+      #factButton {
+        font-size: 1.1rem;
+        padding: 12px 28px;
+      }
+      #muteToggle {
+        font-size: 1.2rem;
+      }
     }
   </style>
 </head>
@@ -138,10 +173,10 @@
     <p id="factDisplay">Click the button below to learn a cool space fact!</p>
     <div id="sparkleContainer"></div>
   </div>
-
-  <div class="button-row">
-    <button class="btn" id="factButton">Show Me a Random Fact</button>
-    <button class="btn" id="muteToggle" title="Toggle sound">🔊</button>
+  
+  <div class="buttons-container">
+    <button id="factButton">Show Me a Random Fact</button>
+    <button id="muteToggle" title="Toggle sound">🔊</button>
   </div>
 
   <script>
@@ -187,7 +222,7 @@
       if (soundEnabled) {
         const clickSound = new Audio('pop.mp3');
         clickSound.volume = 0.2;
-        clickSound.play().catch(e => console.warn('Sound error:', e));
+        clickSound.play().catch(e => console.warn('Sound play failed:', e));
       }
 
       factDisplay.classList.remove('show');
