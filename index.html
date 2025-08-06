@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Random Space Fact Generator | Space Simplified</title>
+  <meta name="description" content="Discover fascinating facts about space with our free, random space fact generator. Instantly learn something cool about the cosmos." />
+  <style>
+    body {
+      background-color: #0b0c10;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      padding: 1rem;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    #factDisplay {
+      font-size: 1.3rem;
+      margin: 1.5rem 0;
+      min-height: 80px;
+      max-width: 600px;
+      line-height: 1.5;
+    }
+    button {
+      padding: 12px 25px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 6px;
+      background-color: #1f2833;
+      color: #66fcf1;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #45a29e;
+    }
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+      #factDisplay {
+        font-size: 1rem;
+      }
+      button {
+        font-size: 1rem;
+        padding: 10px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🔭 Random Space Fact Generator</h1>
+  <p id="factDisplay">Click the button below to learn a cool space fact!</p>
+  <button onclick="getRandomFact()">Show Me a Random Fact</button>
+
+  <script>
+    const facts = [
+      "A day on Venus is longer than its year.",
+      "Neutron stars can spin at 600+ rotations per second.",
+      "There are more stars in the universe than grains of sand on Earth.",
+      "Jupiter’s Great Red Spot is actually a giant storm.",
+      "The Moon is slowly drifting away from Earth.",
+      "Saturn’s rings are mostly ice particles.",
+      "One spoon of a neutron star weighs about a billion tons.",
+      "It rains diamonds on Neptune and Uranus.",
+      "The ISS orbits Earth every 90 minutes.",
+      "There may be a planet made of diamonds — 55 Cancri e."
+    ];
+
+    function getRandomFact() {
+      const randomFact = facts[Math.floor(Math.random() * facts.length)];
+      document.getElementById('factDisplay').innerText = randomFact;
+    }
+  </script>
+</body>
+</html>
