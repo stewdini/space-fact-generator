@@ -6,7 +6,6 @@
 <title>Random Space Fact Generator | Space Simplified</title>
 <meta name="description" content="Discover fascinating facts about space with our free, random space fact generator. Instantly learn something cool about the cosmos." />
 <style>
-  /* (Same CSS as before - omitted here for brevity) */
   body {
     margin: 0;
     height: 100vh;
@@ -187,7 +186,7 @@
   }
 
   function getRandomFact() {
-    const clickSound = new Audio('https://actions.google.com/sounds/v1/cartoon/pop.ogg');
+    const clickSound = new Audio('https://stewdini.github.io/space-fact-generator/pop.mp3');
     clickSound.volume = 0.15;
     clickSound.play().catch(e => {
       console.warn('Sound play rejected:', e);
