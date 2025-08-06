@@ -156,21 +156,10 @@
   <button id="factButton">Show Me a Random Fact</button>
 
   <audio id="clickSound" preload="auto">
-  <source src="https://cdn.pixabay.com/download/audio/2022/03/27/audio_2a4d4f23c0.mp3?filename=pop-6187.mp3" type="audio/mpeg" />
-</audio>
-<script>
-  
-  // Inside your getRandomFact() function:
-  try {
-    clickSound.volume = 0.15; // 15% volume
-    clickSound.currentTime = 0;
-    clickSound.play();
-  } catch (e) {
-    console.warn('Sound play failed:', e);
-  }
-  // ... rest of your code
-</script>
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/27/audio_2a4d4f23c0.mp3?filename=pop-6187.mp3" type="audio/mpeg" />
+  </audio>
 
+  <script>
     const facts = [
       "A day on Venus is longer than its year.",
       "Neutron stars can spin at 600+ rotations per second.",
@@ -192,12 +181,10 @@
     function createSparkle() {
       const sparkle = document.createElement('div');
       sparkle.classList.add('sparkleParticle');
-      // Random movement values within -50 to +50 pixels
       const moveX = (Math.random() * 100 - 50).toFixed(2) + 'px';
       const moveY = (Math.random() * 100 - 50).toFixed(2) + 'px';
       sparkle.style.setProperty('--move-x', moveX);
       sparkle.style.setProperty('--move-y', moveY);
-      // Random start position within container
       sparkle.style.left = (Math.random() * 180) + 'px';
       sparkle.style.top = (Math.random() * 80) + 'px';
       sparkleContainer.appendChild(sparkle);
@@ -205,25 +192,18 @@
     }
 
     function getRandomFact() {
-      // Play click sound (ignore errors if any)
       try {
+        clickSound.volume = 0.15; // softer volume
         clickSound.currentTime = 0;
         clickSound.play();
       } catch (e) {
-        // sound play failed (browser restrictions)
         console.warn('Sound play failed:', e);
       }
-
-      // Reset fade animation on fact text
       factDisplay.classList.remove('show');
       void factDisplay.offsetWidth; // trigger reflow
-
-      // Generate sparkles
-      for(let i=0; i<15; i++) {
+      for (let i = 0; i < 15; i++) {
         createSparkle();
       }
-
-      // Show random fact
       const randomFact = facts[Math.floor(Math.random() * facts.length)];
       factDisplay.innerText = randomFact;
       factDisplay.classList.add('show');
@@ -233,4 +213,3 @@
   </script>
 </body>
 </html>
-
