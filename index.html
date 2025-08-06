@@ -33,13 +33,15 @@
   /* Space objects base style */
   .space-object {
     position: fixed;
-    border-radius: 50%;
     pointer-events: none;
     z-index: 0;
     will-change: transform;
   }
 
   /* Planets: softer, less intense glow */
+  .planet {
+    border-radius: 50%;
+  }
   .planet.red {
     background: #ff5c5c;
     box-shadow: 0 0 6px 2px #ff5c5c99;
@@ -66,6 +68,7 @@
     background: linear-gradient(90deg, #fff, #66fcf1);
     filter: drop-shadow(0 0 5px #66fcf1);
     opacity: 0.6;
+    border-radius: 50%;
   }
 
   /* Asteroids: brownish, irregular shape with opacity */
@@ -75,31 +78,21 @@
     opacity: 0.7;
   }
 
-  /* Rocket style */
-  .rocket {
-    width: 20px;
-    height: 20px;
-    background: transparent;
-    pointer-events: none;
-    position: fixed;
-    z-index: 0;
-    will-change: transform;
-    filter: drop-shadow(0 0 2px #ffffff88);
+  /* Rockets: SVG container overrides */
+  .space-object.rocket {
+    background: transparent !important;
+    border-radius: 0 !important;
   }
-  .rocket::before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
+  .space-object.rocket svg {
+    display: block;
     width: 100%;
     height: 100%;
-    transform: translate(-50%, -50%);
-    background-image: url('data:image/svg+xml;utf8,<svg fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M32 2L26 18 12 24l14 6 6 14 6-14 14-6-14-6-6-16z"/></svg>');
-    background-repeat: no-repeat;
-    background-size: contain;
+    stroke: white;
+    fill: white;
+    filter: drop-shadow(0 0 2px #ffffff88);
   }
 
-  /* Your original heading and sparkle styles */
+  /* Heading and sparkle styles */
   h1 {
     font-size: 3rem;
     margin-bottom: 1rem;
@@ -196,7 +189,7 @@
     z-index: 2;
   }
 
-  /* Fact Button styles (original) */
+  /* Fact Button styles */
   #factButton {
     padding: 14px 35px;
     font-size: 1.3rem;
@@ -236,7 +229,7 @@
     box-shadow: 0 0 10px #45a29e99;
   }
 
-  /* Mute toggle icon - original style, inline with fact button */
+  /* Mute toggle icon */
   #muteToggle {
     background: none;
     border: none;
@@ -353,6 +346,28 @@
   const spaceObjectsContainer = document.getElementById('spaceObjectsContainer');
   const planetColors = ['red', 'blue', 'green', 'orange', 'purple'];
 
+  // Rocket SVG icons array
+  const rocketSVGs = [
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" >
+       <path d="M32 2 L24 20 L40 20 Z" />
+       <rect x="28" y="20" width="8" height="30" rx="3" ry="3" fill="white" />
+       <path d="M24 50 L40 50 L32 62 Z" />
+     </svg>`,
+
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">
+       <path d="M32 4 L28 24 L36 24 Z" />
+       <rect x="27" y="24" width="10" height="28" rx="4" ry="4" fill="white" />
+       <circle cx="32" cy="38" r="6" stroke="white" stroke-width="2" fill="none"/>
+       <path d="M26 52 L38 52 L32 62 Z" />
+     </svg>`,
+
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="white" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
+       <path d="M32 3 L22 25 L42 25 Z" />
+       <rect x="24" y="25" width="16" height="26" rx="5" ry="5" fill="white" />
+       <path d="M20 48 L44 48 L32 62 Z" />
+     </svg>`
+  ];
+
   class SpaceObject {
     constructor(type) {
       this.type = type;
@@ -363,44 +378,68 @@
         const colorClass = planetColors[Math.floor(Math.random() * planetColors.length)];
         this.el.classList.add(colorClass);
         this.size = 30 + Math.random() * 30;
+        this.el.style.borderRadius = '50%';
+        this.el.style.background = '';
+        this.el.style.boxShadow = '';
+        // The planet color and glow are done by CSS classes
       } else if (type === 'comet') {
-        this.size = 6 + Math.random() * 6;
+        this.size = 20 + Math.random() * 15;
+        this.el.style.borderRadius = '50%';
+        this.el.style.background = 'linear-gradient(90deg, #fff, #66fcf1)';
+        this.el.style.filter = 'drop-shadow(0 0 5px #66fcf1)';
+        this.el.style.opacity = 0.6;
       } else if (type === 'asteroid') {
         this.size = 15 + Math.random() * 20;
+        this.el.style.borderRadius = '30% 50% 40% 50% / 60% 30% 50% 40%';
+        this.el.style.background = 'radial-gradient(circle, #a48a5c, #3f341c)';
+        this.el.style.opacity = 0.7;
       } else if (type === 'rocket') {
-        this.size = 15 + Math.random() * 10;
-        this.el.classList.add('rocket');
+        this.size = 20 + Math.random() * 10;
+        this.el.style.width = this.size + 'px';
+        this.el.style.height = this.size + 'px';
+        this.el.style.pointerEvents = 'none';
+
+        // Pick a random rocket SVG and insert it
+        const rocketIndex = Math.floor(Math.random() * rocketSVGs.length);
+        this.el.innerHTML = rocketSVGs[rocketIndex];
+
+        // Make sure SVG fills container and is white with slight glow
+        const svgEl = this.el.querySelector('svg');
+        svgEl.setAttribute('width', '100%');
+        svgEl.setAttribute('height', '100%');
+        this.el.style.filter = 'drop-shadow(0 0 2px #ffffff88)';
       }
 
-      this.el.style.width = this.size + 'px';
-      this.el.style.height = this.size + 'px';
+      if (type !== 'rocket') {
+        this.el.style.width = this.size + 'px';
+        this.el.style.height = this.size + 'px';
+      }
 
-      // Pick a random edge for the object to start outside the viewport
-      const edge = Math.floor(Math.random() * 4); // 0=top,1=right,2=bottom,3=left
-
+      // Initialize position just outside a random edge, move inward
+      const edge = Math.floor(Math.random() * 4);
       switch(edge) {
-        case 0: // Top edge (x anywhere, y just above screen)
+        case 0: // Top
           this.x = Math.random() * window.innerWidth;
           this.y = -this.size - 10;
           this.speedX = (Math.random() - 0.5) * 0.3;
-          this.speedY = Math.random() * 0.3 + 0.05; // move downward
+          this.speedY = Math.random() * 0.3 + 0.05; // down
           break;
-        case 1: // Right edge (x just off right, y anywhere)
+        case 1: // Right
           this.x = window.innerWidth + this.size + 10;
           this.y = Math.random() * window.innerHeight;
-          this.speedX = -(Math.random() * 0.3 + 0.05); // move leftward
+          this.speedX = -(Math.random() * 0.3 + 0.05); // left
           this.speedY = (Math.random() - 0.5) * 0.3;
           break;
-        case 2: // Bottom edge (x anywhere, y just below screen)
+        case 2: // Bottom
           this.x = Math.random() * window.innerWidth;
           this.y = window.innerHeight + this.size + 10;
           this.speedX = (Math.random() - 0.5) * 0.3;
-          this.speedY = -(Math.random() * 0.3 + 0.05); // move upward
+          this.speedY = -(Math.random() * 0.3 + 0.05); // up
           break;
-        case 3: // Left edge (x just left off screen, y anywhere)
+        case 3: // Left
           this.x = -this.size - 10;
           this.y = Math.random() * window.innerHeight;
-          this.speedX = Math.random() * 0.3 + 0.05; // move rightward
+          this.speedX = Math.random() * 0.3 + 0.05; // right
           this.speedY = (Math.random() - 0.5) * 0.3;
           break;
       }
@@ -415,7 +454,7 @@
       this.x += this.speedX;
       this.y += this.speedY;
 
-      // Normal wrap-around behavior
+      // Wrap around edges
       if (this.x < -this.size) this.x = window.innerWidth + this.size;
       else if (this.x > window.innerWidth + this.size) this.x = -this.size;
 
@@ -430,7 +469,7 @@
     }
   }
 
-  // Create space objects: mostly planets, some comets, asteroids, rockets (5% rockets)
+  // Create space objects: planets, comets, asteroids, rockets (5% rockets)
   const spaceObjects = [];
   const totalObjects = 20;
 
@@ -452,7 +491,7 @@
 
   animateSpaceObjects();
 
-  // Fact generator logic - fetched from your JSON file (will be loaded later)
+  // Fact generator logic - loaded from your JSON file
   let facts = [];
   let previousIndex = -1;
 
@@ -464,11 +503,11 @@
 
   let isMuted = false;
 
-  // Pop sound from your chosen option A
+  // Pop sound (clean pop)
   const popSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/26/audio_ebaf1f29de.mp3?filename=pop-6167.mp3');
   popSound.volume = 0.3;
 
-  // Load facts from JSON hosted on GitHub
+  // Load facts JSON
   fetch('https://raw.githubusercontent.com/stewdini/space-fact-generator/main/facts.json')
     .then(response => {
       if (!response.ok) throw new Error('Network response was not OK');
@@ -507,7 +546,6 @@
     const idx = getRandomFactIndex();
     factDisplay.textContent = facts[idx];
 
-    // Show copy icon only if fact is not the initial text
     copyButton.style.display = 'inline-flex';
     copyFeedback.style.display = 'none';
 
@@ -532,7 +570,7 @@
     muteToggle.textContent = isMuted ? '🔇' : '🔊';
   });
 
-  // On page load: hide copy icon initially
+  // On load: hide copy button initially
   copyButton.style.display = 'none';
 </script>
 </body>
