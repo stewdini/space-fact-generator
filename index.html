@@ -6,7 +6,6 @@
 <title>Random Space Fact Generator | Space Simplified</title>
 <meta name="description" content="Discover fascinating facts about space with our free, random space fact generator. Instantly learn something cool about the cosmos." />
 <style>
-  /* Body & background */
   body {
     margin: 0;
     height: 100vh;
@@ -22,7 +21,7 @@
     padding: 1rem;
     position: relative;
   }
-  /* Star twinkle effect */
+  /* Star twinkle background */
   body::before {
     content: '';
     position: fixed;
@@ -37,8 +36,6 @@
     from { background-position: 0 0; }
     to { background-position: -10000px 0; }
   }
-
-  /* Header and sparkle */
   h1 {
     font-size: 3rem;
     margin-bottom: 1rem;
@@ -59,8 +56,6 @@
     0%, 100% { opacity: 1; transform: rotate(0deg) scale(1); }
     50% { opacity: 0.5; transform: rotate(20deg) scale(1.3); }
   }
-
-  /* Fact text with fade-in + shadow */
   #factDisplay {
     font-size: 1.4rem;
     margin: 2rem 0 2rem 0;
@@ -80,8 +75,6 @@
     from { opacity: 0; }
     to { opacity: 1; }
   }
-
-  /* Button styling with glowing pulse */
   button {
     padding: 14px 35px;
     font-size: 1.3rem;
@@ -110,8 +103,6 @@
     transform: scale(0.95);
     box-shadow: 0 0 10px #45a29e99;
   }
-
-  /* Sparkle container */
   #sparkleContainer {
     position: absolute;
     top: 50%;
@@ -119,18 +110,18 @@
     pointer-events: none;
     transform: translate(-50%, -50%);
     z-index: 2;
+    width: 200px;
+    height: 100px;
   }
-
   .sparkleParticle {
     position: absolute;
     width: 8px;
     height: 8px;
     background: radial-gradient(circle, #66fcf1, transparent);
     border-radius: 50%;
-    opacity: 0;
-    animation: sparkleParticleAnim 1000ms forwards;
+    opacity: 1;
+    animation: sparkleParticleAnim 1s forwards;
   }
-
   @keyframes sparkleParticleAnim {
     0% {
       opacity: 1;
@@ -138,11 +129,9 @@
     }
     100% {
       opacity: 0;
-      transform: translate(var(--x), var(--y)) scale(0.2);
+      transform: translate(var(--move-x), var(--move-y)) scale(0.2);
     }
   }
-
-  /* Responsive adjustments */
   @media (max-width: 480px) {
     h1 {
       font-size: 2.2rem;
@@ -166,7 +155,9 @@
   </div>
   <button id="factButton">Show Me a Random Fact</button>
 
-  <audio id="clickSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
+  <audio id="clickSound" preload="auto">
+    <source src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_4590b64ef4.mp3?filename=mouse-click-125943.mp3" type="audio/mpeg" />
+  </audio>
 
   <script>
     const facts = [
@@ -190,22 +181,33 @@
     function createSparkle() {
       const sparkle = document.createElement('div');
       sparkle.classList.add('sparkleParticle');
-      sparkle.style.setProperty('--x', (Math.random() * 100 - 50) + 'px');
-      sparkle.style.setProperty('--y', (Math.random() * 100 - 50) + 'px');
+      // Random movement values within -50 to +50 pixels
+      const moveX = (Math.random() * 100 - 50).toFixed(2) + 'px';
+      const moveY = (Math.random() * 100 - 50).toFixed(2) + 'px';
+      sparkle.style.setProperty('--move-x', moveX);
+      sparkle.style.setProperty('--move-y', moveY);
+      // Random start position within container
+      sparkle.style.left = (Math.random() * 180) + 'px';
+      sparkle.style.top = (Math.random() * 80) + 'px';
       sparkleContainer.appendChild(sparkle);
       sparkle.addEventListener('animationend', () => sparkle.remove());
     }
 
     function getRandomFact() {
-      // Play sound
-      clickSound.currentTime = 0;
-      clickSound.play();
+      // Play click sound (ignore errors if any)
+      try {
+        clickSound.currentTime = 0;
+        clickSound.play();
+      } catch (e) {
+        // sound play failed (browser restrictions)
+        console.warn('Sound play failed:', e);
+      }
 
-      // Reset fade animation
+      // Reset fade animation on fact text
       factDisplay.classList.remove('show');
-      void factDisplay.offsetWidth;
+      void factDisplay.offsetWidth; // trigger reflow
 
-      // Show sparkle particles
+      // Generate sparkles
       for(let i=0; i<15; i++) {
         createSparkle();
       }
