@@ -6,6 +6,7 @@
 <title>Random Space Fact Generator | Space Simplified</title>
 <meta name="description" content="Discover fascinating facts about space with our free, random space fact generator. Instantly learn something cool about the cosmos." />
 <style>
+  /* (Same CSS as before - omitted here for brevity) */
   body {
     margin: 0;
     height: 100vh;
@@ -154,65 +155,57 @@
   </div>
   <button id="factButton">Show Me a Random Fact</button>
 
-  <script>
-    const facts = [
-      "A day on Venus is longer than its year.",
-      "Neutron stars can spin at 600+ rotations per second.",
-      "There are more stars in the universe than grains of sand on Earth.",
-      "Jupiter’s Great Red Spot is actually a giant storm.",
-      "The Moon is slowly drifting away from Earth.",
-      "Saturn’s rings are mostly ice particles.",
-      "One spoon of a neutron star weighs about a billion tons.",
-      "It rains diamonds on Neptune and Uranus.",
-      "The ISS orbits Earth every 90 minutes.",
-      "There may be a planet made of diamonds — 55 Cancri e."
-    ];
+<script>
+  const facts = [
+    "A day on Venus is longer than its year.",
+    "Neutron stars can spin at 600+ rotations per second.",
+    "There are more stars in the universe than grains of sand on Earth.",
+    "Jupiter’s Great Red Spot is actually a giant storm.",
+    "The Moon is slowly drifting away from Earth.",
+    "Saturn’s rings are mostly ice particles.",
+    "One spoon of a neutron star weighs about a billion tons.",
+    "It rains diamonds on Neptune and Uranus.",
+    "The ISS orbits Earth every 90 minutes.",
+    "There may be a planet made of diamonds — 55 Cancri e."
+  ];
 
-    const factDisplay = document.getElementById('factDisplay');
-    const sparkleContainer = document.getElementById('sparkleContainer');
-    const factButton = document.getElementById('factButton');
+  const factDisplay = document.getElementById('factDisplay');
+  const sparkleContainer = document.getElementById('sparkleContainer');
+  const factButton = document.getElementById('factButton');
 
-    // Create audio instance here
+  function createSparkle() {
+    const sparkle = document.createElement('div');
+    sparkle.classList.add('sparkleParticle');
+    const moveX = (Math.random() * 100 - 50).toFixed(2) + 'px';
+    const moveY = (Math.random() * 100 - 50).toFixed(2) + 'px';
+    sparkle.style.setProperty('--move-x', moveX);
+    sparkle.style.setProperty('--move-y', moveY);
+    sparkle.style.left = (Math.random() * 180) + 'px';
+    sparkle.style.top = (Math.random() * 80) + 'px';
+    sparkleContainer.appendChild(sparkle);
+    sparkle.addEventListener('animationend', () => sparkle.remove());
+  }
+
+  function getRandomFact() {
     const clickSound = new Audio('https://actions.google.com/sounds/v1/cartoon/pop.ogg');
-    clickSound.volume = 0.15; // Softer volume
+    clickSound.volume = 0.15;
+    clickSound.play().catch(e => {
+      console.warn('Sound play rejected:', e);
+    });
 
-    function createSparkle() {
-      const sparkle = document.createElement('div');
-      sparkle.classList.add('sparkleParticle');
-      const moveX = (Math.random() * 100 - 50).toFixed(2) + 'px';
-      const moveY = (Math.random() * 100 - 50).toFixed(2) + 'px';
-      sparkle.style.setProperty('--move-x', moveX);
-      sparkle.style.setProperty('--move-y', moveY);
-      sparkle.style.left = (Math.random() * 180) + 'px';
-      sparkle.style.top = (Math.random() * 80) + 'px';
-      sparkleContainer.appendChild(sparkle);
-      sparkle.addEventListener('animationend', () => sparkle.remove());
+    factDisplay.classList.remove('show');
+    void factDisplay.offsetWidth;
+
+    for(let i=0; i<15; i++) {
+      createSparkle();
     }
 
-    function getRandomFact() {
-      try {
-        clickSound.currentTime = 0;
-        clickSound.play().catch(e => {
-          console.warn('Audio play rejected:', e);
-        });
-      } catch (e) {
-        console.warn('Sound play error:', e);
-      }
+    const randomFact = facts[Math.floor(Math.random() * facts.length)];
+    factDisplay.innerText = randomFact;
+    factDisplay.classList.add('show');
+  }
 
-      factDisplay.classList.remove('show');
-      void factDisplay.offsetWidth;
-
-      for(let i=0; i<15; i++) {
-        createSparkle();
-      }
-
-      const randomFact = facts[Math.floor(Math.random() * facts.length)];
-      factDisplay.innerText = randomFact;
-      factDisplay.classList.add('show');
-    }
-
-    factButton.addEventListener('click', getRandomFact);
-  </script>
+  factButton.addEventListener('click', getRandomFact);
+</script>
 </body>
 </html>
-
