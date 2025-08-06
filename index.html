@@ -38,58 +38,79 @@
     will-change: transform;
   }
 
-  /* Planets: softer, less intense glow */
+  /* PLANETS with subtle craters using multiple radial gradients */
   .planet {
     border-radius: 50%;
+    box-shadow: 0 0 8px 1px rgba(100,150,255,0.3);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
   }
   .planet.red {
-    background: #ff5c5c;
-    box-shadow: 0 0 6px 2px #ff5c5c99;
+    background-color: #b0413e;
+    background-image:
+      radial-gradient(circle at 30% 30%, #a03736 10%, transparent 12%),
+      radial-gradient(circle at 70% 60%, #a83a3a 15%, transparent 18%),
+      radial-gradient(circle at 55% 75%, #80312f 8%, transparent 10%);
+    box-shadow: 0 0 6px 1px rgba(180, 65, 62, 0.35);
   }
   .planet.blue {
-    background: #5ca0ff;
-    box-shadow: 0 0 6px 2px #5ca0ff99;
+    background-color: #4b7dad;
+    background-image:
+      radial-gradient(circle at 25% 25%, #3d6890 8%, transparent 10%),
+      radial-gradient(circle at 65% 60%, #366384 14%, transparent 17%),
+      radial-gradient(circle at 50% 80%, #2b516f 7%, transparent 9%);
+    box-shadow: 0 0 6px 1px rgba(75, 125, 173, 0.35);
   }
   .planet.green {
-    background: #5cff8a;
-    box-shadow: 0 0 6px 2px #5cff8a99;
+    background-color: #4ca36c;
+    background-image:
+      radial-gradient(circle at 30% 30%, #418b5a 10%, transparent 12%),
+      radial-gradient(circle at 70% 60%, #3e7e52 14%, transparent 17%),
+      radial-gradient(circle at 55% 75%, #2e5c3d 7%, transparent 9%);
+    box-shadow: 0 0 6px 1px rgba(76, 163, 108, 0.35);
   }
   .planet.orange {
-    background: #ffa75c;
-    box-shadow: 0 0 6px 2px #ffa75c99;
+    background-color: #d17f3c;
+    background-image:
+      radial-gradient(circle at 30% 30%, #ab6831 10%, transparent 12%),
+      radial-gradient(circle at 70% 60%, #9c5f2b 14%, transparent 17%),
+      radial-gradient(circle at 55% 75%, #6d411d 7%, transparent 9%);
+    box-shadow: 0 0 6px 1px rgba(209, 127, 60, 0.35);
   }
   .planet.purple {
-    background: #b55cff;
-    box-shadow: 0 0 6px 2px #b55cff99;
+    background-color: #7855b8;
+    background-image:
+      radial-gradient(circle at 30% 30%, #6646a1 10%, transparent 12%),
+      radial-gradient(circle at 70% 60%, #5a3d8a 14%, transparent 17%),
+      radial-gradient(circle at 55% 75%, #3d2b5f 7%, transparent 9%);
+    box-shadow: 0 0 6px 1px rgba(120, 85, 184, 0.35);
   }
 
-  /* Comets: translucent with glow */
+  /* COMETS textured with layered linear gradient, no transparency */
   .comet {
-    background: linear-gradient(90deg, #fff, #66fcf1);
-    filter: drop-shadow(0 0 5px #66fcf1);
-    opacity: 0.6;
-    border-radius: 50%;
+    border-radius: 50% / 60%;
+    background: linear-gradient(90deg, #a0f0ff 0%, #66fcf1 30%, #b3ffff 60%, #66fcf1 80%, #a0f0ff 100%);
+    box-shadow: 0 0 8px 3px #66fcf1aa;
   }
 
-  /* Asteroids: brownish, irregular shape with opacity */
+  /* ASTEROIDS with irregular shape using clip-path and layered radial gradients */
   .asteroid {
-    background: radial-gradient(circle, #a48a5c, #3f341c);
-    border-radius: 30% 50% 40% 50% / 60% 30% 50% 40%;
-    opacity: 0.7;
+    background: radial-gradient(circle at 40% 40%, #997a55 40%, #6b5432 70%);
+    clip-path: polygon(
+      30% 0%, 70% 10%, 100% 40%, 85% 70%, 55% 100%, 20% 90%, 5% 50%, 10% 20%
+    );
+    box-shadow: 0 0 5px 1px #6b543266;
   }
 
-  /* Rockets: SVG container overrides */
+  /* ROCKETS: base styles */
   .space-object.rocket {
-    background: transparent !important;
-    border-radius: 0 !important;
-  }
-  .space-object.rocket svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-    stroke: white;
-    fill: white;
-    filter: drop-shadow(0 0 2px #ffffff88);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 30px !important;
+    height: 40px !important;
+    filter: drop-shadow(0 0 1.5px #fff9);
   }
 
   /* Heading and sparkle styles */
@@ -341,79 +362,49 @@
   resize();
   animateStarfield();
 
-  // Space Objects random drifting with colored glowing planets + rockets
+  // Base64 rocket images - 3 variants (colored little rocketship pictures)
+  // These are tiny 30x40 pixel PNGs encoded in base64
+  const rocketImages = [
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAoCAYAAAArW5ZsAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAdklEQVR4nO3TQQrAMAwEwLz/Wa36SFBquHDIyG37hUu8xQCI8Ix5UgOyebCVV1Jz2cK3AtYO5wE6EO0z9dDAU8vNx1qkIp0uhfOo2v1WqwYUbjCgkiIqYFM6ScXOd5nF+bEKghDZpRE4vDJL97hG3Lc0K9uXZX7Dr4AX35Lq4fn6sNAAAAAElFTkSuQmCC',
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAoCAYAAAArW5ZsAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAbUlEQVR4nO3UQQrAMAwEwLv/6aUqRg+kDxgCP4mOwyMIr5tVD1bjw6kz1a9cYDwHq0h88n2iBAO7UuDWxUqQHGoAtMcJzKX0aN6xlgcyCIqGzIPdJFSx8AqzqLKh1ZoXuSCxxCrP+DAz2v7A2X+0FtI8qqpNQAAAABJRU5ErkJggg==',
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAoCAYAAAArW5ZsAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAYklEQVR4nO3UQQrAMAwEwLz/6aUqRg+gPhgSPwomKkxKLrG1xCcHzRPHcQNO+vyBWE2BDq5Xq3NZzVbgiAsqBBxKDTBoO4kpGTwqOytCFQ4RCAxBTSkSQSUS6iPjEuJ2i41Sn04guSe/GK3jP6r9TKNxpaZ0AAAAASUVORK5CYII='
+  ];
 
   const spaceObjectsContainer = document.getElementById('spaceObjectsContainer');
-  const planetColors = ['red', 'blue', 'green', 'orange', 'purple'];
-
-  // Rocket SVG icons array
-  const rocketSVGs = [
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" >
-       <path d="M32 2 L24 20 L40 20 Z" />
-       <rect x="28" y="20" width="8" height="30" rx="3" ry="3" fill="white" />
-       <path d="M24 50 L40 50 L32 62 Z" />
-     </svg>`,
-
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">
-       <path d="M32 4 L28 24 L36 24 Z" />
-       <rect x="27" y="24" width="10" height="28" rx="4" ry="4" fill="white" />
-       <circle cx="32" cy="38" r="6" stroke="white" stroke-width="2" fill="none"/>
-       <path d="M26 52 L38 52 L32 62 Z" />
-     </svg>`,
-
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="white" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
-       <path d="M32 3 L22 25 L42 25 Z" />
-       <rect x="24" y="25" width="16" height="26" rx="5" ry="5" fill="white" />
-       <path d="M20 48 L44 48 L32 62 Z" />
-     </svg>`
-  ];
 
   class SpaceObject {
     constructor(type) {
       this.type = type;
       this.el = document.createElement('div');
-      this.el.classList.add('space-object', type);
+      this.el.classList.add('space-object');
 
       if (type === 'planet') {
-        const colorClass = planetColors[Math.floor(Math.random() * planetColors.length)];
-        this.el.classList.add(colorClass);
-        this.size = 30 + Math.random() * 30;
-        this.el.style.borderRadius = '50%';
-        this.el.style.background = '';
-        this.el.style.boxShadow = '';
-        // The planet color and glow are done by CSS classes
+        this.size = 40 + Math.random() * 35;
+        this.el.classList.add('planet');
+
+        // Assign random planet color class
+        const planetColors = ['red', 'blue', 'green', 'orange', 'purple'];
+        const color = planetColors[Math.floor(Math.random() * planetColors.length)];
+        this.el.classList.add(color);
+
       } else if (type === 'comet') {
-        this.size = 20 + Math.random() * 15;
-        this.el.style.borderRadius = '50%';
-        this.el.style.background = 'linear-gradient(90deg, #fff, #66fcf1)';
-        this.el.style.filter = 'drop-shadow(0 0 5px #66fcf1)';
-        this.el.style.opacity = 0.6;
+        this.size = 25 + Math.random() * 20;
+        this.el.classList.add('comet');
       } else if (type === 'asteroid') {
-        this.size = 15 + Math.random() * 20;
-        this.el.style.borderRadius = '30% 50% 40% 50% / 60% 30% 50% 40%';
-        this.el.style.background = 'radial-gradient(circle, #a48a5c, #3f341c)';
-        this.el.style.opacity = 0.7;
+        this.size = 20 + Math.random() * 20;
+        this.el.classList.add('asteroid');
       } else if (type === 'rocket') {
-        this.size = 20 + Math.random() * 10;
-        this.el.style.width = this.size + 'px';
-        this.el.style.height = this.size + 'px';
-        this.el.style.pointerEvents = 'none';
+        this.size = 30;
+        this.el.classList.add('rocket');
 
-        // Pick a random rocket SVG and insert it
-        const rocketIndex = Math.floor(Math.random() * rocketSVGs.length);
-        this.el.innerHTML = rocketSVGs[rocketIndex];
-
-        // Make sure SVG fills container and is white with slight glow
-        const svgEl = this.el.querySelector('svg');
-        svgEl.setAttribute('width', '100%');
-        svgEl.setAttribute('height', '100%');
-        this.el.style.filter = 'drop-shadow(0 0 2px #ffffff88)';
+        // Assign one of 3 rocket images randomly
+        const rocketIndex = Math.floor(Math.random() * rocketImages.length);
+        this.el.style.backgroundImage = `url(${rocketImages[rocketIndex]})`;
       }
 
-      if (type !== 'rocket') {
-        this.el.style.width = this.size + 'px';
-        this.el.style.height = this.size + 'px';
-      }
+      // Set size
+      this.el.style.width = this.size + 'px';
+      this.el.style.height = (this.type === 'rocket' ? 40 : this.size) + 'px';
 
       // Initialize position just outside a random edge, move inward
       const edge = Math.floor(Math.random() * 4);
