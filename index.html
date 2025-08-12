@@ -9,7 +9,6 @@
 <link rel="icon" href="favicon.ico" />
 
 <style>
-  /* Keep your original styling here */
   body {
     margin: 0;
     height: 100vh;
@@ -35,14 +34,28 @@
     pointer-events: none;
   }
 
+  /* Background containers behind UI */
+  #spaceObjectsContainer, #smokeTrailContainer {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0; /* Behind UI */
+  }
+
+  /* UI elements (header, fact, buttons) on top */
+  h1, #factDisplay, #factButton, #muteToggle {
+    position: relative;
+    z-index: 10; /* In front */
+  }
+
+  /* Space object styles as before */
   .space-object {
     position: fixed;
     pointer-events: none;
-    z-index: 0;
     will-change: transform;
   }
 
-  /* Planets */
   .planet {
     border-radius: 50%;
     box-shadow: 0 0 8px 1px rgba(100,150,255,0.3);
@@ -91,14 +104,12 @@
     box-shadow: 0 0 6px 1px rgba(120, 85, 184, 0.35);
   }
 
-  /* Comets */
   .comet {
     border-radius: 50% / 60%;
     background: linear-gradient(90deg, #a0f0ff 0%, #66fcf1 30%, #b3ffff 60%, #66fcf1 80%, #a0f0ff 100%);
     box-shadow: 0 0 8px 3px #66fcf1aa;
   }
 
-  /* Asteroids */
   .asteroid {
     background: radial-gradient(circle at 40% 40%, #997a55 40%, #6b5432 70%);
     clip-path: polygon(
@@ -107,7 +118,6 @@
     box-shadow: 0 0 5px 1px #6b543266;
   }
 
-  /* Rockets: Your original rocket SVG backgrounds, size fixed */
   .space-object.rocket {
     width: 30px !important;
     height: 40px !important;
@@ -117,7 +127,6 @@
     background-position: center;
   }
 
-  /* Rocket flames (simple orange glow behind rocket) */
   .rocket-flame {
     position: absolute;
     bottom: -10px;
@@ -135,42 +144,20 @@
     100% { transform: translateX(-50%) scaleY(1.15) scaleX(0.85); opacity: 0.85; }
   }
 
-  /* Smoke trail container */
-  #smokeTrailContainer {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 0;
-  }
-
   /* Smoke puff style */
   .smoke-puff {
     position: fixed;
     background: radial-gradient(circle, rgba(180,180,180,0.7) 0%, rgba(180,180,180,0) 80%);
     border-radius: 50%;
     opacity: 0.6;
-    animation: puffFade 2.5s forwards;
     pointer-events: none;
-  }
-  @keyframes puffFade {
-    0% {
-      transform: scale(0.7);
-      opacity: 0.6;
-    }
-    100% {
-      transform: scale(1.8);
-      opacity: 0;
-    }
+    will-change: transform, opacity;
   }
 
-  /* UI styles simplified for demo */
+  /* UI styles */
   h1 {
     font-size: 3rem;
     margin-bottom: 1rem;
-    position: relative;
-    z-index: 1;
     text-shadow: 0 0 8px #66fcf1;
   }
 
@@ -192,10 +179,7 @@
     font-size: 1.4rem;
     margin: 2rem 0;
     line-height: 1.6;
-    position: relative;
-    opacity: 1;
     max-width: 600px;
-    z-index: 1;
   }
 
   #factButton {
@@ -225,22 +209,24 @@
 </style>
 </head>
 <body>
+
 <canvas id="starfield"></canvas>
 
-<!-- Containers -->
+<!-- Background objects container -->
 <div id="spaceObjectsContainer"></div>
+<!-- Smoke trail container -->
 <div id="smokeTrailContainer"></div>
 
+<!-- UI -->
 <h1>🔭 Random Space Fact Generator<span class="sparkle">✨</span></h1>
 <p id="factDisplay">Click the button below to learn a cool space fact!</p>
-
 <div>
   <button id="factButton">Show Me a Random Fact</button>
   <button id="muteToggle" title="Toggle sound">🔊</button>
 </div>
 
 <script>
-  // Starfield
+  // Starfield setup (same as before)
   const canvas = document.getElementById('starfield');
   const ctx = canvas.getContext('2d');
   let stars = [];
@@ -289,7 +275,7 @@
   resize();
   animateStarfield();
 
-  // Rockets SVG backgrounds you liked
+  // Rocket SVGs (same as before)
   const rocketSVGs = [
     `<svg width="30" height="40" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg" >
       <path fill="#66fcf1" d="M12 0L14 5L12 9L10 5L12 0Z"/>
@@ -315,32 +301,19 @@
     div.style.pointerEvents = 'none';
     div.style.willChange = 'transform';
 
-    // Simple flame - orange blurred circle behind rocket bottom center
+    // Flame behind rocket
     const flame = document.createElement('div');
     flame.classList.add('rocket-flame');
-    flame.style.position = 'absolute';
-    flame.style.bottom = '-12px';
-    flame.style.left = '50%';
-    flame.style.transform = 'translateX(-50%)';
-    flame.style.width = '14px';
-    flame.style.height = '20px';
-    flame.style.background = 'radial-gradient(circle, rgba(255,165,0,0.9) 0%, rgba(255,165,0,0) 80%)';
-    flame.style.filter = 'blur(3px)';
-    flame.style.animation = 'flameFlicker 0.15s infinite alternate';
-    flame.style.pointerEvents = 'none';
     div.appendChild(flame);
 
     return div;
   }
 
-  // Space objects array
-  const spaceObjects = [];
-
-  // Helper random between min/max
   function randomRange(min, max) {
     return Math.random() * (max - min) + min;
   }
 
+  // SpaceObject class with smoke trail array attached
   class SpaceObject {
     constructor(type, size, speedX, speedY, rotationSpeed) {
       this.type = type;
@@ -352,8 +325,17 @@
       this.y = Math.random() * window.innerHeight;
       this.rotation = 0;
       this.el = null;
+
+      // For rockets: keep a fixed-length array of past positions for smoke trail
+      if(this.type === 'rocket') {
+        this.smokeTrail = [];
+        this.maxTrailLength = 15; // number of smoke puffs
+        this.smokeElements = [];
+      }
+
       this.createElement();
     }
+
     createElement() {
       const container = document.getElementById('spaceObjectsContainer');
       if(this.type === 'rocket') {
@@ -379,51 +361,86 @@
         }
       }
       container.appendChild(this.el);
+
+      // For rockets create smoke puff divs in smokeTrailContainer up front
+      if(this.type === 'rocket') {
+        const smokeContainer = document.getElementById('smokeTrailContainer');
+        for(let i=0; i<this.maxTrailLength; i++) {
+          const puff = document.createElement('div');
+          puff.classList.add('smoke-puff');
+          // random size for variety
+          const size = randomRange(6, 14);
+          puff.style.width = size + 'px';
+          puff.style.height = size + 'px';
+          puff.style.opacity = 0;
+          smokeContainer.appendChild(puff);
+          this.smokeElements.push(puff);
+        }
+      }
     }
+
     update() {
       this.x += this.speedX;
       this.y += this.speedY;
 
+      // Wrap around edges
       if(this.x < -this.size) this.x = window.innerWidth + this.size;
       else if(this.x > window.innerWidth + this.size) this.x = -this.size;
       if(this.y < -this.size) this.y = window.innerHeight + this.size;
       else if(this.y > window.innerHeight + this.size) this.y = -this.size;
 
       if(this.type === 'rocket') {
-        // Correct rotation based on velocity vector
+        // Rotate rocket to face velocity vector
         let angleRad = Math.atan2(this.speedY, this.speedX);
         let angleDeg = angleRad * (180 / Math.PI) + 90; 
-        // +90 because original rocket SVG points up (0deg)
         this.rotation = angleDeg;
         this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rotation}deg)`;
 
-        // Smoke trail behind rocket
-        this.addSmokePuff(this.x - Math.cos(angleRad)*20, this.y - Math.sin(angleRad)*20);
+        // Update smoke trail positions:
+        // Add current position behind rocket, offset by ~20px opposite direction of velocity
+        const smokeX = this.x - Math.cos(angleRad)*20;
+        const smokeY = this.y - Math.sin(angleRad)*20;
+
+        // Push new position to smoke trail array
+        this.smokeTrail.push({x: smokeX, y: smokeY, age: 0});
+        if(this.smokeTrail.length > this.maxTrailLength) {
+          this.smokeTrail.shift();
+        }
+
+        // Update smoke puff divs: position and opacity based on age
+        for(let i=0; i<this.smokeTrail.length; i++) {
+          const puff = this.smokeElements[i];
+          const pos = this.smokeTrail[i];
+          // Increase age by frame
+          pos.age += 1;
+
+          puff.style.left = pos.x + 'px';
+          puff.style.top = pos.y + 'px';
+
+          // Fade out older smoke: older = less opacity, bigger size
+          let opacity = 0.5 * (1 - pos.age / this.maxTrailLength);
+          puff.style.opacity = opacity < 0 ? 0 : opacity;
+
+          // Increase puff size slightly over age
+          let baseSize = parseFloat(puff.style.width);
+          let size = baseSize + pos.age; // grows by 1px per frame
+          puff.style.width = size + 'px';
+          puff.style.height = size + 'px';
+        }
       } else {
+        // For others just rotate a bit
         this.rotation += this.rotationSpeed;
-        if(this.rotation > 360) this.rotation -= 360;
-        if(this.rotation < 0) this.rotation += 360;
         this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rotation}deg)`;
       }
-    }
-    addSmokePuff(x,y) {
-      const container = document.getElementById('smokeTrailContainer');
-      const puff = document.createElement('div');
-      puff.classList.add('smoke-puff');
-      let size = randomRange(6, 14);
-      puff.style.width = size + 'px';
-      puff.style.height = size + 'px';
-      puff.style.left = x + 'px';
-      puff.style.top = y + 'px';
-      container.appendChild(puff);
-      puff.addEventListener('animationend', () => puff.remove());
     }
   }
 
   // Create objects
+  const spaceObjects = [];
   function createSpaceObjects() {
     const container = document.getElementById('spaceObjectsContainer');
     container.innerHTML = '';
+    document.getElementById('smokeTrailContainer').innerHTML = '';
     spaceObjects.length = 0;
 
     // Rockets
