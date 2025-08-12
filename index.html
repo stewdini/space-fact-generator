@@ -39,6 +39,7 @@
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+    transition: transform 0.05s linear;
   }
 
   /* PLANETS */
@@ -141,11 +142,6 @@
     opacity: 1;
   }
 
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
   #copyButton {
     background: none;
     border: none;
@@ -242,12 +238,15 @@
   /* Smoke style */
   .smoke {
     position: fixed;
+    width: 14px;
+    height: 14px;
     background: rgba(180,180,180,0.3);
     border-radius: 50%;
     filter: blur(3px);
     pointer-events: none;
     z-index: 0;
     will-change: opacity, transform;
+    transform-origin: center center;
   }
 </style>
 <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png" />
@@ -400,16 +399,16 @@
 
         this.x = Math.random() * window.innerWidth;
         this.y = Math.random() * window.innerHeight;
-        this.speedX = (Math.random() - 0.5) * 0.05;
-        this.speedY = (Math.random() - 0.5) * 0.05;
+        this.speedX = (Math.random() - 0.5) * 0.1;
+        this.speedY = (Math.random() - 0.5) * 0.1;
 
         this.rotation = Math.random() * 360;
-        this.rotationSpeed = (Math.random() - 0.5) * 0.1;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.2;
 
         this.el.style.transformOrigin = '50% 50%';
       } else if (type === 'rocket') {
         this.size = 30;
-        this.el.style.backgroundImage = `url(${rocketImages[0]})`;
+        this.el.style.backgroundImage = `url(${rocketImages[0]})`; // Use rocket1.png for now
         this.el.style.width = this.size + 'px';
         this.el.style.height = '40px';
 
@@ -418,84 +417,75 @@
           case 0: // top
             this.x = Math.random() * window.innerWidth;
             this.y = -50;
-            this.speedX = (Math.random() - 0.5) * 0.15;
-            this.speedY = 0.3 + Math.random() * 0.15;
+            this.speedX = (Math.random() - 0.5) * 0.35;
+            this.speedY = 0.6 + Math.random() * 0.3; // faster downward
             break;
           case 1: // right
             this.x = window.innerWidth + 50;
             this.y = Math.random() * window.innerHeight;
-            this.speedX = -(0.3 + Math.random() * 0.15);
-            this.speedY = (Math.random() - 0.5) * 0.15;
+            this.speedX = -(0.6 + Math.random() * 0.3); // faster left
+            this.speedY = (Math.random() - 0.5) * 0.35;
             break;
           case 2: // bottom
             this.x = Math.random() * window.innerWidth;
             this.y = window.innerHeight + 50;
-            this.speedX = (Math.random() - 0.5) * 0.15;
-            this.speedY = -(0.3 + Math.random() * 0.15);
+            this.speedX = (Math.random() - 0.5) * 0.35;
+            this.speedY = -(0.6 + Math.random() * 0.3); // faster up
             break;
           case 3: // left
             this.x = -50;
             this.y = Math.random() * window.innerHeight;
-            this.speedX = 0.3 + Math.random() * 0.15;
-            this.speedY = (Math.random() - 0.5) * 0.15;
+            this.speedX = 0.6 + Math.random() * 0.3; // faster right
+            this.speedY = (Math.random() - 0.5) * 0.35;
             break;
         }
 
         this.rotation = 0;
         this.rotationSpeed = 0;
+        this.smokeTrail = [];
 
-        this.el.style.transformOrigin = '50% 80%';
+        this.el.style.transformOrigin = '50% 80%'; // pivot near bottom center so rotation looks right
       }
 
       this.updatePosition();
       spaceObjectsContainer.appendChild(this.el);
     }
 
-    createSmokeParticle(x, y) {
-      const particle = document.createElement('div');
-      particle.classList.add('smoke');
-      particle.style.left = x + 'px';
-      particle.style.top = y + 'px';
-      particle.style.width = '12px';
-      particle.style.height = '12px';
-      particle.style.opacity = '0.4';
-      particle.style.transition = 'opacity 1.5s ease-out, transform 1.5s ease-out';
-      document.body.appendChild(particle);
-
-      requestAnimationFrame(() => {
-        particle.style.opacity = '0';
-        particle.style.transform = `translateY(-20px) scale(1.3)`;
-      });
-
-      setTimeout(() => {
-        particle.remove();
-      }, 1500);
+    updatePosition() {
+      this.el.style.left = this.x + 'px';
+      this.el.style.top = this.y + 'px';
     }
 
     update() {
       this.x += this.speedX;
       this.y += this.speedY;
-      this.rotation += this.rotationSpeed;
 
-      if(this.type === 'planet' || this.type === 'asteroid') {
-        if(this.x < -this.size) this.x = window.innerWidth + this.size;
-        else if(this.x > window.innerWidth + this.size) this.x = -this.size;
-        if(this.y < -this.size) this.y = window.innerHeight + this.size;
-        else if(this.y > window.innerHeight + this.size) this.y = -this.size;
-      }
-
-      if(this.type === 'rocket') {
+      if(this.type === 'planet') {
+        // Optional slow rotation for planets
+        this.rotation += 0.02;
+        if(this.rotation > 360) this.rotation -= 360;
+        this.el.style.transform = `rotate(${this.rotation}deg)`;
+      } else if(this.type === 'asteroid') {
+        this.rotation += this.rotationSpeed;
+        if(this.rotation > 360) this.rotation -= 360;
+        else if(this.rotation < 0) this.rotation += 360;
+        this.el.style.transform = `rotate(${this.rotation}deg) translate(0,0)`;
+      } else if(this.type === 'rocket') {
+        // Remove if out of screen bounds + margin
         if(this.x < -100 || this.x > window.innerWidth + 100 || this.y < -100 || this.y > window.innerHeight + 100) {
           this.el.remove();
-          return false;
+          return false; // tell caller to remove this object
         }
 
-        // Rotate rocket to face direction of movement
+        // Rotate rocket to face direction of movement, +90 to align correctly
         this.rotation = Math.atan2(this.speedY, this.speedX) * 180 / Math.PI + 90;
+        this.el.style.transform = `rotate(${this.rotation}deg)`;
 
         // Create smoke particle behind rocket ~30% chance per frame
         if(Math.random() < 0.3) {
-          this.createSmokeParticle(this.x + this.size/2, this.y + 40);
+          const smokeX = this.x + this.size / 2;  // horizontal center bottom
+          const smokeY = this.y + 38;             // near bottom middle (adjust if needed)
+          this.createSmokeParticle(smokeX, smokeY);
         }
       }
 
@@ -503,111 +493,105 @@
       return true;
     }
 
-    updatePosition() {
-      this.el.style.left = this.x + 'px';
-      this.el.style.top = this.y + 'px';
-      this.el.style.transform = `rotate(${this.rotation}deg)`;
+    createSmokeParticle(x, y) {
+      const smoke = document.createElement('div');
+      smoke.classList.add('smoke');
+      smoke.style.left = x + 'px';
+      smoke.style.top = y + 'px';
+
+      spaceObjectsContainer.appendChild(smoke);
+
+      let opacity = 0.4 + Math.random() * 0.3;
+      let scale = 0.5 + Math.random() * 0.5;
+      let rise = 0;
+      let lifetime = 40 + Math.random() * 20;
+      let frame = 0;
+
+      function animateSmoke() {
+        if(frame >= lifetime) {
+          smoke.remove();
+          return;
+        }
+        rise += 0.3;
+        opacity -= 0.01;
+        scale += 0.005;
+        smoke.style.transform = `translateY(${-rise}px) scale(${scale})`;
+        smoke.style.opacity = opacity;
+        frame++;
+        requestAnimationFrame(animateSmoke);
+      }
+      animateSmoke();
     }
   }
 
-  let spaceObjects = [];
+  const spaceObjects = [];
 
-  // Spawn planets once at start
-  for(let i=0; i<15; i++) {
+  // Generate some initial space objects
+  for(let i=0; i<6; i++) {
     spaceObjects.push(new SpaceObject('planet'));
   }
-
-  // Spawn asteroids initially
-  for(let i=0; i<10; i++) {
+  for(let i=0; i<5; i++) {
     spaceObjects.push(new SpaceObject('asteroid'));
   }
+  for(let i=0; i<4; i++) {
+    spaceObjects.push(new SpaceObject('rocket'));
+  }
 
-  // Animation loop for space objects
   function animateSpaceObjects() {
-    for(let i = spaceObjects.length - 1; i >= 0; i--) {
+    for(let i = spaceObjects.length -1; i >= 0; i--) {
       const alive = spaceObjects[i].update();
-      if(!alive) spaceObjects.splice(i, 1);
+      if(alive === false) {
+        spaceObjects.splice(i, 1);
+        // Replace with a new one of same type
+        spaceObjects.push(new SpaceObject(spaceObjects[i]?.type || 'rocket'));
+      }
     }
-
-    // Spawn rocket rarely (~0.003 = 0.3% chance per frame)
-    if(Math.random() < 0.003) {
-      spaceObjects.push(new SpaceObject('rocket'));
-    }
-
     requestAnimationFrame(animateSpaceObjects);
   }
   animateSpaceObjects();
 
-  // Space facts
+  // Fact generator code (shortened for clarity)
   const facts = [
-    "The hottest planet in our solar system is Venus.",
-    "A day on Venus is longer than its year.",
-    "Jupiter's Great Red Spot is a giant storm.",
-    "Neutron stars are so dense that a teaspoon would weigh billions of tons.",
-    "Saturn is the least dense planet; it could float on water.",
-    "Mars has the tallest volcano in the solar system, Olympus Mons.",
-    "Mercury has no atmosphere and experiences extreme temperature changes.",
-    "The Milky Way galaxy is about 100,000 light years across.",
-    "One day on Mercury lasts 59 Earth days.",
-    "There are more trees on Earth than stars in the Milky Way.",
-    "Space is completely silent as there is no atmosphere.",
-    "The Sun accounts for 99.86% of the solar system's mass.",
-    "A full NASA space suit costs about $12 million.",
-    "Water has been found on the Moon and Mars.",
-    "The largest known star is UY Scuti, a red supergiant.",
-    "The footprints on the Moon will likely remain for millions of years."
+    "The largest volcano in our solar system is on Mars — Olympus Mons.",
+    "Jupiter has the shortest day of all planets, completing a rotation in about 10 hours.",
+    "Saturn’s rings are made mostly of ice particles with a smaller amount of rocky debris.",
+    "Venus spins backward compared to most planets, meaning the Sun rises in the west there.",
+    "A day on Mercury lasts longer than its year!",
+    "Neutron stars can spin 600 times per second.",
+    "Space is not completely empty—it has tiny particles and radiation.",
+    "The hottest planet is not the closest to the Sun, but Venus due to its thick atmosphere.",
+    "Pluto is classified as a dwarf planet, not a full-sized planet.",
+    "There are thousands of exoplanets discovered beyond our solar system."
   ];
 
   const factDisplay = document.getElementById('factDisplay');
   const factButton = document.getElementById('factButton');
   const copyButton = document.getElementById('copyButton');
   const copyFeedback = document.getElementById('copyFeedback');
-  const muteToggle = document.getElementById('muteToggle');
-
-  let audioCtx, beepSound, isMuted = false;
-
-  function setupAudio() {
-    if(!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-  }
-
-  function playBeep() {
-    if(isMuted) return;
-    setupAudio();
-
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-
-    oscillator.type = 'square';
-    oscillator.frequency.value = 880; // 880Hz beep
-    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-
-    oscillator.start();
-    oscillator.stop(audioCtx.currentTime + 0.1);
-  }
 
   factButton.addEventListener('click', () => {
     const randomFact = facts[Math.floor(Math.random() * facts.length)];
     factDisplay.textContent = randomFact;
     factDisplay.classList.add('show');
-    playBeep();
     copyButton.style.display = 'inline-block';
+    copyFeedback.style.display = 'none';
   });
 
   copyButton.addEventListener('click', () => {
     navigator.clipboard.writeText(factDisplay.textContent).then(() => {
       copyFeedback.style.display = 'inline';
-      setTimeout(() => copyFeedback.style.display = 'none', 1500);
+      setTimeout(() => {
+        copyFeedback.style.display = 'none';
+      }, 2000);
     });
   });
 
+  // Sound mute toggle placeholder (no sound currently)
+  const muteToggle = document.getElementById('muteToggle');
+  let muted = false;
   muteToggle.addEventListener('click', () => {
-    isMuted = !isMuted;
-    muteToggle.textContent = isMuted ? '🔇' : '🔊';
+    muted = !muted;
+    muteToggle.textContent = muted ? '🔇' : '🔊';
   });
 </script>
 </body>
