@@ -90,8 +90,6 @@
     box-shadow: 0 0 6px 1px rgba(120, 85, 184, 0.35);
   }
 
-  /* COMETS replaced by ASTEROIDS */
-
   /* ASTEROIDS base style */
   .asteroid {
     width: 30px;
@@ -417,9 +415,9 @@
 
         // Use your asteroid images from images folder (three variants)
         const asteroidImgs = [
-          'images/asteroid.png',
           'images/asteroid1.png',
-          'images/asteroid2.png'
+          'images/asteroid2.png',
+          'images/asteroid3.png'
         ];
         this.imageSrc = asteroidImgs[Math.floor(Math.random() * asteroidImgs.length)];
         this.el.style.backgroundImage = `url(${this.imageSrc})`;
