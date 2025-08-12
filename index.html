@@ -5,8 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Random Space Fact Generator | Space Simplified</title>
 
-<!-- Favicon link added -->
-<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/stewdini/space-fact-generator/main/favicon.png" />
+<!-- Favicon links -->
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+<link rel="manifest" href="site.webmanifest" />
+<link rel="mask-icon" href="safari-pinned-tab.svg" color="#5bbad5" />
+<link rel="shortcut icon" href="favicon.ico" />
+<meta name="msapplication-TileColor" content="#2b5797" />
+<meta name="msapplication-config" content="browserconfig.xml" />
+<meta name="theme-color" content="#000010" />
 
 <style>
   body {
@@ -34,6 +42,7 @@
     pointer-events: none;
   }
 
+  /* Space objects base style */
   .space-object {
     position: fixed;
     pointer-events: none;
@@ -41,6 +50,7 @@
     will-change: transform;
   }
 
+  /* PLANETS with subtle craters using multiple radial gradients */
   .planet {
     border-radius: 50%;
     box-shadow: 0 0 8px 1px rgba(100,150,255,0.3);
@@ -89,12 +99,14 @@
     box-shadow: 0 0 6px 1px rgba(120, 85, 184, 0.35);
   }
 
+  /* COMETS textured with layered linear gradient, no transparency */
   .comet {
     border-radius: 50% / 60%;
     background: linear-gradient(90deg, #a0f0ff 0%, #66fcf1 30%, #b3ffff 60%, #66fcf1 80%, #a0f0ff 100%);
     box-shadow: 0 0 8px 3px #66fcf1aa;
   }
 
+  /* ASTEROIDS with irregular shape using clip-path and layered radial gradients */
   .asteroid {
     background: radial-gradient(circle at 40% 40%, #997a55 40%, #6b5432 70%);
     clip-path: polygon(
@@ -103,6 +115,7 @@
     box-shadow: 0 0 5px 1px #6b543266;
   }
 
+  /* ROCKETS: base styles */
   .space-object.rocket {
     background-size: contain;
     background-repeat: no-repeat;
@@ -112,6 +125,7 @@
     filter: drop-shadow(0 0 1.5px #fff9);
   }
 
+  /* Heading and sparkle styles */
   h1 {
     font-size: 3rem;
     margin-bottom: 1rem;
@@ -135,6 +149,7 @@
     50% { opacity: 0.5; transform: rotate(20deg) scale(1.3); }
   }
 
+  /* Fact display container */
   #factWrapper {
     position: relative;
     display: flex;
@@ -168,6 +183,7 @@
     to { opacity: 1; }
   }
 
+  /* Copy button and feedback */
   #copyButton {
     background: none;
     border: none;
@@ -196,6 +212,7 @@
     align-self: center;
   }
 
+  /* Buttons container */
   .buttons-container {
     display: inline-flex;
     align-items: center;
@@ -205,6 +222,7 @@
     z-index: 2;
   }
 
+  /* Fact Button styles */
   #factButton {
     padding: 14px 35px;
     font-size: 1.3rem;
@@ -244,6 +262,7 @@
     box-shadow: 0 0 10px #45a29e99;
   }
 
+  /* Mute toggle icon */
   #muteToggle {
     background: none;
     border: none;
@@ -265,6 +284,7 @@
 <body>
   <canvas id="starfield"></canvas>
 
+  <!-- Container for space objects -->
   <div id="spaceObjectsContainer"></div>
 
   <h1>🔭 Random Space Fact Generator<span class="sparkle">✨</span></h1>
@@ -363,6 +383,8 @@
 
   const spaceObjectsContainer = document.getElementById('spaceObjectsContainer');
 
+<script>
+  // Continue SpaceObject class from before
   class SpaceObject {
     constructor(type) {
       this.type = type;
@@ -373,58 +395,44 @@
         this.size = 40 + Math.random() * 35;
         this.el.classList.add('planet');
 
+        // Assign random planet color class
         const planetColors = ['red', 'blue', 'green', 'orange', 'purple'];
         const color = planetColors[Math.floor(Math.random() * planetColors.length)];
         this.el.classList.add(color);
+        this.el.style.width = this.size + 'px';
+        this.el.style.height = this.size + 'px';
 
       } else if (type === 'comet') {
-        this.size = 25 + Math.random() * 20;
-        this.el.classList.add('comet');
-      } else if (type === 'asteroid') {
         this.size = 20 + Math.random() * 20;
+        this.el.classList.add('comet');
+        this.el.style.width = this.size + 'px';
+        this.el.style.height = this.size * 0.6 + 'px';
+
+      } else if (type === 'asteroid') {
+        this.size = 25 + Math.random() * 30;
         this.el.classList.add('asteroid');
+        this.el.style.width = this.size + 'px';
+        this.el.style.height = this.size + 'px';
+
       } else if (type === 'rocket') {
         this.size = 30;
         this.el.classList.add('rocket');
+        this.el.style.width = this.size + 'px';
+        this.el.style.height = this.size * 1.3 + 'px';
 
-        // FIX: use template literal and wrap url in quotes
-        const rocketIndex = Math.floor(Math.random() * rocketImages.length);
-        this.el.style.backgroundImage = `url('${rocketImages[rocketIndex]}')`;
+        // Set random rocket image background
+        const img = rocketImages[Math.floor(Math.random() * rocketImages.length)];
+        this.el.style.backgroundImage = `url(${img})`;
       }
 
-      this.el.style.width = this.size + 'px';
-      this.el.style.height = (this.type === 'rocket' ? 40 : this.size) + 'px';
-
-      const edge = Math.floor(Math.random() * 4);
-      switch(edge) {
-        case 0:
-          this.x = Math.random() * window.innerWidth;
-          this.y = -this.size - 10;
-          this.speedX = (Math.random() - 0.5) * 0.3;
-          this.speedY = Math.random() * 0.3 + 0.05;
-          break;
-        case 1:
-          this.x = window.innerWidth + this.size + 10;
-          this.y = Math.random() * window.innerHeight;
-          this.speedX = -(Math.random() * 0.3 + 0.05);
-          this.speedY = (Math.random() - 0.5) * 0.3;
-          break;
-        case 2:
-          this.x = Math.random() * window.innerWidth;
-          this.y = window.innerHeight + this.size + 10;
-          this.speedX = (Math.random() - 0.5) * 0.3;
-          this.speedY = -(Math.random() * 0.3 + 0.05);
-          break;
-        case 3:
-          this.x = -this.size - 10;
-          this.y = Math.random() * window.innerHeight;
-          this.speedX = Math.random() * 0.3 + 0.05;
-          this.speedY = (Math.random() - 0.5) * 0.3;
-          break;
-      }
-
+      // Initial random position offscreen for animation start
+      this.x = Math.random() * window.innerWidth;
+      this.y = Math.random() * window.innerHeight;
+      this.speedX = (Math.random() - 0.5) * 0.4; // slow horizontal drift
+      this.speedY = (Math.random() - 0.5) * 0.4; // slow vertical drift
       this.el.style.left = this.x + 'px';
       this.el.style.top = this.y + 'px';
+
       spaceObjectsContainer.appendChild(this.el);
     }
 
@@ -432,67 +440,70 @@
       this.x += this.speedX;
       this.y += this.speedY;
 
+      // Wrap around screen edges
+      if(this.x > window.innerWidth) this.x = 0 - this.size;
+      if(this.x < 0 - this.size) this.x = window.innerWidth;
+      if(this.y > window.innerHeight) this.y = 0 - this.size;
+      if(this.y < 0 - this.size) this.y = window.innerHeight;
+
       this.el.style.left = this.x + 'px';
       this.el.style.top = this.y + 'px';
-
-      if (
-        this.x < -this.size - 20 ||
-        this.x > window.innerWidth + this.size + 20 ||
-        this.y < -this.size - 20 ||
-        this.y > window.innerHeight + this.size + 20
-      ) {
-        this.el.remove();
-        return false;
-      }
-      return true;
     }
   }
 
+  // Create multiple space objects
   const spaceObjects = [];
 
-  function spawnSpaceObject() {
-    const types = ['planet', 'comet', 'asteroid', 'rocket'];
-    const type = types[Math.floor(Math.random() * types.length)];
-    const obj = new SpaceObject(type);
-    spaceObjects.push(obj);
-  }
+  const typesCount = {
+    planet: 6,
+    comet: 6,
+    asteroid: 6,
+    rocket: 5
+  };
 
-  setInterval(spawnSpaceObject, 1400);
+  for (let i = 0; i < typesCount.planet; i++) spaceObjects.push(new SpaceObject('planet'));
+  for (let i = 0; i < typesCount.comet; i++) spaceObjects.push(new SpaceObject('comet'));
+  for (let i = 0; i < typesCount.asteroid; i++) spaceObjects.push(new SpaceObject('asteroid'));
+  for (let i = 0; i < typesCount.rocket; i++) spaceObjects.push(new SpaceObject('rocket'));
 
+  // Animate space objects drifting slowly
   function animateSpaceObjects() {
-    for(let i = spaceObjects.length - 1; i >= 0; i--) {
-      if (!spaceObjects[i].update()) {
-        spaceObjects.splice(i, 1);
-      }
-    }
+    spaceObjects.forEach(obj => obj.update());
     requestAnimationFrame(animateSpaceObjects);
   }
 
   animateSpaceObjects();
 
-  // Facts and buttons
-
+  // Facts array for the fact generator
   const facts = [
+    "The largest volcano in our solar system is Olympus Mons on Mars, standing about 22 kilometers high.",
     "A day on Venus is longer than a year on Venus.",
-    "Neutron stars can spin 600 times per second.",
-    "The largest volcano in our solar system is Olympus Mons on Mars.",
-    "Saturn’s rings are made mostly of ice particles.",
-    "There are more stars in the universe than grains of sand on Earth.",
-    "Jupiter's Great Red Spot is a giant storm lasting at least 400 years.",
-    "The Sun makes up 99.86% of the solar system’s mass.",
-    "Water ice exists on the Moon’s poles.",
+    "Neutron stars can spin up to 600 times per second.",
+    "Jupiter's Great Red Spot is a giant storm that has lasted for over 350 years.",
+    "The footprints left by astronauts on the Moon will remain there for millions of years.",
+    "Saturn's rings are made mostly of ice particles with a smaller amount of rocky debris and dust.",
+    "There are more stars in the universe than grains of sand on all the world's beaches.",
     "A teaspoon of neutron star material would weigh about 6 billion tons.",
-    "The Hubble Space Telescope has helped discover thousands of exoplanets."
+    "The Milky Way galaxy is about 100,000 light years in diameter.",
+    "Pluto is smaller than Earth's moon.",
+    "The Sun accounts for about 99.86% of the total mass of our Solar System.",
+    "The Hubble Space Telescope has helped discover that the universe is expanding at an accelerating rate.",
+    "Mercury has ice in permanently shadowed craters near its poles.",
+    "If you could fly a plane to Pluto, it would take over 800 years.",
+    "The Voyager 1 spacecraft is the farthest human-made object from Earth."
   ];
 
+  // Fact display and buttons
   const factDisplay = document.getElementById('factDisplay');
   const factButton = document.getElementById('factButton');
   const copyButton = document.getElementById('copyButton');
   const copyFeedback = document.getElementById('copyFeedback');
   const muteToggle = document.getElementById('muteToggle');
-  const popSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/26/audio_ebaf1f29de.mp3?filename=pop-6167.mp3');
-  popSound.volume = 0.3;
 
+  // Audio setup
+  const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+  audio.volume = 0.35;
+  audio.loop = false;
   let muted = false;
 
   muteToggle.addEventListener('click', () => {
@@ -501,25 +512,61 @@
   });
 
   factButton.addEventListener('click', () => {
-    const fact = facts[Math.floor(Math.random() * facts.length)];
-    factDisplay.textContent = fact;
-    factDisplay.classList.add('show');
+    // Disable button while loading fact
+    factButton.disabled = true;
 
-    if (!muted) {
-      popSound.currentTime = 0;
-      popSound.play();
-    }
+    // Pick random fact different from current
+    let newFact;
+    do {
+      newFact = facts[Math.floor(Math.random() * facts.length)];
+    } while (newFact === factDisplay.textContent);
 
-    copyButton.style.display = 'inline-block';
-    copyFeedback.style.display = 'none';
+    factDisplay.classList.remove('show');
+    setTimeout(() => {
+      factDisplay.textContent = newFact;
+      factDisplay.classList.add('show');
+
+      // Enable copy button once fact is visible
+      copyButton.style.display = 'inline-block';
+
+      // Play sound if not muted
+      if (!muted) {
+        // To comply with browser autoplay policy, play sound after user interaction (button click)
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+      }
+
+      factButton.disabled = false;
+    }, 300);
   });
 
+  // Clipboard copy
   copyButton.addEventListener('click', () => {
+    if (!factDisplay.textContent) return;
     navigator.clipboard.writeText(factDisplay.textContent).then(() => {
-      copyFeedback.style.display = 'inline';
+      // Show checkmark feedback
+      copyFeedback.style.display = 'inline-block';
       setTimeout(() => {
         copyFeedback.style.display = 'none';
-      }, 2000);
+      }, 1200);
+    });
+  });
+
+  // Initially hide copy button
+  copyButton.style.display = 'none';
+
+  // Accessibility: add aria-live for fact display changes
+  factDisplay.setAttribute('aria-live', 'polite');
+  factDisplay.setAttribute('aria-atomic', 'true');
+
+  // On first load, fade in initial message
+  factDisplay.classList.add('show');
+
+  // Resize handler for space objects positions (keep them inside viewport)
+  window.addEventListener('resize', () => {
+    spaceObjects.forEach(obj => {
+      obj.x = Math.min(obj.x, window.innerWidth - obj.size);
+      obj.y = Math.min(obj.y, window.innerHeight - obj.size);
     });
   });
 </script>
