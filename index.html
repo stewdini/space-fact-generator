@@ -383,9 +383,9 @@
         this.speedY = 0;
         this.rotation = Math.random() * 360;
         this.rotationSpeed = 0; // planets do not rotate
+        this.el.style.width = this.size + 'px';
+        this.el.style.height = this.size + 'px';
 
-      } else if (type === 'comet') {
-        // Not used now, but leaving code
       } else if (type === 'asteroid') {
         this.size = 30 + Math.random() * 20;
         this.el.classList.add('asteroid');
@@ -395,8 +395,8 @@
         this.el.style.height = this.size + 'px';
         this.x = Math.random() * window.innerWidth;
         this.y = Math.random() * window.innerHeight;
-        this.speedX = (Math.random() - 0.5) * 0.2;
-        this.speedY = (Math.random() - 0.5) * 0.2;
+        this.speedX = (Math.random() - 0.5) * 0.15;
+        this.speedY = (Math.random() - 0.5) * 0.15;
         this.rotation = Math.random() * 360;
         this.rotationSpeed = (Math.random() - 0.5) * 0.5; // slow rotation
       } else if (type === 'rocket') {
@@ -413,108 +413,98 @@
           case 0: // Top
             this.x = Math.random() * window.innerWidth;
             this.y = -this.size - 10;
-            this.speedX = (Math.random() - 0.5) * 0.1;
-            this.speedY = Math.random() * 0.1 + 0.02; // down slower
+            this.speedX = (Math.random() - 0.5) * 0.25;
+            this.speedY = Math.random() * 0.25 + 0.05; // increased speed downward
             break;
           case 1: // Right
             this.x = window.innerWidth + this.size + 10;
             this.y = Math.random() * window.innerHeight;
-            this.speedX = -(Math.random() * 0.1 + 0.02); // left slower
-            this.speedY = (Math.random() - 0.5) * 0.1;
+            this.speedX = -(Math.random() * 0.25 + 0.05); // increased speed left
+            this.speedY = (Math.random() - 0.5) * 0.25;
             break;
           case 2: // Bottom
             this.x = Math.random() * window.innerWidth;
             this.y = window.innerHeight + this.size + 10;
-            this.speedX = (Math.random() - 0.5) * 0.1;
-            this.speedY = -(Math.random() * 0.1 + 0.02); // up slower
+            this.speedX = (Math.random() - 0.5) * 0.25;
+            this.speedY = -(Math.random() * 0.25 + 0.05); // increased speed upward
             break;
           case 3: // Left
             this.x = -this.size - 10;
             this.y = Math.random() * window.innerHeight;
-            this.speedX = Math.random() * 0.1 + 0.02; // right slower
-            this.speedY = (Math.random() - 0.5) * 0.1;
+            this.speedX = Math.random() * 0.25 + 0.05; // increased speed right
+            this.speedY = (Math.random() - 0.5) * 0.25;
             break;
         }
 
         this.rotation = Math.atan2(this.speedY, this.speedX) * (180/Math.PI);
         this.rotationSpeed = 0;
 
-        // Flames element
-        this.flames = document.createElement('div');
-        this.flames.style.position = 'absolute';
-        this.flames.style.width = '16px';
-        this.flames.style.height = '24px';
-        this.flames.style.background = 'radial-gradient(ellipse at center, #ff6600 0%, transparent 80%)';
-        this.flames.style.filter = 'blur(3px)';
-        this.flames.style.opacity = '0.8';
-        this.flames.style.left = '-8px';
-        this.flames.style.top = '8px';
-        this.flames.style.zIndex = '-1';
-        this.flames.style.borderRadius = '50%';
-        this.el.appendChild(this.flames);
-
         // Smoke trail container
         this.smokeTrail = [];
       }
+
+      this.updatePosition();
+      spaceObjectsContainer.appendChild(this.el);
+    }
+
+    updatePosition() {
       this.el.style.left = this.x + 'px';
       this.el.style.top = this.y + 'px';
-      spaceObjectsContainer.appendChild(this.el);
     }
 
     update() {
       this.x += this.speedX;
       this.y += this.speedY;
 
-      // Wrap around screen edges for asteroids and rockets
-      if(this.x < -100) this.x = window.innerWidth + 100;
-      else if(this.x > window.innerWidth + 100) this.x = -100;
-      if(this.y < -100) this.y = window.innerHeight + 100;
-      else if(this.y > window.innerHeight + 100) this.y = -100;
+      // Wrap around screen edges
+      if(this.x < -150) this.x = window.innerWidth + 150;
+      else if(this.x > window.innerWidth + 150) this.x = -150;
+      if(this.y < -150) this.y = window.innerHeight + 150;
+      else if(this.y > window.innerHeight + 150) this.y = -150;
 
-      // Rotation update for asteroids
       if(this.type === 'asteroid') {
         this.rotation += this.rotationSpeed;
         this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rotation}deg)`;
-      } else if (this.type === 'rocket') {
+      } else if(this.type === 'rocket') {
         // Rotate rocket to face direction of movement
         this.rotation = Math.atan2(this.speedY, this.speedX) * (180 / Math.PI);
         this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rotation}deg)`;
 
-        // Update flame position (always behind rocket)
-        this.flames.style.left = (-8 * Math.cos(this.rotation * Math.PI/180)) + 'px';
-        this.flames.style.top = (8 * Math.sin(this.rotation * Math.PI/180)) + 'px';
-
+        // Create smoke trail
         this.createSmoke();
 
-        // Update smoke trail
+        // Update smoke trail elements
         this.smokeTrail.forEach(smoke => {
           smoke.life -= 1;
           smoke.x += smoke.vx;
           smoke.y += smoke.vy;
           smoke.el.style.left = smoke.x + 'px';
           smoke.el.style.top = smoke.y + 'px';
-          smoke.el.style.opacity = smoke.life / 20;
+          smoke.el.style.opacity = smoke.life / 25;
           if(smoke.life <= 0){
             smoke.el.remove();
           }
         });
         this.smokeTrail = this.smokeTrail.filter(smoke => smoke.life > 0);
-      } else {
+
+      } else if(this.type === 'planet') {
         this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rotation}deg)`;
       }
+
+      this.updatePosition();
     }
 
     createSmoke() {
-      if(this.smokeTrail.length > 15) {
+      if(this.smokeTrail.length > 20) {
         const oldest = this.smokeTrail.shift();
         oldest.el.remove();
       }
       const smoke = document.createElement('div');
       smoke.classList.add('smoke');
       smoke.style.position = 'fixed';
-      smoke.style.width = '12px';
-      smoke.style.height = '12px';
-      smoke.style.background = 'rgba(200,200,200,0.3)';
+      smoke.style.width = '14px';
+      smoke.style.height = '14px';
+      smoke.style.background = 'rgba(180,180,180,0.3)';
       smoke.style.borderRadius = '50%';
       smoke.style.left = (this.x - (this.size / 2)) + 'px';
       smoke.style.top = (this.y - (this.size / 4)) + 'px';
@@ -527,14 +517,14 @@
         y: this.y - (this.size / 4),
         vx: -this.speedX * 0.3 + (Math.random() - 0.5) * 0.3,
         vy: -this.speedY * 0.3 + (Math.random() - 0.5) * 0.3,
-        life: 20
+        life: 25
       });
     }
   }
 
   // Create space objects
   const planetsCount = 10;
-  const rocketsCount = 7;
+  const rocketsCount = 8;
   const asteroidsCount = 12;
 
   const spaceObjects = [];
@@ -610,5 +600,12 @@
     });
   });
 </script>
+
+<style>
+  /* Smoke style */
+  .smoke {
+    filter: blur(3px);
+  }
+</style>
 </body>
 </html>
