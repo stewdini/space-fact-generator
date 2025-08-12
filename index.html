@@ -458,154 +458,115 @@
     updatePosition() {
       this.el.style.left = this.x + 'px';
       this.el.style.top = this.y + 'px';
+      this.el.style.transform = `rotate(${this.rotation}deg)`;
     }
 
     update() {
       this.x += this.speedX;
       this.y += this.speedY;
+      this.rotation += this.rotationSpeed;
 
-      // Wrap around edges with buffer
-      if(this.x < -100) this.x = window.innerWidth + 100;
-      else if(this.x > window.innerWidth + 100) this.x = -100;
-      if(this.y < -100) this.y = window.innerHeight + 100;
-      else if(this.y > window.innerHeight + 100) this.y = -100;
+      // Wrap around screen for planets and asteroids
+      if(this.type === 'planet' || this.type === 'asteroid') {
+        if(this.x < -this.size) this.x = window.innerWidth + this.size;
+        else if(this.x > window.innerWidth + this.size) this.x = -this.size;
+        if(this.y < -this.size) this.y = window.innerHeight + this.size;
+        else if(this.y > window.innerHeight + this.size) this.y = -this.size;
+      }
 
-      if(this.type === 'asteroid') {
-        this.rotation += this.rotationSpeed;
-        this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rotation}deg)`;
-      } else if(this.type === 'rocket') {
-        // Rotate rocket to face velocity vector
-        this.rotation = Math.atan2(this.speedY, this.speedX) * (180 / Math.PI);
-        this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rotation}deg)`;
-
-        // Create smoke trail behind rocket base
-        this.createSmoke();
-
-        // Update smoke trail elements
-        this.smokeTrail.forEach(smoke => {
-          smoke.life -= 1;
-          smoke.x += smoke.vx;
-          smoke.y += smoke.vy;
-          smoke.el.style.left = smoke.x + 'px';
-          smoke.el.style.top = smoke.y + 'px';
-          smoke.el.style.opacity = smoke.life / 30;
-          if(smoke.life <= 0){
-            smoke.el.remove();
-          }
-        });
-        this.smokeTrail = this.smokeTrail.filter(smoke => smoke.life > 0);
-      } else if(this.type === 'planet') {
-        this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rotation}deg)`;
+      // Remove rockets when offscreen + some margin
+      if(this.type === 'rocket') {
+        if(this.x < -100 || this.x > window.innerWidth + 100 || this.y < -100 || this.y > window.innerHeight + 100) {
+          this.el.remove();
+          return false; // signal to remove from array
+        }
+        this.smokeTrail.push({x:this.x, y:this.y});
+        if(this.smokeTrail.length > 20) this.smokeTrail.shift();
       }
 
       this.updatePosition();
-    }
-
-    createSmoke() {
-      if(this.smokeTrail.length > 25) {
-        const oldest = this.smokeTrail.shift();
-        oldest.el.remove();
-      }
-
-      // Calculate smoke position behind rocket: move opposite direction of velocity, scaled by rocket size
-      const smokeDistance = this.size * 0.6;
-      const smokeX = this.x - Math.cos(this.rotation * Math.PI / 180) * smokeDistance;
-      const smokeY = this.y - Math.sin(this.rotation * Math.PI / 180) * smokeDistance;
-
-      const smoke = document.createElement('div');
-      smoke.classList.add('smoke');
-      smoke.style.left = smokeX + 'px';
-      smoke.style.top = smokeY + 'px';
-      smoke.style.width = '14px';
-      smoke.style.height = '14px';
-      smoke.style.position = 'fixed';
-      smoke.style.pointerEvents = 'none';
-      smoke.style.zIndex = '0';
-
-      // Smoke velocity is small random offset plus slight drift opposite rocket velocity
-      const vx = -this.speedX * 0.2 + (Math.random() - 0.5) * 0.2;
-      const vy = -this.speedY * 0.2 + (Math.random() - 0.5) * 0.2;
-
-      this.smokeTrail.push({
-        el: smoke,
-        x: smokeX,
-        y: smokeY,
-        vx: vx,
-        vy: vy,
-        life: 30
-      });
-
-      document.body.appendChild(smoke);
+      return true;
     }
   }
-
-  // Create space objects
-  const planetsCount = 10;
-  const rocketsCount = 8;
-  const asteroidsCount = 12;
 
   const spaceObjects = [];
 
-  for(let i=0; i<planetsCount; i++) {
+  // Spawn some planets and asteroids on page load
+  for(let i=0; i<6; i++) {
     spaceObjects.push(new SpaceObject('planet'));
   }
-  for(let i=0; i<rocketsCount; i++) {
-    spaceObjects.push(new SpaceObject('rocket'));
-  }
-  for(let i=0; i<asteroidsCount; i++) {
+  for(let i=0; i<12; i++) {
     spaceObjects.push(new SpaceObject('asteroid'));
   }
 
-  // Animation loop
-  function animate() {
-    spaceObjects.forEach(obj => obj.update());
-    requestAnimationFrame(animate);
+  function animateSpaceObjects() {
+    // Update all objects, remove rockets offscreen
+    for(let i = spaceObjects.length - 1; i >= 0; i--) {
+      const alive = spaceObjects[i].update();
+      if(!alive) spaceObjects.splice(i,1);
+    }
+
+    // Occasionally spawn new rockets
+    if(Math.random() < 0.015) {
+      spaceObjects.push(new SpaceObject('rocket'));
+    }
+
+    requestAnimationFrame(animateSpaceObjects);
   }
-  animate();
+  animateSpaceObjects();
 
-  // Space facts list
-  const spaceFacts = [
-    "A day on Venus is longer than a year on Venus.",
-    "Neutron stars can spin 600 times per second.",
-    "The footprints on the Moon will stay there for millions of years.",
-    "Mars has the tallest volcano in the solar system.",
-    "One million Earths could fit inside the Sun.",
-    "There is a planet made of diamonds.",
-    "The largest asteroid in the asteroid belt is called Ceres.",
-    "Jupiter’s Great Red Spot is a giant storm larger than Earth.",
-    "Saturn’s rings are made mostly of ice particles.",
-    "The first woman in space was Valentina Tereshkova.",
-    "Space smells like seared steak and hot metal.",
-    "The Sun accounts for 99.86% of the Solar System’s mass."
-  ];
-
-  const factButton = document.getElementById('factButton');
+  // Copy button & fact logic
   const factDisplay = document.getElementById('factDisplay');
   const copyButton = document.getElementById('copyButton');
   const copyFeedback = document.getElementById('copyFeedback');
+  const factButton = document.getElementById('factButton');
   const muteToggle = document.getElementById('muteToggle');
 
   let isMuted = false;
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-  // Sound effect for button
-  const buttonSound = new Audio('https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg');
-  buttonSound.volume = 0.25;
+  // Space facts array
+  const facts = [
+    "A day on Venus is longer than a year on Venus.",
+    "Neutron stars can spin 600 times per second.",
+    "There’s a diamond planet called 55 Cancri e.",
+    "The largest known star is UY Scuti, about 1700 times the Sun's radius.",
+    "Jupiter's Great Red Spot is a giant storm lasting at least 350 years.",
+    "Saturn’s rings are made mostly of ice particles.",
+    "Mars has the largest dust storms in the solar system.",
+    "The Sun accounts for 99.86% of the Solar System’s mass.",
+    "Black holes aren’t visible, but can be detected by their effects on nearby objects.",
+    "One spoonful of neutron star material would weigh about 6 billion tons."
+  ];
 
-  muteToggle.addEventListener('click', () => {
-    isMuted = !isMuted;
-    muteToggle.textContent = isMuted ? '🔇' : '🔊';
-  });
+  function playClickSound() {
+    if(isMuted) return;
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    osc.type = 'square';
+    osc.frequency.value = 500;
+    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+
+    osc.connect(gainNode).connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.05);
+  }
 
   factButton.addEventListener('click', () => {
-    if (!isMuted) {
-      buttonSound.currentTime = 0;
-      buttonSound.play();
-    }
-    const randomFact = spaceFacts[Math.floor(Math.random() * spaceFacts.length)];
-    factDisplay.textContent = randomFact;
+    playClickSound();
+    factButton.disabled = true;
+
+    const fact = facts[Math.floor(Math.random() * facts.length)];
+    factDisplay.textContent = fact;
     factDisplay.classList.add('show');
-    copyButton.style.display = 'inline-flex';
+
+    copyButton.style.display = 'inline-block';
     copyFeedback.style.display = 'none';
+
+    setTimeout(() => {
+      factButton.disabled = false;
+    }, 2000);
   });
 
   copyButton.addEventListener('click', () => {
@@ -615,6 +576,11 @@
         copyFeedback.style.display = 'none';
       }, 1500);
     });
+  });
+
+  muteToggle.addEventListener('click', () => {
+    isMuted = !isMuted;
+    muteToggle.textContent = isMuted ? '🔇' : '🔊';
   });
 </script>
 </body>
