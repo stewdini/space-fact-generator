@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Test Favicon and Sound</title>
+
+<!-- Favicon links -->
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+<link rel="manifest" href="site.webmanifest" />
+<link rel="shortcut icon" href="favicon.ico" />
+<meta name="theme-color" content="#000010" />
+</head>
+<body>
+<h1>Favicon and Sound Test</h1>
+
+<button id="playSound">Play Sound</button>
+
+<audio id="popSound" preload="auto" src="https://actions.google.com/sounds/v1/cartoon/pop.ogg"></audio>
+
+<script>
+  const popSound = document.getElementById('popSound');
+  const playBtn = document.getElementById('playSound');
+
+  playBtn.addEventListener('click', () => {
+    popSound.currentTime = 0;
+    popSound.play().catch(e => console.warn("Audio play error:", e));
+  });
+</script>
+
+</body>
+</html>
