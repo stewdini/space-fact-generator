@@ -64,8 +64,8 @@
     pointer-events: none;
     z-index: 0;
     will-change: transform;
-    width: 30px;
-    height: 12px;
+    width: 40px;
+    height: 15px;
   }
 
   /* ROCKET container */
@@ -280,7 +280,6 @@
   #muteToggle:hover {
     transform: scale(1.2);
   }
-
 </style>
 </head>
 <body>
@@ -450,17 +449,16 @@
   }
 
   // === ROCKET ===
-  // SVG rocket resembling emoji style (colorful, small)
+  // Simple, colorful SVG rocket emoji style
   const rocketSVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="30" height="40" fill="none">
-  <path fill="#FF4136" d="M32 2s-9.5 19.5-9.5 31.7C22.5 47 26 52 32 52s9.5-5 9.5-18.3C41.5 21.5 32 2 32 2z"/>
-  <path fill="#FFDC00" d="M28 25h8v8h-8z"/>
-  <path fill="#7FDBFF" d="M26 53c-4-2-10-14-10-14s5 4 10 4 10-4 10-4-6 12-10 14z"/>
-  <circle cx="32" cy="20" r="4" fill="#001F3F"/>
+  <path fill="#ff4d4d" d="M32 2s-12 20-12 32 5 14 12 14 12-4 12-14-12-32-12-32z"/>
+  <ellipse cx="32" cy="25" rx="6" ry="8" fill="#fff" />
+  <circle cx="32" cy="25" r="4" fill="#2f8fd4" />
+  <path fill="#ffb84d" d="M20 54s6-8 12-8 12 8 12 8-6 4-12 4-12-4-12-4z"/>
 </svg>
 `;
 
-  // Rocket class with SVG element
   class Rocket {
     constructor() {
       this.size = 30;
@@ -488,47 +486,46 @@
     }
 
     spawn() {
-      const safeZoneRect = getSafeZoneRect();
-      const margin = 30;
+      const rect = getSafeZoneRect();
+      const margin = 50;
       const screenWidth = window.innerWidth;
       const screenHeight = window.innerHeight;
 
-      // Spawn randomly OUTSIDE safe zone on edges
+      // Spawn at random edge outside screen + margin
       const edge = Math.floor(Math.random() * 4);
 
-      if (edge === 0) { // top edge
+      if (edge === 0) { // top
         this.x = Math.random() * screenWidth;
         this.y = -this.height - margin;
-      } else if (edge === 1) { // right edge
+      } else if (edge === 1) { // right
         this.x = screenWidth + margin;
         this.y = Math.random() * screenHeight;
-      } else if (edge === 2) { // bottom edge
+      } else if (edge === 2) { // bottom
         this.x = Math.random() * screenWidth;
         this.y = screenHeight + margin;
-      } else { // left edge
+      } else { // left
         this.x = -this.size - margin;
         this.y = Math.random() * screenHeight;
       }
 
-      // Target is random point outside safe zone on opposite side
+      // Target random point outside safe zone (opposite side)
       do {
         this.targetX = Math.random() * screenWidth;
         this.targetY = Math.random() * screenHeight;
       } while (
-        this.targetX > safeZoneRect.left &&
-        this.targetX < safeZoneRect.right &&
-        this.targetY > safeZoneRect.top &&
-        this.targetY < safeZoneRect.bottom
+        this.targetX > rect.left &&
+        this.targetX < rect.right &&
+        this.targetY > rect.top &&
+        this.targetY < rect.bottom
       );
 
-      // Calculate velocity vector
       const dx = this.targetX - this.x;
       const dy = this.targetY - this.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
       this.vx = (dx / dist) * this.speed;
       this.vy = (dy / dist) * this.speed;
 
-      // Calculate angle in degrees for rotation (rocket points upward by default)
+      // Calculate angle so rocket points towards velocity
       this.angle = Math.atan2(this.vy, this.vx) * 180 / Math.PI + 90;
 
       this.updatePosition();
@@ -542,24 +539,23 @@
       this.x += this.vx;
       this.y += this.vy;
 
-      // Spawn smoke particles trailing behind
+      // Create smoke particles behind rocket
       this.smokeParticles.push(new SmokeParticle(
-        this.x + this.size/2 - 3 + (Math.random() * 4 - 2),
-        this.y + this.height - 6 + (Math.random() * 3 - 1)
+        this.x + this.size/2 + (Math.random() * 6 - 3),
+        this.y + this.height - 8 + (Math.random() * 3 - 1)
       ));
 
-      // Update smoke particles and remove dead ones
+      // Update smoke particles and remove dead
       this.smokeParticles = this.smokeParticles.filter(p => p.update());
 
       this.updatePosition();
 
-      // Remove rocket if outside screen + margin
-      const margin = 50;
+      const margin = 80;
       if (
         this.x < -margin || this.x > window.innerWidth + margin ||
         this.y < -margin || this.y > window.innerHeight + margin
       ) {
-        // Remove all smoke particles too
+        // Remove all smoke particles and element
         this.smokeParticles.forEach(p => p.element.remove());
         this.smokeParticles = [];
         this.el.remove();
@@ -569,16 +565,17 @@
     }
   }
 
-  // Smoke particle class
+  // === SMOKE PARTICLE ===
   class SmokeParticle {
     constructor(x, y) {
       this.x = x;
       this.y = y;
-      this.size = Math.random() * 5 + 5;
-      this.opacity = 0.35;
-      this.life = 80 + Math.random() * 40;
-      this.vx = (Math.random() - 0.5) * 0.2;
-      this.vy = -0.3 - Math.random() * 0.1;
+      this.size = 6 + Math.random() * 4;
+      this.opacity = 0.4;
+      this.life = 60 + Math.random() * 30;
+      this.vx = (Math.random() - 0.5) * 0.15;
+      this.vy = -0.2 - Math.random() * 0.1;
+
       this.element = document.createElement('div');
       this.element.classList.add('smoke-trail');
       this.element.style.width = this.size + 'px';
@@ -586,19 +583,22 @@
       spaceObjectsContainer.appendChild(this.element);
       this.updateElement();
     }
+
     updateElement() {
       this.element.style.transform = `translate(${this.x}px, ${this.y}px)`;
       this.element.style.opacity = this.opacity;
       this.element.style.width = this.size + 'px';
       this.element.style.height = this.size + 'px';
     }
+
     update() {
       this.x += this.vx;
       this.y += this.vy;
-      this.opacity -= 0.005;
+      this.opacity -= 0.007;
       this.life--;
-      this.size *= 0.98;
+      this.size *= 0.97;
       this.updateElement();
+
       if (this.opacity <= 0 || this.life <= 0) {
         this.element.remove();
         return false;
@@ -608,21 +608,21 @@
   }
 
   // === COMET ===
-  // Comet SVG (bright nucleus + tail)
+  // Improved comet SVG with glowing nucleus and long tail
   const cometSVG = `
-<svg viewBox="0 0 64 24" width="40" height="15" xmlns="http://www.w3.org/2000/svg" >
-  <defs>
-    <radialGradient id="cometTail" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(20 12) rotate(90) scale(20 5)">
-      <stop offset="0%" stop-color="white" stop-opacity="0.7"/>
-      <stop offset="100%" stop-color="white" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <ellipse cx="10" cy="12" rx="8" ry="6" fill="url(#cometTail)"/>
-  <circle cx="35" cy="12" r="8" fill="#FFF" />
-  <circle cx="35" cy="12" r="5" fill="#4fc3f7" />
-  <circle cx="35" cy="12" r="3" fill="#0288d1" />
-</svg>
-`;
+  <svg viewBox="0 0 64 24" width="50" height="18" xmlns="http://www.w3.org/2000/svg" >
+    <defs>
+      <radialGradient id="cometTail" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(15 12) rotate(90) scale(25 8)">
+        <stop offset="0%" stop-color="white" stop-opacity="0.7"/>
+        <stop offset="100%" stop-color="white" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <ellipse cx="12" cy="12" rx="10" ry="7" fill="url(#cometTail)"/>
+    <circle cx="40" cy="12" r="10" fill="#FFF" />
+    <circle cx="40" cy="12" r="6" fill="#66ccff" />
+    <circle cx="40" cy="12" r="3" fill="#0099ff" />
+  </svg>
+  `;
 
   class Comet {
     constructor() {
@@ -631,24 +631,28 @@
       this.el.innerHTML = cometSVG;
       spaceObjectsContainer.appendChild(this.el);
 
-      this.size = 40;
-      this.width = 40;
-      this.height = 15;
+      this.size = 50;
+      this.width = 50;
+      this.height = 18;
 
-      // Spawn random position OUTSIDE safe zone
+      // Spawn random position outside safe zone
+      let x, y;
       do {
-        this.x = Math.random() * (window.innerWidth - this.width);
-        this.y = Math.random() * (window.innerHeight - this.height);
-      } while (isInSafeZone(this.x, this.y, this.width));
+        x = Math.random() * (window.innerWidth - this.width);
+        y = Math.random() * (window.innerHeight - this.height);
+      } while (isInSafeZone(x, y, this.width));
 
-      // Random velocity vector with speed 0.3 to 0.7 px/frame
-      const speed = 0.3 + Math.random() * 0.4;
+      this.x = x;
+      this.y = y;
+
+      // Velocity vector with random speed and direction
+      const speed = 0.4 + Math.random() * 0.6;
       const angle = Math.random() * 2 * Math.PI;
       this.vx = Math.cos(angle) * speed;
       this.vy = Math.sin(angle) * speed;
 
       this.angle = Math.random() * 360;
-      this.angularVelocity = (Math.random() - 0.5) * 0.5; // rotate slowly
+      this.angularVelocity = (Math.random() - 0.5) * 0.3;
     }
 
     update() {
@@ -667,7 +671,7 @@
     }
   }
 
-  // Spawn planets, rockets, comets
+  // === SPAWN & ANIMATE ===
   const planets = [];
   const rockets = [];
   const comets = [];
@@ -676,8 +680,7 @@
     planets.forEach(p => p.el.remove());
     planets.length = 0;
 
-    // Spawn 7 planets randomly outside safe zone
-    for(let i=0; i<7; i++) {
+    for(let i = 0; i < 7; i++) {
       planets.push(new Planet());
     }
   }
@@ -688,10 +691,10 @@
     comets.forEach(c => c.el.remove());
     comets.length = 0;
 
-    for(let i=0; i<5; i++) {
+    for(let i = 0; i < 5; i++) {
       rockets.push(new Rocket());
     }
-    for(let i=0; i<8; i++) {
+    for(let i = 0; i < 8; i++) {
       comets.push(new Comet());
     }
   }
@@ -703,8 +706,8 @@
         rockets.push(new Rocket());
       }
     }
-
     comets.forEach(c => c.update());
+
     requestAnimationFrame(animateObjects);
   }
 
@@ -729,7 +732,7 @@
 
   setupSpace();
 
-  // Fact generator logic
+  // === FACT GENERATOR LOGIC ===
   const factButton = document.getElementById('factButton');
   const factDisplay = document.getElementById('factDisplay');
   const copyButton = document.getElementById('copyButton');
@@ -790,7 +793,6 @@
     muted = !muted;
     muteToggle.textContent = muted ? '🔇' : '🔊';
   });
-
 </script>
 
 </body>
