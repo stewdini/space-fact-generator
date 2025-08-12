@@ -1,427 +1,835 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Random Space Fact Generator | Space Simplified</title>
 
-<!-- Favicons (you said you already have these in repo) -->
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
-<link rel="manifest" href="site.webmanifest" />
-<link rel="shortcut icon" href="favicon.ico" />
-<meta name="theme-color" content="#000010" />
+<!-- Favicon links -->
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="mask-icon" href="safari-pinned-tab.svg" color="#5bbad5">
+<link rel="shortcut icon" href="favicon.ico">
+<meta name="msapplication-TileColor" content="#2b5797">
+<meta name="msapplication-config" content="browserconfig.xml">
+<meta name="theme-color" content="#000010">
 
 <style>
-  /* ---------- layout & layering ---------- */
-  html,body { height:100%; margin:0; background:#000010; color:#e0e0e0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow:hidden; }
-  body { display:flex; align-items:center; justify-content:center; padding:1rem; }
+  body {
+    margin: 0;
+    height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #e0e0e0;
+    background: #000010;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 1rem;
+    position: relative;
+  }
 
-  /* z-index layers:
-     0 = starfield
-     1 = planets (static)
-     2 = moving objects + smoke canvas (rockets, comets, smoke)
-     3 = UI (text & buttons)
-  */
-  canvas#starfield { position:fixed; inset:0; z-index:0; pointer-events:none; }
-  #planetsContainer { position:fixed; inset:0; z-index:1; pointer-events:none; }
-  #movingObjectsContainer { position:fixed; inset:0; z-index:2; pointer-events:none; }
-  #movingObjectsContainer canvas { position:absolute; left:0; top:0; } /* smoke canvas */
-  #uiContainer { position:relative; z-index:3; max-width:700px; width:100%; text-align:center; }
+  canvas#starfield {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
 
-  /* ---------- space object base ---------- */
-  .space-object { position:absolute; pointer-events:none; will-change:transform; user-select:none; }
+  /* Space objects base style */
+  .space-object {
+    position: fixed;
+    pointer-events: none;
+    z-index: 0;
+    will-change: transform;
+  }
 
-  /* planets (static) */
-  .planet { border-radius:50%; background-repeat:no-repeat; background-position:center; background-size:cover; box-shadow:0 0 8px 1px rgba(100,150,255,0.25); }
-  .planet.red{ background-color:#b0413e; background-image:
-    radial-gradient(circle at 30% 30%, #a03736 10%, transparent 12%),
-    radial-gradient(circle at 70% 60%, #a83a3a 15%, transparent 18%),
-    radial-gradient(circle at 55% 75%, #80312f 8%, transparent 10%); }
-  .planet.blue{ background-color:#4b7dad; background-image:
-    radial-gradient(circle at 25% 25%, #3d6890 8%, transparent 10%),
-    radial-gradient(circle at 65% 60%, #366384 14%, transparent 17%),
-    radial-gradient(circle at 50% 80%, #2b516f 7%, transparent 9%); }
-  .planet.green{ background-color:#4ca36c; }
-  .planet.orange{ background-color:#d17f3c; }
-  .planet.purple{ background-color:#7855b8; }
+  /* PLANETS with subtle craters using multiple radial gradients */
+  .planet {
+    border-radius: 50%;
+    box-shadow: 0 0 8px 1px rgba(100,150,255,0.3);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+  }
+  .planet.red {
+    background-color: #b0413e;
+    background-image:
+      radial-gradient(circle at 30% 30%, #a03736 10%, transparent 12%),
+      radial-gradient(circle at 70% 60%, #a83a3a 15%, transparent 18%),
+      radial-gradient(circle at 55% 75%, #80312f 8%, transparent 10%);
+    box-shadow: 0 0 6px 1px rgba(180, 65, 62, 0.35);
+  }
+  .planet.blue {
+    background-color: #4b7dad;
+    background-image:
+      radial-gradient(circle at 25% 25%, #3d6890 8%, transparent 10%),
+      radial-gradient(circle at 65% 60%, #366384 14%, transparent 17%),
+      radial-gradient(circle at 50% 80%, #2b516f 7%, transparent 9%);
+    box-shadow: 0 0 6px 1px rgba(75, 125, 173, 0.35);
+  }
+  .planet.green {
+    background-color: #4ca36c;
+    background-image:
+      radial-gradient(circle at 30% 30%, #418b5a 10%, transparent 12%),
+      radial-gradient(circle at 70% 60%, #3e7e52 14%, transparent 17%),
+      radial-gradient(circle at 55% 75%, #2e5c3d 7%, transparent 9%);
+    box-shadow: 0 0 6px 1px rgba(76, 163, 108, 0.35);
+  }
+  .planet.orange {
+    background-color: #d17f3c;
+    background-image:
+      radial-gradient(circle at 30% 30%, #ab6831 10%, transparent 12%),
+      radial-gradient(circle at 70% 60%, #9c5f2b 14%, transparent 17%),
+      radial-gradient(circle at 55% 75%, #6d411d 7%, transparent 9%);
+    box-shadow: 0 0 6px 1px rgba(209, 127, 60, 0.35);
+  }
+  .planet.purple {
+    background-color: #7855b8;
+    background-image:
+      radial-gradient(circle at 30% 30%, #6646a1 10%, transparent 12%),
+      radial-gradient(circle at 70% 60%, #5a3d8a 14%, transparent 17%),
+      radial-gradient(circle at 55% 75%, #3d2b5f 7%, transparent 9%);
+    box-shadow: 0 0 6px 1px rgba(120, 85, 184, 0.35);
+  }
 
-  /* comet */
-  .comet { width:60px; height:24px; border-radius:18px; background:linear-gradient(90deg,#a0f0ff,#66fcf1); box-shadow:0 0 8px 2px #66fcf1aa; }
+  /* COMETS textured with layered linear gradient, no transparency */
+  .comet {
+    border-radius: 50% / 60%;
+    background: linear-gradient(90deg, #a0f0ff 0%, #66fcf1 30%, #b3ffff 60%, #66fcf1 80%, #a0f0ff 100%);
+    box-shadow: 0 0 8px 3px #66fcf1aa;
+    width: 25px;
+    height: 40px;
+  }
 
-  /* rocket base - we will set background via JS (keeps your original look) */
-  .rocket { width:30px; height:40px; background-size:contain; background-repeat:no-repeat; background-position:center; }
+  /* ROCKETS: base styles with fixed size */
+  .space-object.rocket {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 30px !important;
+    height: 40px !important;
+    filter: drop-shadow(0 0 1.5px #fff9);
+    position: fixed;
+    pointer-events: none;
+    z-index: 0;
+  }
 
-  /* flame element (small svg gradient/shape) */
-  .flame { position:absolute; width:16px; height:20px; pointer-events:none; transform-origin:center center; filter:drop-shadow(0 0 6px rgba(255,120,30,0.6)); will-change:transform,opacity; }
+  /* Flames behind rocket */
+  .flame {
+    position: absolute;
+    width: 14px;
+    height: 20px;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background: radial-gradient(circle at 50% 50%, #ff9e0d, #ff3a0d);
+    filter: drop-shadow(0 0 6px #ff6600);
+    border-radius: 50% 50% 40% 40%;
+    animation: flameFlicker 0.15s infinite alternate;
+    z-index: -1;
+  }
+  @keyframes flameFlicker {
+    0% {
+      transform: translateX(-50%) scaleY(1) scaleX(1);
+      opacity: 1;
+      filter: drop-shadow(0 0 6px #ff6600);
+    }
+    100% {
+      transform: translateX(-50%) scaleY(1.3) scaleX(1.1);
+      opacity: 0.7;
+      filter: drop-shadow(0 0 10px #ff3300);
+    }
+  }
 
-  /* UI styling (unchanged look you had) */
-  h1 { font-size:2.8rem; margin:0 0 .6rem 0; text-shadow:0 0 8px #66fcf1; user-select:none; }
-  .sparkle{ display:inline-block; animation:sparkle 2s linear infinite; font-size:1.6rem; color:#66fcf1; margin-left:.3rem; vertical-align:middle; }
-  @keyframes sparkle{ 0%,100%{opacity:1;transform:rotate(0) scale(1)} 50%{opacity:.5;transform:rotate(20deg) scale(1.2)} }
+  /* Smoke trail container */
+  .smoke-trail {
+    position: fixed;
+    pointer-events: none;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, rgba(200,200,200,0.3) 0%, rgba(200,200,200,0) 80%);
+    border-radius: 50%;
+    opacity: 0.4;
+    z-index: 0;
+    will-change: transform, opacity;
+  }
 
-  #factWrapper{ display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
-  #factDisplay{ font-size:1.25rem; max-width:600px; line-height:1.5; text-shadow:0 0 6px #45a29eaa; user-select:text; }
-  #copyButton{ background:none;border:none; cursor:pointer; padding:0; width:28px; height:28px; display:none; color:#ccc; }
-  #copyFeedback{ display:none; margin-left:6px; color:#66fcf1; }
+  /* Heading and sparkle styles */
+  h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 10;
+    text-shadow: 0 0 8px #66fcf1;
+  }
 
-  .buttons-container{ display:inline-flex; gap:10px; align-items:center; margin-top:6px; }
-  #factButton{ padding:12px 28px; font-size:1.05rem; border-radius:10px; border:0; background:#1f2833; color:#66fcf1; box-shadow:0 0 12px #45a29e99; cursor:pointer; }
-  #muteToggle{ background:none; border:0; color:#66fcf1; font-size:1.2rem; cursor:pointer; }
+  .sparkle {
+    display: inline-block;
+    animation: sparkleAnim 2s linear infinite;
+    font-size: 2.2rem;
+    color: #66fcf1;
+    margin-left: 0.3em;
+    position: relative;
+    top: 5px;
+  }
 
-  /* ensure UI elements clickable (even though backgrounds are pointer-events:none) */
-  button{ position:relative; z-index:3; }
+  @keyframes sparkleAnim {
+    0%, 100% { opacity: 1; transform: rotate(0deg) scale(1); }
+    50% { opacity: 0.5; transform: rotate(20deg) scale(1.3); }
+  }
+
+  /* Fact display container */
+  #factWrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    max-width: 700px;
+    z-index: 10;
+    background: rgba(0,0,0,0.4);
+    border-radius: 10px;
+    padding: 0.6rem 1rem;
+  }
+
+  #factDisplay {
+    font-size: 1.4rem;
+    margin: 2rem 0;
+    line-height: 1.6;
+    position: relative;
+    opacity: 0;
+    animation: fadeIn 1s forwards;
+    text-shadow: 0 0 6px #45a29eaa;
+    max-width: 600px;
+    word-wrap: break-word;
+    color: #e0e0e0;
+    z-index: 10;
+  }
+
+  #factDisplay.show {
+    animation: fadeIn 1s forwards;
+    opacity: 1;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Copy button and feedback */
+  #copyButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 4px;
+    display: none; /* hidden initially */
+    color: #ccc;
+    transition: color 0.2s ease, transform 0.2s ease;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    z-index: 10;
+  }
+
+  #copyButton:hover {
+    color: #fff;
+    transform: scale(1.2);
+  }
+
+  #copyFeedback {
+    font-size: 1.5rem;
+    color: #66fcf1;
+    margin-left: 8px;
+    user-select: none;
+    display: none;
+    align-self: center;
+    z-index: 10;
+  }
+
+  /* Buttons container */
+  .buttons-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 1rem;
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Fact Button styles */
+  #factButton {
+    padding: 14px 35px;
+    font-size: 1.3rem;
+    border: none;
+    border-radius: 10px;
+    background-color: #1f2833;
+    color: #66fcf1;
+    cursor: pointer;
+    transition: background-color 0.4s ease, box-shadow 0.4s ease, transform 0.2s ease;
+    box-shadow: 0 0 12px #45a29e99;
+    animation: pulseGlow 2.5s ease-in-out infinite;
+    z-index: 10;
+  }
+
+  #factButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    animation: none;
+    box-shadow: none;
+    background-color: #0a141b;
+    color: #444;
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 12px #45a29e99, 0 0 20px #66fcf1cc; }
+    50% { box-shadow: 0 0 20px #45a29ecc, 0 0 30px #66fcf1ff; }
+  }
+
+  #factButton:hover:not(:disabled) {
+    background-color: #45a29e;
+    box-shadow: 0 0 30px #66fcf1ff;
+    transform: scale(1.05);
+    animation: none;
+  }
+
+  #factButton:active:not(:disabled) {
+    transform: scale(0.95);
+    box-shadow: 0 0 10px #45a29e99;
+  }
+
+  /* Mute toggle icon */
+  #muteToggle {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #66fcf1;
+    padding: 0;
+    margin: 0 0 0 12px;
+    line-height: 1;
+    user-select: none;
+    transition: transform 0.2s ease;
+    z-index: 10;
+  }
+
+  #muteToggle:hover {
+    transform: scale(1.2);
+  }
+
+  /* Safe zone where no objects spawn or move */
+  #safeZone {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 700px;
+    height: 300px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 9;
+  }
 </style>
 </head>
 <body>
 
-  <!-- starfield (far back) -->
   <canvas id="starfield"></canvas>
 
-  <!-- static planets (behind UI) -->
-  <div id="planetsContainer"></div>
+  <!-- Container for space objects -->
+  <div id="spaceObjectsContainer"></div>
 
-  <!-- moving objects + smoke canvas -->
-  <div id="movingObjectsContainer">
-    <canvas id="smokeCanvas"></canvas>
+  <!-- Safe zone overlay for reference (hidden) -->
+  <div id="safeZone" aria-hidden="true"></div>
+
+  <h1>🔭 Random Space Fact Generator<span class="sparkle">✨</span></h1>
+
+  <div id="factWrapper" style="display:flex; align-items:center; justify-content:center; gap: 6px; flex-wrap:wrap; max-width:700px;">
+    <p id="factDisplay">Click the button below to learn a cool space fact!</p>
+
+    <button id="copyButton" title="Copy to clipboard" aria-label="Copy fact" aria-live="polite" aria-atomic="true" role="button">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        viewBox="0 0 24 24"
+        width="24"
+        height="24"
+        aria-hidden="true"
+      >
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </svg>
+    </button>
+
+    <span id="copyFeedback" aria-hidden="true" role="alert">✅</span>
   </div>
 
-  <!-- UI (on top) -->
-  <div id="uiContainer">
-    <h1>🔭 Random Space Fact Generator <span class="sparkle">✨</span></h1>
-
-    <div id="factWrapper">
-      <p id="factDisplay">Click the button below to learn a cool space fact!</p>
-      <button id="copyButton" title="Copy fact" aria-label="Copy fact">
-        <!-- simple copy icon -->
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9"/></svg>
-      </button>
-      <span id="copyFeedback">✅</span>
-    </div>
-
-    <div class="buttons-container">
-      <button id="factButton">Show Me a Random Fact</button>
-      <button id="muteToggle" title="Toggle sound">🔊</button>
-    </div>
+  <div class="buttons-container">
+    <button id="factButton">Show Me a Random Fact</button>
+    <button id="muteToggle" title="Toggle sound">🔊</button>
   </div>
 
 <script>
-/* -------------------- Setup canvases & sizes (important: declare smokeCanvas BEFORE calling resize) -------------------- */
-const starCanvas = document.getElementById('starfield');
-const starCtx = starCanvas.getContext('2d');
+  // Starfield canvas setup
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  const starCount = 150;
+  let width, height;
+  let mouseX = 0;
+  let mouseY = 0;
 
-const smokeCanvas = document.getElementById('smokeCanvas');
-const smokeCtx = smokeCanvas.getContext('2d');
+  function initStars() {
+    stars = [];
+    for(let i=0; i<starCount; i++) {
+      stars.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        radius: Math.random() * 1.3 + 0.3,
+      });
+    }
+  }
 
-/* global sizes */
-let W = window.innerWidth;
-let H = window.innerHeight;
+  function resize() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+    initStars();
+  }
 
-function setCanvasSizes(){
-  W = window.innerWidth;
-  H = window.innerHeight;
-  starCanvas.width = W;
-  starCanvas.height = H;
-  smokeCanvas.width = W;
-  smokeCanvas.height = H;
-}
-window.addEventListener('resize', () => {
-  setCanvasSizes();
-  // (optional) we could re-layout planets to avoid center, but keep them fixed after initial create
-});
-setCanvasSizes();
+  function drawStars() {
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = 'white';
+    stars.forEach(star => {
+      let parallaxX = star.x + (mouseX - width/2) * 0.02 * star.radius;
+      let parallaxY = star.y + (mouseY - height/2) * 0.02 * star.radius;
 
-/* -------------------- starfield -------------------- */
-let stars = [];
-const STAR_COUNT = 160;
-function initStars(){
-  stars = [];
-  for(let i=0;i<STAR_COUNT;i++){
-    stars.push({
-      x: Math.random()*W,
-      y: Math.random()*H,
-      r: Math.random()*1.4+0.2
+      ctx.beginPath();
+      ctx.arc(parallaxX, parallaxY, star.radius, 0, 2 * Math.PI);
+      ctx.fill();
     });
   }
-}
-function drawStarfield(){
-  starCtx.clearRect(0,0,W,H);
-  starCtx.fillStyle = 'white';
-  stars.forEach(s=>{
-    starCtx.beginPath();
-    starCtx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-    starCtx.fill();
+
+  window.addEventListener('resize', resize);
+  window.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
   });
-}
-initStars();
-(function animateStars(){
-  drawStarfield();
-  requestAnimationFrame(animateStars);
-})();
 
-/* -------------------- static planets (created once) -------------------- */
-const planetsContainer = document.getElementById('planetsContainer');
-const planetColors = ['red','blue','green','orange','purple'];
-const planetCount = 10;
-function createPlanets(){
-  // clear if called again
-  planetsContainer.innerHTML = '';
-  const margin = 170; // avoid central UI area
-  for(let i=0;i<planetCount;i++){
-    const p = document.createElement('div');
-    p.className = 'space-object planet ' + planetColors[Math.floor(Math.random()*planetColors.length)];
-    const size = 40 + Math.random()*50;
-    p.style.width = size + 'px';
-    p.style.height = size + 'px';
-
-    // pick pos not inside center box
-    let x,y;
-    do {
-      x = Math.random()*(W - size);
-      y = Math.random()*(H - size);
-    } while (x > W/2 - margin && x < W/2 + margin && y > H/2 - margin && y < H/2 + margin);
-
-    p.style.left = `${x}px`;
-    p.style.top  = `${y}px`;
-    planetsContainer.appendChild(p);
+  function animateStarfield() {
+    drawStars();
+    requestAnimationFrame(animateStarfield);
   }
-}
-createPlanets();
 
-/* -------------------- moving objects (rockets + comets) + smoke on canvas -------------------- */
-const movingObjectsContainer = document.getElementById('movingObjectsContainer');
+  resize();
+  animateStarfield();
 
-/* small rocket PNG base64s (keeps your previous look) */
-const rocketImages = [
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAoCAYAAAArW5ZsAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAdklEQVR4nO3TQQrAMAwEwLz/Wa36SFBquHDIyG37hUu8xQCI8Ix5UgOyebCVV1Jz2cK3AtYO5wE6EO0z9dDAU8vNx1qkIp0uhfOo2v1WqwYUbjCgkiIqYFM6ScXOd5nF+bEKghDZpRE4vDJL97hG3Lc0K9uXZX7Dr4AX35Lq4fn6sNAAAAAElFTkSuQmCC',
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAqCAYAAADg6ms4AAAACXBIWXMAAAsTAAALEwEAmpwYAAAEx0lEQVRIidWVSWhTVRTGf+fHJE8XkgyoiYkk5MdD8w3b5oCQSAyIoVFC1cRZqshikmK7CR3E4EYkXbAXnHJj6gshSSshUoKEdCiBwiJ0nqELXEpTUO93WzmOu9+/fmdxv9txTlx8Xx6vXvffb9c35sBhrP/OnT99e9e4zWnzG+qJoMsa4xjO22Px/Nzfh3MPkpCXCOzPILna/EwcXF7y0a3tfwsp4TkLfB4DNLEMD5zMzPGnSqBxJ3k0i7FWh/puTcJ3Tx2VgfM/FQJqMsi1yNqzA+bzG7F8VgLcCsjyx1Wu6O1XJWmTH2Rm4wL+yUX5MDqDd4ApLPM3Ajkt+vtKoDDwMhrMeZVixVqswOTvlEsWETM8y7KKmZQihfJIpxv9Ue6TW3noRUT62wlWTOuQkjTGm/TJyRDFP8w36aTKJ1Z1dUHZ13TRzEME6uJbYqspZqLq6CvYsWxhXLphYl0Kwp1lQH2+39Nq+vtwMW3Fhd46JxGMphEK3dZw3r+dYoWq5Jz+qWRvWvGuq8zJm+5n5nyc4xqDXAALiU4n0xmCbi+IcPqYUwH8ynQ76WyfKqZrNKkMGRmZyUwV5llMikv90xN+zXXTA+Ic/l8zk2p3+wHbcXNhZhVLzTL3eMq8z/roYjs3tEm7v7RKPxG39aRZn4tN6O84LM67+VqfG4/kL8uZNUYVVt7dkXDwTwQhf4uOy9OHChU5tvf6ZqmRzDYiY+Xy1Mv+ZHHovXxTDqyxg5Aaf4Y+3y7klvAcbCVYytzz4DAAAAAElFTkSuQmCC',
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAyCAYAAAB8ACp1AAAACXBIWXMAAAsTAAALEwEAmpwYAAAEm0lEQVRIid2Vv0tcVRiGH+/OH3scFUwI0SIEpKpm8E7GqyiTVUxuYoWKIqiKWwQUA3AwCiiVaIcqjKUBghCqthRCoIpXAzGkRKkHAAAJOTnOJnbN29lWXN7DnPt63GXdM4fdV9+27nXv9zPmbOR7BvsxJ8a02Ro5Wfw7cqBe8DX4EEA1sBbwHbL4DHkfrvwLfALe9UDLfgctBPwChM+fwOvwDFBDkUcdKxav0J+yr1QmSr0dvVtGLK36G30LZgjuz+Y6WVyMTXkYdHk87cqDHoYccUyf6n8eD8tIC8U6sv7zKnOm6MJ7cCm1uJ3b6SGY0cL4Lvwh/F+ZTqW16IP8vFOPX0E35HmTX9GmykFJ18i3xvsbHlfcJ4D/wFgJzjSiQqriY5tp1QmV9P7TwyQG9lUt5GVT4Vk5h6mM8CPwvcyf7zFhPpq2M6X1+P+1TkaDXcUztOxzZX8yX0TOhxjUGr5EvoMfDtSHr1fAiqrhLkP9E68LsjX6CnXNRAX2xmr3pQHlR9T9D/8QEj7T7e9wPBxJ8Az4CeB7kAC5+kMGiRXyHQAAAABJRU5ErkJggg=='
-];
+  // Container and safe zone rectangle for collision avoidance
+  const spaceObjectsContainer = document.getElementById('spaceObjectsContainer');
+  const safeZone = document.getElementById('safeZone');
 
-class MovingObject {
-  constructor(kind) {
-    this.kind = kind; // 'rocket' or 'comet'
-    this.el = document.createElement('div');
-    this.el.className = 'space-object ' + (kind === 'rocket' ? 'rocket':'comet');
-    movingObjectsContainer.appendChild(this.el);
+  // Get safe zone rectangle boundaries
+  function getSafeZoneRect() {
+    const rect = safeZone.getBoundingClientRect();
+    return {
+      left: rect.left,
+      right: rect.right,
+      top: rect.top,
+      bottom: rect.bottom,
+      width: rect.width,
+      height: rect.height,
+    };
+  }
 
-    // flame div for rockets, styled via .flame
-    if(kind === 'rocket') {
-      this.flame = document.createElement('div');
-      this.flame.className = 'flame';
-      movingObjectsContainer.appendChild(this.flame);
-      // flame SVG inside (small)
-      this.flame.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 1c-2 3-2 6 0 10 0 0 1-3 1-5s-1-5-1-5z" fill="#ff8c00"/></svg>';
-      // set rocket visual
-      this.el.style.backgroundImage = `url('${rocketImages[Math.floor(Math.random()*rocketImages.length)]}')`;
-      this.el.style.width = '30px';
-      this.el.style.height = '40px';
-    } else {
-      // comet size
-      this.el.style.width = '60px';
-      this.el.style.height = '24px';
+  // Check if an object is inside safe zone
+  function isInSafeZone(x, y, size) {
+    const rect = getSafeZoneRect();
+    return (
+      x + size > rect.left &&
+      x < rect.right &&
+      y + size > rect.top &&
+      y < rect.bottom
+    );
+  }
+
+  // Base64 rocket image (single style) - keep original look
+  const rocketImageURL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAoCAYAAAArW5ZsAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAdklEQVR4nO3TQQrAMAwEwLz/Wa36SFBquHDIyG37hUu8xQCI8Ix5UgOyebCVV1Jz2cK3AtYO5wE6EO0z9dF3FyfjICpMf2T6jHaFGa1vDQyzwTIrgIs47Im2xfq2mu5/cWOhWqvIDqgqxFTZvMCKwAAAABJRU5ErkJggg==';
+
+  // Flame SVG element for rockets
+  function createFlame() {
+    const flame = document.createElement('div');
+    flame.classList.add('flame');
+    return flame;
+  }
+
+  // Smoke particle class
+  class SmokeParticle {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.size = Math.random() * 5 + 5;
+      this.opacity = 0.35;
+      this.life = 80 + Math.random() * 40;
+      this.vx = (Math.random() - 0.5) * 0.2;
+      this.vy = -0.3 - Math.random() * 0.1;
+      this.element = document.createElement('div');
+      this.element.classList.add('smoke-trail');
+      this.element.style.width = this.size + 'px';
+      this.element.style.height = this.size + 'px';
+      spaceObjectsContainer.appendChild(this.element);
+      this.updateElement();
     }
-
-    // initial place outside an edge
-    this.size = (this.kind === 'rocket' ? 30 : 60);
-    this.resetPosition();
-    this.smokeParticles = []; // array of {x,y, born, life, r}
-    this.lastSmoke = 0;
-    this.speed = (this.kind==='rocket') ? (0.6 + Math.random()*0.8) : (1.0 + Math.random()*0.6);
-  }
-
-  resetPosition(){
-    // spawn from a random edge
-    const edges = ['top','bottom','left','right'];
-    const edge = edges[Math.floor(Math.random()*edges.length)];
-    if(edge==='top'){ this.x = Math.random()*W; this.y = -40; this.vx = (Math.random()-0.5)*0.6; this.vy = 1; }
-    else if(edge==='bottom'){ this.x = Math.random()*W; this.y = H+40; this.vx = (Math.random()-0.5)*0.6; this.vy = -1; }
-    else if(edge==='left'){ this.x = -40; this.y = Math.random()*H; this.vx = 1; this.vy = (Math.random()-0.5)*0.6; }
-    else { this.x = W+40; this.y = Math.random()*H; this.vx = -1; this.vy = (Math.random()-0.5)*0.6; }
-
-    // normalize direction
-    const L = Math.hypot(this.vx, this.vy) || 1;
-    this.vx /= L; this.vy /= L;
-    this.angle = Math.atan2(this.vy, this.vx); // radians
-
-    // position element initially
-    this.updateDOM();
-  }
-
-  updateDOM(){
-    // center the element at x,y and rotate; translate before rotate to rotate around center
-    this.el.style.left = this.x + 'px';
-    this.el.style.top  = this.y + 'px';
-    this.el.style.transform = `translate(-50%,-50%) rotate(${this.angle}rad)`;
-    // flame (if rocket) placed behind the rocket tail
-    if(this.kind==='rocket' && this.flame){
-      const flameDist = 18;
-      const fx = this.x - Math.cos(this.angle)*flameDist;
-      const fy = this.y - Math.sin(this.angle)*flameDist;
-      this.flame.style.left = fx + 'px';
-      this.flame.style.top  = fy + 'px';
-      this.flame.style.transform = `translate(-50%,-50%) rotate(${this.angle}rad) scale(1)`;
-      this.flame.style.opacity = 1;
+    updateElement() {
+      this.element.style.transform = `translate(${this.x}px, ${this.y}px)`;
+      this.element.style.opacity = this.opacity;
+      this.element.style.width = this.size + 'px';
+      this.element.style.height = this.size + 'px';
     }
-  }
-
-  update(dt, time){
-    // move
-    this.x += this.vx * this.speed;
-    this.y += this.vy * this.speed;
-
-    // spawn smoke for rockets: small particles behind tail
-    if(this.kind === 'rocket'){
-      if(time - this.lastSmoke > 60){ // spawn frequently
-        this.smokeParticles.push({
-          x: this.x - Math.cos(this.angle)*14,
-          y: this.y - Math.sin(this.angle)*14,
-          born: time,
-          life: 1200 + Math.random()*700,
-          r: 3 + Math.random()*4
-        });
-        this.lastSmoke = time;
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      this.opacity -= 0.005;
+      this.life--;
+      this.size *= 0.98;
+      this.updateElement();
+      if (this.opacity <= 0 || this.life <= 0) {
+        this.element.remove();
+        return false;
       }
-    } else { // for comets, spawn faint trail
-      if(time - this.lastSmoke > 120){
-        this.smokeParticles.push({
-          x: this.x - Math.cos(this.angle)*8,
-          y: this.y - Math.sin(this.angle)*8,
-          born: time,
-          life: 900 + Math.random()*600,
-          r: 2 + Math.random()*2
-        });
-        this.lastSmoke = time;
+      return true;
+    }
+  }
+
+  // Rocket class
+  class Rocket {
+    constructor() {
+      this.size = 30;
+      this.height = 40;
+      this.x = 0;
+      this.y = 0;
+      this.speed = 0.6 + Math.random() * 0.7;
+      this.angle = 0;
+      this.vx = 0;
+      this.vy = 0;
+      this.smokeParticles = [];
+
+      this.el = document.createElement('div');
+      this.el.classList.add('space-object', 'rocket');
+      this.el.style.backgroundImage = `url(${rocketImageURL})`;
+      spaceObjectsContainer.appendChild(this.el);
+
+      this.flame = createFlame();
+      this.el.appendChild(this.flame);
+
+      this.spawn();
+    }
+
+    spawn() {
+      const safeZoneRect = getSafeZoneRect();
+      const margin = 30;
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
+
+      // Spawn randomly OUTSIDE safe zone on edges
+      // Pick a random edge: top, right, bottom, left (0-3)
+      const edge = Math.floor(Math.random() * 4);
+
+      if (edge === 0) { // top edge
+        this.x = Math.random() * screenWidth;
+        this.y = -this.height - margin;
+      } else if (edge === 1) { // right edge
+        this.x = screenWidth + margin;
+        this.y = Math.random() * screenHeight;
+      } else if (edge === 2) { // bottom edge
+        this.x = Math.random() * screenWidth;
+        this.y = screenHeight + margin;
+      } else { // left edge
+        this.x = -this.size - margin;
+        this.y = Math.random() * screenHeight;
+      }
+
+      // Target is random point outside safe zone on opposite side
+      // Make sure target is outside safe zone for clear path
+      do {
+        this.targetX = Math.random() * screenWidth;
+        this.targetY = Math.random() * screenHeight;
+      } while (
+        this.targetX > safeZoneRect.left &&
+        this.targetX < safeZoneRect.right &&
+        this.targetY > safeZoneRect.top &&
+        this.targetY < safeZoneRect.bottom
+      );
+
+      // Calculate velocity vector
+      const dx = this.targetX - this.x;
+      const dy = this.targetY - this.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      this.vx = (dx / dist) * this.speed;
+      this.vy = (dy / dist) * this.speed;
+
+      // Calculate angle in degrees for rotation (rocket points upward by default)
+      this.angle = Math.atan2(this.vy, this.vx) * 180 / Math.PI + 90;
+
+      this.updatePosition();
+    }
+
+    updatePosition() {
+      this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.angle}deg)`;
+    }
+
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+
+      // Spawn smoke particles trailing behind
+      this.smokeParticles.push(new SmokeParticle(
+        this.x + this.size/2 - 3 + (Math.random() * 4 - 2),
+        this.y + this.height - 6 + (Math.random() * 3 - 1)
+      ));
+
+      // Update smoke particles and remove dead ones
+      this.smokeParticles = this.smokeParticles.filter(p => p.update());
+
+      this.updatePosition();
+
+      // Remove rocket if outside screen + margin
+      const margin = 50;
+      if (
+        this.x < -margin || this.x > window.innerWidth + margin ||
+        this.y < -margin || this.y > window.innerHeight + margin
+      ) {
+        // Remove all smoke particles too
+        this.smokeParticles.forEach(p => p.element.remove());
+        this.smokeParticles = [];
+        this.el.remove();
+        return false;
+      }
+      return true;
+    }
+  }
+
+  // Comet class
+  class Comet {
+    constructor() {
+      this.el = document.createElement('div');
+      this.el.classList.add('space-object', 'comet');
+      spaceObjectsContainer.appendChild(this.el);
+      this.size = 25;
+      this.width = 25;
+      this.height = 40;
+
+      const safeZoneRect = getSafeZoneRect();
+      const margin = 20;
+
+      // Spawn random position OUTSIDE safe zone
+      do {
+        this.x = Math.random() * window.innerWidth;
+        this.y = Math.random() * window.innerHeight;
+      } while (isInSafeZone(this.x, this.y, this.size));
+
+      // Random velocity vector with speed 0.3 to 0.7 px/frame
+      const speed = 0.3 + Math.random() * 0.4;
+      const angle = Math.random() * 2 * Math.PI;
+      this.vx = Math.cos(angle) * speed;
+      this.vy = Math.sin(angle) * speed;
+
+      this.angle = Math.random() * 360;
+      this.angularVelocity = (Math.random() - 0.5) * 0.5; // rotate slowly
+    }
+
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      this.angle += this.angularVelocity;
+
+      // Bounce off edges (screen wrap)
+      if (this.x < -this.width) this.x = window.innerWidth + this.width;
+      if (this.x > window.innerWidth + this.width) this.x = -this.width;
+      if (this.y < -this.height) this.y = window.innerHeight + this.height;
+      if (this.y > window.innerHeight + this.height) this.y = -this.height;
+
+      this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.angle}deg)`;
+      return true;
+    }
+  }
+
+  // PLANET class (static)
+  class Planet {
+    constructor(color, size, x, y) {
+      this.el = document.createElement('div');
+      this.el.classList.add('space-object', 'planet', color);
+      this.el.style.width = size + 'px';
+      this.el.style.height = size + 'px';
+      this.x = x;
+      this.y = y;
+      this.el.style.left = x + 'px';
+      this.el.style.top = y + 'px';
+      spaceObjectsContainer.appendChild(this.el);
+    }
+  }
+
+  // Initialize objects
+  const rockets = [];
+  const comets = [];
+  const planets = [];
+
+  // Create some static planets outside safe zone
+  function spawnPlanets() {
+    // Clear any existing
+    planets.forEach(p => p.el.remove());
+    planets.length = 0;
+
+    // Define planet specs [color, size, x, y]
+    const specs = [
+      ['red', 70, 60, 100],
+      ['blue', 80, window.innerWidth - 140, 150],
+      ['green', 65, 120, window.innerHeight - 150],
+      ['orange', 55, window.innerWidth - 110, window.innerHeight - 180],
+      ['purple', 50, window.innerWidth / 2 + 200, 50]
+    ];
+
+    const safeZoneRect = getSafeZoneRect();
+
+    specs.forEach(([color, size, x, y]) => {
+      // Only place if NOT inside safe zone (for future window resize)
+      if (
+        x + size < safeZoneRect.left ||
+        x > safeZoneRect.right ||
+        y + size < safeZoneRect.top ||
+        y > safeZoneRect.bottom
+      ) {
+        planets.push(new Planet(color, size, x, y));
+      }
+    });
+  }
+
+  // Spawn rockets and comets
+  function spawnObjects() {
+    // Clear existing rockets and comets from DOM
+    rockets.forEach(r => r.el.remove());
+    rockets.length = 0;
+    comets.forEach(c => c.el.remove());
+    comets.length = 0;
+
+    // Spawn 5 rockets
+    for (let i=0; i<5; i++) {
+      rockets.push(new Rocket());
+    }
+    // Spawn 8 comets
+    for (let i=0; i<8; i++) {
+      comets.push(new Comet());
+    }
+  }
+
+  function animateObjects() {
+    // Update rockets, remove if out of bounds
+    for (let i = rockets.length -1; i >= 0; i--) {
+      const alive = rockets[i].update();
+      if (!alive) {
+        rockets.splice(i, 1);
+        rockets.push(new Rocket());
       }
     }
 
-    // expire particles
-    this.smokeParticles = this.smokeParticles.filter(p => (time - p.born) < p.life);
+    // Update comets
+    comets.forEach(c => c.update());
 
-    // if outside with margin, reset to another edge
-    const margin = 80;
-    if(this.x < -margin || this.x > W + margin || this.y < -margin || this.y > H + margin){
-      this.resetPosition();
+    requestAnimationFrame(animateObjects);
+  }
+
+  // Initial setup
+  function setupSpace() {
+    spawnPlanets();
+    spawnObjects();
+    animateObjects();
+  }
+
+  window.addEventListener('resize', () => {
+    // Clear and respawn planets and other objects to adjust for new safe zone
+    planets.forEach(p => p.el.remove());
+    rockets.forEach(r => r.el.remove());
+    comets.forEach(c => c.el.remove());
+    planets.length = 0;
+    rockets.length = 0;
+    comets.length = 0;
+    spawnPlanets();
+    spawnObjects();
+  });
+
+  setupSpace();
+
+  // Fact generator logic
+  const factButton = document.getElementById('factButton');
+  const factDisplay = document.getElementById('factDisplay');
+  const copyButton = document.getElementById('copyButton');
+  const copyFeedback = document.getElementById('copyFeedback');
+  const muteToggle = document.getElementById('muteToggle');
+
+  // Sample facts
+  const facts = [
+    "A day on Venus is longer than a year on Venus.",
+    "Neutron stars can spin 600 times per second.",
+    "Jupiter has the shortest day of all planets.",
+    "Saturn's rings are made mostly of ice particles.",
+    "Mars has the tallest volcano in the solar system.",
+    "The footprints on the Moon will likely remain for millions of years.",
+    "One million Earths could fit inside the Sun.",
+    "The hottest planet isn't the closest to the Sun.",
+    "There are more stars in the universe than grains of sand on Earth.",
+    "A teaspoon of neutron star would weigh 6 billion tons."
+  ];
+
+  // Sound setup
+  let audioCtx;
+  let oscillator;
+  let muted = false;
+
+  function playBeep() {
+    if (muted) return;
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
-
-    // update DOM
-    this.updateDOM();
+    oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    oscillator.type = 'square';
+    oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
+    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + 0.1);
   }
 
-  drawSmoke(ctx, time){
-    for(const p of this.smokeParticles){
-      const age = time - p.born;
-      const t = age / p.life;
-      const alpha = Math.max(0, 0.6 * (1 - t));
-      const r = p.r * (1 + t*1.4);
-      ctx.beginPath();
-      ctx.fillStyle = `rgba(200,200,200,${alpha.toFixed(3)})`;
-      ctx.shadowColor = `rgba(200,200,200,${(alpha*0.6).toFixed(3)})`;
-      ctx.shadowBlur = 8*(1-t);
-      ctx.arc(p.x, p.y, r, 0, Math.PI*2);
-      ctx.fill();
-    }
-  }
-}
+  factButton.addEventListener('click', () => {
+    const randomIndex = Math.floor(Math.random() * facts.length);
+    factDisplay.textContent = facts[randomIndex];
+    factDisplay.classList.add('show');
+    copyButton.style.display = 'inline-block';
+    playBeep();
+  });
 
-/* create objects */
-const movingObjects = [];
-for(let i=0;i<5;i++) movingObjects.push(new MovingObject('rocket'));
-for(let i=0;i<3;i++) movingObjects.push(new MovingObject('comet'));
+  copyButton.addEventListener('click', () => {
+    navigator.clipboard.writeText(factDisplay.textContent).then(() => {
+      copyFeedback.style.display = 'inline';
+      setTimeout(() => copyFeedback.style.display = 'none', 1500);
+    });
+  });
 
-/* animation loop - draws smoke on smokeCanvas (behind UI) */
-let lastTime = performance.now();
-function animate(time = performance.now()){
-  const dt = time - lastTime;
-  lastTime = time;
-
-  // clear smoke canvas each frame
-  smokeCtx.clearRect(0,0,smokeCanvas.width, smokeCanvas.height);
-  smokeCtx.globalCompositeOperation = 'source-over';
-
-  // update + draw
-  for(const obj of movingObjects){
-    obj.update(dt, time);
-    obj.drawSmoke(smokeCtx, time);
-  }
-
-  requestAnimationFrame(animate);
-}
-requestAnimationFrame(animate);
-
-/* -------------------- UI: facts, copy, mute -------------------- */
-const facts = [
-  "The largest volcano in the solar system is Olympus Mons on Mars.",
-  "Venus rotates in the opposite direction to most planets.",
-  "Jupiter has 79 known moons.",
-  "A day on Mercury is longer than its year.",
-  "Neutron stars can spin up to 600 times per second.",
-  "The Milky Way is about 100,000 light-years across.",
-  "Saturn's rings are made of ice and rock.",
-  "The Sun contains 99.86% of the solar system's mass.",
-  "Comets are 'dirty snowballs' of ice, dust and rock.",
-  "The footprints on the Moon can last millions of years."
-];
-
-const factButton = document.getElementById('factButton');
-const factDisplay = document.getElementById('factDisplay');
-const copyButton = document.getElementById('copyButton');
-const copyFeedback = document.getElementById('copyFeedback');
-const muteToggle = document.getElementById('muteToggle');
-
-let isMuted = false;
-
-/* small clean pop sound using WebAudio (avoids CORS issues) */
-let audioCtx;
-function playPop(){
-  try {
-    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if(isMuted) return;
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = 'sine';
-    o.frequency.value = 700; // clean pop frequency
-    g.gain.value = 0.03;
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start();
-    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.12);
-    o.stop(audioCtx.currentTime + 0.13);
-  } catch(e){ /* ignore */ }
-}
-
-factButton.addEventListener('click', ()=>{
-  factButton.disabled = true;
-  setTimeout(()=> factButton.disabled = false, 800);
-  const idx = Math.floor(Math.random()*facts.length);
-  factDisplay.textContent = facts[idx];
-  copyButton.style.display = 'inline-block';
-  copyFeedback.style.display = 'none';
-  playPop();
-});
-
-copyButton.addEventListener('click', async ()=>{
-  try {
-    await navigator.clipboard.writeText(factDisplay.textContent || '');
-    copyFeedback.style.display = 'inline';
-    setTimeout(()=> copyFeedback.style.display='none', 1200);
-  } catch(e){
-    // fallback copy attempt
-    const ta = document.createElement('textarea');
-    ta.value = factDisplay.textContent || '';
-    document.body.appendChild(ta);
-    ta.select();
-    try { document.execCommand('copy'); copyFeedback.style.display = 'inline'; setTimeout(()=>copyFeedback.style.display='none',1200); }catch(e){ alert('Copy failed'); }
-    document.body.removeChild(ta);
-  }
-});
-
-muteToggle.addEventListener('click', ()=>{
-  isMuted = !isMuted;
-  muteToggle.textContent = isMuted ? '🔇' : '🔊';
-});
-
-/* done */
+  muteToggle.addEventListener('click', () => {
+    muted = !muted;
+    muteToggle.textContent = muted ? '🔇' : '🔊';
+  });
 </script>
 </body>
 </html>
