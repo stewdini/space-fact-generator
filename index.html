@@ -4,14 +4,6 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Random Space Fact Generator | Space Simplified</title>
-
-<!-- Favicon links -->
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
-<link rel="manifest" href="site.webmanifest" />
-<link rel="shortcut icon" href="favicon.ico" />
-
 <style>
   body {
     margin: 0;
@@ -38,20 +30,15 @@
     pointer-events: none;
   }
 
-  #spaceObjectsContainer {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 0;
-  }
-
   /* Space objects base style */
   .space-object {
-    position: absolute;
+    position: fixed;
     pointer-events: none;
+    z-index: 0;
     will-change: transform;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
   }
 
   /* PLANETS with subtle craters using multiple radial gradients */
@@ -61,7 +48,6 @@
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
-    position: absolute;
   }
   .planet.red {
     background-color: #b0413e;
@@ -104,35 +90,18 @@
     box-shadow: 0 0 6px 1px rgba(120, 85, 184, 0.35);
   }
 
-  /* Rocket style (small colored rocket SVG as background) */
-  .rocket {
+  /* COMETS replaced by ASTEROIDS */
+
+  /* ASTEROIDS base style */
+  .asteroid {
     width: 30px;
-    height: 40px;
-    background-image: url('data:image/svg+xml;utf8,<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%2366fcf1" stroke="%2333aabb" stroke-width="1" d="M12 2c-1 2-2 6-2 8s1 5 2 6 2-3 2-6-1-6-2-8z"/><path fill="%23fff" d="M11 10h2v2h-2z"/><path fill="%2366fcf1" d="M10 18l-5 3 2-7 3 4z"/><path fill="%2390e0f0" d="M14 18l5 3-2-7-3 4z"/></svg>');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    position: absolute;
-    filter: drop-shadow(0 0 2px #66fcf1aa);
+    height: 30px;
   }
 
-  /* Asteroid SVG variants as backgrounds */
-  .asteroid {
-    width: 40px;
-    height: 40px;
-    position: absolute;
-    background-repeat: no-repeat;
-    background-size: contain;
-    filter: drop-shadow(0 0 2px #997a5566);
-  }
-  .asteroid.type1 {
-    background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle fill="%23997a55" cx="32" cy="32" r="30"/><circle fill="%236b5432" cx="22" cy="22" r="10"/></svg>');
-  }
-  .asteroid.type2 {
-    background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><ellipse fill="%23997a55" cx="32" cy="32" rx="28" ry="22"/><circle fill="%236b5432" cx="38" cy="30" r="9"/></svg>');
-  }
-  .asteroid.type3 {
-    background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><polygon fill="%23997a55" points="10,12 54,8 58,56 16,54"/><circle fill="%236b5432" cx="28" cy="40" r="8"/></svg>');
+  /* ROCKETS */
+  .rocket {
+    width: 30px !important;
+    height: 40px !important;
   }
 
   /* Heading and sparkle styles */
@@ -140,7 +109,7 @@
     font-size: 3rem;
     margin-bottom: 1rem;
     position: relative;
-    z-index: 2;
+    z-index: 1;
     text-shadow: 0 0 8px #66fcf1;
   }
 
@@ -168,13 +137,12 @@
     gap: 10px;
     flex-wrap: wrap;
     max-width: 700px;
-    z-index: 2;
-    margin-bottom: 1rem;
+    z-index: 1;
   }
 
   #factDisplay {
     font-size: 1.4rem;
-    margin: 0;
+    margin: 2rem 0;
     line-height: 1.6;
     position: relative;
     opacity: 0;
@@ -295,14 +263,15 @@
 <body>
   <canvas id="starfield"></canvas>
 
+  <!-- Container for space objects -->
   <div id="spaceObjectsContainer"></div>
 
   <h1>🔭 Random Space Fact Generator<span class="sparkle">✨</span></h1>
 
-  <div id="factWrapper" aria-live="polite" aria-atomic="true" aria-relevant="additions">
-    <p id="factDisplay" aria-live="polite" aria-atomic="true">Click the button below to learn a cool space fact!</p>
+  <div id="factWrapper" style="display:flex; align-items:center; justify-content:center; gap: 6px; flex-wrap:wrap; max-width:700px;">
+    <p id="factDisplay">Click the button below to learn a cool space fact!</p>
 
-    <button id="copyButton" title="Copy to clipboard" aria-label="Copy fact" role="button" aria-live="polite" aria-atomic="true">
+    <button id="copyButton" title="Copy to clipboard" aria-label="Copy fact" aria-live="polite" aria-atomic="true" role="button">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
@@ -320,7 +289,7 @@
       </svg>
     </button>
 
-    <span id="copyFeedback" role="alert" aria-live="assertive" aria-hidden="true">✅</span>
+    <span id="copyFeedback" aria-hidden="true" role="alert">✅</span>
   </div>
 
   <div class="buttons-container">
@@ -384,246 +353,287 @@
   resize();
   animateStarfield();
 
-  // Space objects container
   const spaceObjectsContainer = document.getElementById('spaceObjectsContainer');
 
-  // Helpers to avoid placing objects in center area behind text
-  const safeZoneRadius = 250; // px radius around center to avoid placing objects
-
-  // Utility function to generate random position avoiding center safe zone
-  function randomPositionAvoidCenter(objSize) {
-    let x, y;
-    const cx = window.innerWidth/2;
-    const cy = window.innerHeight/2;
-
-    // Try until position is outside the safe zone circle
-    do {
-      x = Math.random() * (window.innerWidth - objSize);
-      y = Math.random() * (window.innerHeight - objSize);
-    } while (Math.hypot(x + objSize/2 - cx, y + objSize/2 - cy) < safeZoneRadius);
-    return {x, y};
-  }
-
-  // Planet class (still)
-  class Planet {
-    constructor() {
-      this.size = 40 + Math.random() * 35;
+  class SpaceObject {
+    constructor(type) {
+      this.type = type;
       this.el = document.createElement('div');
-      this.el.classList.add('space-object', 'planet');
+      this.el.classList.add('space-object');
 
-      const colors = ['red', 'blue', 'green', 'orange', 'purple'];
-      this.color = colors[Math.floor(Math.random() * colors.length)];
-      this.el.classList.add(this.color);
+      if (type === 'planet') {
+        this.size = 40 + Math.random() * 35;
+        this.el.classList.add('planet');
 
-      const pos = randomPositionAvoidCenter(this.size);
-      this.x = pos.x;
-      this.y = pos.y;
+        // Assign random planet color class
+        const planetColors = ['red', 'blue', 'green', 'orange', 'purple'];
+        const color = planetColors[Math.floor(Math.random() * planetColors.length)];
+        this.el.classList.add(color);
 
-      this.el.style.width = this.size + 'px';
-      this.el.style.height = this.size + 'px';
-      this.el.style.left = this.x + 'px';
-      this.el.style.top = this.y + 'px';
-
-      spaceObjectsContainer.appendChild(this.el);
-    }
-  }
-
-  // Rocket class
-  class Rocket {
-    constructor() {
-      this.sizeW = 30;
-      this.sizeH = 40;
-      this.el = document.createElement('div');
-      this.el.classList.add('space-object', 'rocket');
-
-      // Start just outside random edge, random direction
-      const edge = Math.floor(Math.random() * 4);
-      if(edge === 0) { // left
-        this.x = -this.sizeW;
-        this.y = Math.random() * window.innerHeight;
-        this.direction = Math.random() * 180 - 90; // roughly rightward angles
-      } else if(edge === 1) { // right
-        this.x = window.innerWidth + this.sizeW;
-        this.y = Math.random() * window.innerHeight;
-        this.direction = Math.random() * 180 + 90; // roughly leftward
-      } else if(edge === 2) { // top
+        // Position planets randomly in allowed area (avoid center area)
         this.x = Math.random() * window.innerWidth;
-        this.y = -this.sizeH;
-        this.direction = Math.random() * 180 + 180; // roughly downward
-      } else { // bottom
-        this.x = Math.random() * window.innerWidth;
-        this.y = window.innerHeight + this.sizeH;
-        this.direction = Math.random() * 180; // roughly upward
-      }
+        this.y = Math.random() * window.innerHeight;
 
-      this.speed = 0.8 + Math.random() * 0.4; // slower speed
+        // Keep planets out of the center text area (approx center 600x300 box)
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        const marginX = 350;
+        const marginY = 150;
 
-      this.el.style.width = this.sizeW + 'px';
-      this.el.style.height = this.sizeH + 'px';
-
-      spaceObjectsContainer.appendChild(this.el);
-
-      // Smoke trail particles array
-      this.smokeParticles = [];
-    }
-
-    update() {
-      // Move rocket based on direction and speed
-      const rad = this.direction * Math.PI / 180;
-      this.x += this.speed * Math.cos(rad);
-      this.y += this.speed * Math.sin(rad);
-
-      // Rotate to face direction
-      const angle = this.direction;
-      this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${angle}deg)`;
-
-      // If out of screen bounds plus margin, reset position
-      const margin = 50;
-      if(this.x < -margin || this.x > window.innerWidth + margin || this.y < -margin || this.y > window.innerHeight + margin) {
-        // Reset to new random edge and position/direction
-        const edge = Math.floor(Math.random() * 4);
-        if(edge === 0) { // left
-          this.x = -this.sizeW;
-          this.y = Math.random() * window.innerHeight;
-          this.direction = Math.random() * 180 - 90;
-        } else if(edge === 1) { // right
-          this.x = window.innerWidth + this.sizeW;
-          this.y = Math.random() * window.innerHeight;
-          this.direction = Math.random() * 180 + 90;
-        } else if(edge === 2) { // top
-          this.x = Math.random() * window.innerWidth;
-          this.y = -this.sizeH;
-          this.direction = Math.random() * 180 + 180;
-        } else { // bottom
-          this.x = Math.random() * window.innerWidth;
-          this.y = window.innerHeight + this.sizeH;
-          this.direction = Math.random() * 180;
+        // Reposition if inside the center area
+        if (this.x > centerX - marginX && this.x < centerX + marginX &&
+            this.y > centerY - marginY && this.y < centerY + marginY) {
+          // Move to outside the center box horizontally or vertically randomly
+          if (Math.random() < 0.5) {
+            this.x = this.x < centerX ? centerX - marginX - this.size : centerX + marginX + this.size;
+          } else {
+            this.y = this.y < centerY ? centerY - marginY - this.size : centerY + marginY + this.size;
+          }
         }
+
+        this.el.style.width = this.size + 'px';
+        this.el.style.height = this.size + 'px';
+        this.el.style.left = this.x + 'px';
+        this.el.style.top = this.y + 'px';
+
+      } else if (type === 'rocket') {
+        this.size = 30;
+        this.el.classList.add('rocket');
+
+        // Use your rocket images from images folder (two variants)
+        const rocketImgs = [
+          'images/rocket1.png',
+          'images/rocket2.png'
+        ];
+        this.imageSrc = rocketImgs[Math.floor(Math.random() * rocketImgs.length)];
+        this.el.style.backgroundImage = `url(${this.imageSrc})`;
+
+        // Start at random edge
+        this.initPositionAndSpeed();
+
+      } else if (type === 'asteroid') {
+        this.size = 30;
+        this.el.classList.add('asteroid');
+
+        // Use your asteroid images from images folder (three variants)
+        const asteroidImgs = [
+          'images/asteroid.png',
+          'images/asteroid1.png',
+          'images/asteroid2.png'
+        ];
+        this.imageSrc = asteroidImgs[Math.floor(Math.random() * asteroidImgs.length)];
+        this.el.style.backgroundImage = `url(${this.imageSrc})`;
+
+        // Random position inside allowed area, avoiding center text
+        this.x = Math.random() * window.innerWidth;
+        this.y = Math.random() * window.innerHeight;
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        const marginX = 350;
+        const marginY = 150;
+        if (this.x > centerX - marginX && this.x < centerX + marginX &&
+            this.y > centerY - marginY && this.y < centerY + marginY) {
+          if (Math.random() < 0.5) {
+            this.x = this.x < centerX ? centerX - marginX - this.size : centerX + marginX + this.size;
+          } else {
+            this.y = this.y < centerY ? centerY - marginY - this.size : centerY + marginY + this.size;
+          }
+        }
+        this.el.style.width = this.size + 'px';
+        this.el.style.height = this.size + 'px';
+        this.el.style.left = this.x + 'px';
+        this.el.style.top = this.y + 'px';
+
+        // Asteroids slowly rotate
+        this.rotation = Math.random() * 360;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.2;
+
       }
-    }
-  }
 
-  // Asteroid class
-  class Asteroid {
-    constructor() {
-      this.size = 35 + Math.random() * 25;
-      this.el = document.createElement('div');
-      this.el.classList.add('space-object', 'asteroid');
-
-      // Assign random asteroid type class
-      const types = ['type1', 'type2', 'type3'];
-      this.type = types[Math.floor(Math.random() * types.length)];
-      this.el.classList.add(this.type);
-
-      const pos = randomPositionAvoidCenter(this.size);
-      this.x = pos.x;
-      this.y = pos.y;
-
-      this.rotation = Math.random() * 360;
-      this.rotationSpeed = (Math.random() * 0.1) - 0.05; // rotate -0.05 to 0.05 deg per frame
-
-      this.speedX = (Math.random() * 0.3) - 0.15; // horizontal speed
-      this.speedY = (Math.random() * 0.3) - 0.15; // vertical speed
-
-      this.el.style.width = this.size + 'px';
-      this.el.style.height = this.size + 'px';
+      if (type === 'rocket') {
+        // Rocket initial position and speed setup
+        // Random edge: 0=top,1=right,2=bottom,3=left
+        this.initPositionAndSpeed = () => {
+          const edge = Math.floor(Math.random() * 4);
+          switch(edge) {
+            case 0: // Top
+              this.x = Math.random() * window.innerWidth;
+              this.y = -this.size - 10;
+              this.speedX = (Math.random() - 0.5) * 0.1;  // slower
+              this.speedY = Math.random() * 0.05 + 0.02;
+              break;
+            case 1: // Right
+              this.x = window.innerWidth + this.size + 10;
+              this.y = Math.random() * window.innerHeight;
+              this.speedX = -(Math.random() * 0.05 + 0.02);
+              this.speedY = (Math.random() - 0.5) * 0.1;
+              break;
+            case 2: // Bottom
+              this.x = Math.random() * window.innerWidth;
+              this.y = window.innerHeight + this.size + 10;
+              this.speedX = (Math.random() - 0.5) * 0.1;
+              this.speedY = -(Math.random() * 0.05 + 0.02);
+              break;
+            case 3: // Left
+              this.x = -this.size - 10;
+              this.y = Math.random() * window.innerHeight;
+              this.speedX = Math.random() * 0.05 + 0.02;
+              this.speedY = (Math.random() - 0.5) * 0.1;
+              break;
+          }
+          this.el.style.width = this.size + 'px';
+          this.el.style.height = this.size * (4/3) + 'px';
+          this.el.style.left = this.x + 'px';
+          this.el.style.top = this.y + 'px';
+        };
+        this.initPositionAndSpeed();
+      }
 
       spaceObjectsContainer.appendChild(this.el);
     }
 
     update() {
-      this.x += this.speedX;
-      this.y += this.speedY;
-      this.rotation += this.rotationSpeed;
+      if (this.type === 'rocket') {
+        this.x += this.speedX * 6; // slower movement
+        this.y += this.speedY * 6;
 
-      // Bounce off edges to stay inside viewport
-      if(this.x < 0 || this.x + this.size > window.innerWidth) this.speedX *= -1;
-      if(this.y < 0 || this.y + this.size > window.innerHeight) this.speedY *= -1;
+        // Update rotation so it faces direction of movement
+        let angle = Math.atan2(this.speedY, this.speedX);
+        this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${angle}rad)`;
 
-      this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rotation}deg)`;
+        // Respawn if out of screen bounds (with margin)
+        if (this.x < -100 || this.x > window.innerWidth + 100 || this.y < -100 || this.y > window.innerHeight + 100) {
+          this.initPositionAndSpeed();
+        }
+      } else if (this.type === 'asteroid') {
+        // Asteroids slowly rotate and drift slightly
+        this.rotation += this.rotationSpeed;
+        this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rotation}deg)`;
+      }
     }
   }
 
-  // Create planets (still)
-  const planets = [];
-  for(let i=0; i<15; i++) {
-    planets.push(new Planet());
+  // Create space objects arrays
+  let planets = [];
+  let rockets = [];
+  let asteroids = [];
+
+  function createSpaceObjects() {
+    // Clear existing objects
+    spaceObjectsContainer.innerHTML = '';
+    planets = [];
+    rockets = [];
+    asteroids = [];
+
+    // Create planets (7)
+    for (let i = 0; i < 7; i++) {
+      const planet = new SpaceObject('planet');
+      planets.push(planet);
+    }
+
+    // Create rockets (5)
+    for (let i = 0; i < 5; i++) {
+      const rocket = new SpaceObject('rocket');
+      rockets.push(rocket);
+    }
+
+    // Create asteroids (7)
+    for (let i = 0; i < 7; i++) {
+      const asteroid = new SpaceObject('asteroid');
+      asteroids.push(asteroid);
+    }
   }
 
-  // Create rockets (moving)
-  const rockets = [];
-  for(let i=0; i<7; i++) {
-    rockets.push(new Rocket());
-  }
+  createSpaceObjects();
 
-  // Create asteroids (moving + rotating)
-  const asteroids = [];
-  for(let i=0; i<10; i++) {
-    asteroids.push(new Asteroid());
-  }
-
-  // Animate loop
-  function animate() {
+  function animateSpaceObjects() {
     rockets.forEach(r => r.update());
     asteroids.forEach(a => a.update());
-    requestAnimationFrame(animate);
+    requestAnimationFrame(animateSpaceObjects);
   }
-  animate();
 
-  // Random facts array
+  animateSpaceObjects();
+
+  // Fact generator logic
   const facts = [
+    "The largest volcano in the solar system is Olympus Mons on Mars.",
     "A day on Venus is longer than its year.",
-    "Neutron stars can spin 600 times per second.",
-    "There are more trees on Earth than stars in the Milky Way.",
-    "Mars has the tallest volcano in the solar system.",
-    "Jupiter's Great Red Spot is a giant storm that has lasted for centuries.",
-    "Saturn's rings are mostly made of ice particles.",
-    "The Sun makes up 99.86% of the mass in our solar system.",
-    "Mercury has no atmosphere and experiences extreme temperature changes.",
-    "The largest asteroid in the asteroid belt is Ceres, which is also classified as a dwarf planet.",
-    "Space is completely silent because there is no atmosphere to carry sound."
+    "Jupiter has 79 known moons.",
+    "The Milky Way galaxy is approximately 100,000 light years across.",
+    "Neutron stars can spin up to 600 times per second.",
+    "Saturn's rings are made primarily of ice particles.",
+    "Pluto is smaller than Earth's moon.",
+    "The Sun accounts for 99.86% of the solar system's mass.",
+    "Mercury has no atmosphere to retain heat.",
+    "The Hubble Space Telescope has been in orbit since 1990."
   ];
 
-  // UI elements
   const factDisplay = document.getElementById('factDisplay');
   const factButton = document.getElementById('factButton');
   const copyButton = document.getElementById('copyButton');
   const copyFeedback = document.getElementById('copyFeedback');
   const muteToggle = document.getElementById('muteToggle');
 
-  // Sound setup
-  const sound = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-  sound.volume = 0.3;
+  // Audio setup
+  let audioCtx;
+  let gainNode;
+  let oscillator;
   let muted = false;
 
-  muteToggle.addEventListener('click', () => {
-    muted = !muted;
-    muteToggle.textContent = muted ? '🔇' : '🔊';
-  });
+  function initAudio() {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    gainNode = audioCtx.createGain();
+    gainNode.gain.value = muted ? 0 : 0.1;
+    gainNode.connect(audioCtx.destination);
+  }
 
-  // Show random fact with sound and copy button reveal
+  function playBeep() {
+    if (muted) return;
+    if (!audioCtx) initAudio();
+    oscillator = audioCtx.createOscillator();
+    oscillator.type = 'square';
+    oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+    oscillator.connect(gainNode);
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + 0.15);
+  }
+
   factButton.addEventListener('click', () => {
-    const randomFact = facts[Math.floor(Math.random() * facts.length)];
-    factDisplay.textContent = randomFact;
-    factDisplay.classList.add('show');
+    if (!audioCtx) initAudio();
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    playBeep();
 
-    if(!muted) sound.play().catch(() => {});
+    // Pick random fact different from current
+    let newFact;
+    do {
+      newFact = facts[Math.floor(Math.random() * facts.length)];
+    } while (newFact === factDisplay.textContent);
+
+    factDisplay.textContent = newFact;
+    factDisplay.classList.remove('show');
+    void factDisplay.offsetWidth; // Trigger reflow
+    factDisplay.classList.add('show');
 
     copyButton.style.display = 'inline-block';
     copyFeedback.style.display = 'none';
   });
 
-  // Copy fact to clipboard with feedback
+  // Copy fact text to clipboard
   copyButton.addEventListener('click', () => {
     navigator.clipboard.writeText(factDisplay.textContent).then(() => {
-      copyFeedback.style.display = 'inline-block';
-      setTimeout(() => { copyFeedback.style.display = 'none'; }, 2000);
+      copyFeedback.style.display = 'inline';
+      setTimeout(() => {
+        copyFeedback.style.display = 'none';
+      }, 1500);
     });
   });
 
-  // Accessibility: reset copy feedback on new fact
-  factDisplay.addEventListener('DOMSubtreeModified', () => {
-    copyFeedback.style.display = 'none';
+  muteToggle.addEventListener('click', () => {
+    muted = !muted;
+    if (gainNode) gainNode.gain.value = muted ? 0 : 0.1;
+    muteToggle.textContent = muted ? '🔇' : '🔊';
   });
 </script>
 </body>
