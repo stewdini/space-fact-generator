@@ -50,75 +50,31 @@
     will-change: transform;
   }
 
-  /* PLANETS with subtle craters using multiple radial gradients */
+  /* PLANET base styles */
   .planet {
     border-radius: 50%;
     box-shadow: 0 0 8px 1px rgba(100,150,255,0.3);
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-  }
-  .planet.red {
-    background-color: #b0413e;
-    background-image:
-      radial-gradient(circle at 30% 30%, #a03736 10%, transparent 12%),
-      radial-gradient(circle at 70% 60%, #a83a3a 15%, transparent 18%),
-      radial-gradient(circle at 55% 75%, #80312f 8%, transparent 10%);
-    box-shadow: 0 0 6px 1px rgba(180, 65, 62, 0.35);
-  }
-  .planet.blue {
-    background-color: #4b7dad;
-    background-image:
-      radial-gradient(circle at 25% 25%, #3d6890 8%, transparent 10%),
-      radial-gradient(circle at 65% 60%, #366384 14%, transparent 17%),
-      radial-gradient(circle at 50% 80%, #2b516f 7%, transparent 9%);
-    box-shadow: 0 0 6px 1px rgba(75, 125, 173, 0.35);
-  }
-  .planet.green {
-    background-color: #4ca36c;
-    background-image:
-      radial-gradient(circle at 30% 30%, #418b5a 10%, transparent 12%),
-      radial-gradient(circle at 70% 60%, #3e7e52 14%, transparent 17%),
-      radial-gradient(circle at 55% 75%, #2e5c3d 7%, transparent 9%);
-    box-shadow: 0 0 6px 1px rgba(76, 163, 108, 0.35);
-  }
-  .planet.orange {
-    background-color: #d17f3c;
-    background-image:
-      radial-gradient(circle at 30% 30%, #ab6831 10%, transparent 12%),
-      radial-gradient(circle at 70% 60%, #9c5f2b 14%, transparent 17%),
-      radial-gradient(circle at 55% 75%, #6d411d 7%, transparent 9%);
-    box-shadow: 0 0 6px 1px rgba(209, 127, 60, 0.35);
-  }
-  .planet.purple {
-    background-color: #7855b8;
-    background-image:
-      radial-gradient(circle at 30% 30%, #6646a1 10%, transparent 12%),
-      radial-gradient(circle at 70% 60%, #5a3d8a 14%, transparent 17%),
-      radial-gradient(circle at 55% 75%, #3d2b5f 7%, transparent 9%);
-    box-shadow: 0 0 6px 1px rgba(120, 85, 184, 0.35);
+    position: fixed;
+    pointer-events: none;
   }
 
-  /* COMETS textured with layered linear gradient, no transparency */
+  /* COMET base style container */
   .comet {
-    border-radius: 50% / 60%;
-    background: linear-gradient(90deg, #a0f0ff 0%, #66fcf1 30%, #b3ffff 60%, #66fcf1 80%, #a0f0ff 100%);
-    box-shadow: 0 0 8px 3px #66fcf1aa;
-    width: 25px;
-    height: 40px;
-  }
-
-  /* ROCKETS: base styles with fixed size */
-  .space-object.rocket {
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    width: 30px !important;
-    height: 40px !important;
-    filter: drop-shadow(0 0 1.5px #fff9);
     position: fixed;
     pointer-events: none;
     z-index: 0;
+    will-change: transform;
+    width: 30px;
+    height: 12px;
+  }
+
+  /* ROCKET container */
+  .rocket {
+    position: fixed;
+    pointer-events: none;
+    z-index: 0;
+    width: 30px;
+    height: 40px;
   }
 
   /* Flames behind rocket */
@@ -325,17 +281,6 @@
     transform: scale(1.2);
   }
 
-  /* Safe zone where no objects spawn or move */
-  #safeZone {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    width: 700px;
-    height: 300px;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    z-index: 9;
-  }
 </style>
 </head>
 <body>
@@ -344,9 +289,6 @@
 
   <!-- Container for space objects -->
   <div id="spaceObjectsContainer"></div>
-
-  <!-- Safe zone overlay for reference (hidden) -->
-  <div id="safeZone" aria-hidden="true"></div>
 
   <h1>🔭 Random Space Fact Generator<span class="sparkle">✨</span></h1>
 
@@ -435,25 +377,20 @@
   resize();
   animateStarfield();
 
-  // Container and safe zone rectangle for collision avoidance
+  // Container for space objects
   const spaceObjectsContainer = document.getElementById('spaceObjectsContainer');
-  const safeZone = document.getElementById('safeZone');
 
-  // Get safe zone rectangle boundaries
+  // Safe zone dimensions (centered rectangle with no objects inside)
+  const safeZoneWidth = 700;
+  const safeZoneHeight = 300;
+
   function getSafeZoneRect() {
-    const rect = safeZone.getBoundingClientRect();
-    return {
-      left: rect.left,
-      right: rect.right,
-      top: rect.top,
-      bottom: rect.bottom,
-      width: rect.width,
-      height: rect.height,
-    };
+    const left = window.innerWidth / 2 - safeZoneWidth / 2;
+    const top = window.innerHeight / 2 - safeZoneHeight / 2;
+    return {left, right: left + safeZoneWidth, top, bottom: top + safeZoneHeight};
   }
 
-  // Check if an object is inside safe zone
-  function isInSafeZone(x, y, size) {
+  function isInSafeZone(x, y, size = 0) {
     const rect = getSafeZoneRect();
     return (
       x + size > rect.left &&
@@ -463,55 +400,67 @@
     );
   }
 
-  // Base64 rocket image (single style) - keep original look
-  const rocketImageURL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAoCAYAAAArW5ZsAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAdklEQVR4nO3TQQrAMAwEwLz/Wa36SFBquHDIyG37hUu8xQCI8Ix5UgOyebCVV1Jz2cK3AtYO5wE6EO0z9dF3FyfjICpMf2T6jHaFGa1vDQyzwTIrgIs47Im2xfq2mu5/cWOhWqvIDqgqxFTZvMCKwAAAABJRU5ErkJggg==';
+  // === PLANET GENERATION ===
 
-  // Flame SVG element for rockets
-  function createFlame() {
-    const flame = document.createElement('div');
-    flame.classList.add('flame');
-    return flame;
-  }
+  const planetColors = ['#b0413e', '#4b7dad', '#4ca36c', '#d17f3c', '#7855b8'];
+  const craterPatterns = [
+    `radial-gradient(circle at 30% 30%, rgba(0,0,0,0.15) 10%, transparent 12%),
+     radial-gradient(circle at 70% 60%, rgba(0,0,0,0.12) 15%, transparent 18%),
+     radial-gradient(circle at 55% 75%, rgba(0,0,0,0.2) 8%, transparent 10%)`,
+    `radial-gradient(circle at 25% 25%, rgba(0,0,0,0.2) 8%, transparent 10%),
+     radial-gradient(circle at 65% 60%, rgba(0,0,0,0.15) 14%, transparent 17%),
+     radial-gradient(circle at 50% 80%, rgba(0,0,0,0.25) 7%, transparent 9%)`
+  ];
 
-  // Smoke particle class
-  class SmokeParticle {
-    constructor(x, y) {
+  class Planet {
+    constructor() {
+      this.el = document.createElement('div');
+      this.el.classList.add('space-object', 'planet');
+
+      // Random size 40-80 px
+      this.size = 40 + Math.random() * 40;
+      this.el.style.width = this.size + 'px';
+      this.el.style.height = this.size + 'px';
+
+      // Random color and crater pattern
+      const color = planetColors[Math.floor(Math.random() * planetColors.length)];
+      const craterPattern = craterPatterns[Math.floor(Math.random() * craterPatterns.length)];
+
+      this.el.style.backgroundColor = color;
+      this.el.style.backgroundImage = craterPattern;
+      this.el.style.backgroundRepeat = 'no-repeat';
+      this.el.style.backgroundPosition = 'center';
+      this.el.style.backgroundSize = 'cover';
+
+      // Position randomly OUTSIDE safe zone
+      let x, y;
+      do {
+        x = Math.random() * (window.innerWidth - this.size);
+        y = Math.random() * (window.innerHeight - this.size);
+      } while (isInSafeZone(x, y, this.size));
+
       this.x = x;
       this.y = y;
-      this.size = Math.random() * 5 + 5;
-      this.opacity = 0.35;
-      this.life = 80 + Math.random() * 40;
-      this.vx = (Math.random() - 0.5) * 0.2;
-      this.vy = -0.3 - Math.random() * 0.1;
-      this.element = document.createElement('div');
-      this.element.classList.add('smoke-trail');
-      this.element.style.width = this.size + 'px';
-      this.element.style.height = this.size + 'px';
-      spaceObjectsContainer.appendChild(this.element);
-      this.updateElement();
-    }
-    updateElement() {
-      this.element.style.transform = `translate(${this.x}px, ${this.y}px)`;
-      this.element.style.opacity = this.opacity;
-      this.element.style.width = this.size + 'px';
-      this.element.style.height = this.size + 'px';
-    }
-    update() {
-      this.x += this.vx;
-      this.y += this.vy;
-      this.opacity -= 0.005;
-      this.life--;
-      this.size *= 0.98;
-      this.updateElement();
-      if (this.opacity <= 0 || this.life <= 0) {
-        this.element.remove();
-        return false;
-      }
-      return true;
+
+      this.el.style.left = `${this.x}px`;
+      this.el.style.top = `${this.y}px`;
+
+      spaceObjectsContainer.appendChild(this.el);
     }
   }
 
-  // Rocket class
+  // === ROCKET ===
+  // SVG rocket resembling emoji style (colorful, small)
+  const rocketSVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="30" height="40" fill="none">
+  <path fill="#FF4136" d="M32 2s-9.5 19.5-9.5 31.7C22.5 47 26 52 32 52s9.5-5 9.5-18.3C41.5 21.5 32 2 32 2z"/>
+  <path fill="#FFDC00" d="M28 25h8v8h-8z"/>
+  <path fill="#7FDBFF" d="M26 53c-4-2-10-14-10-14s5 4 10 4 10-4 10-4-6 12-10 14z"/>
+  <circle cx="32" cy="20" r="4" fill="#001F3F"/>
+</svg>
+`;
+
+  // Rocket class with SVG element
   class Rocket {
     constructor() {
       this.size = 30;
@@ -526,10 +475,13 @@
 
       this.el = document.createElement('div');
       this.el.classList.add('space-object', 'rocket');
-      this.el.style.backgroundImage = `url(${rocketImageURL})`;
+      this.el.style.width = this.size + 'px';
+      this.el.style.height = this.height + 'px';
+      this.el.innerHTML = rocketSVG;
       spaceObjectsContainer.appendChild(this.el);
 
-      this.flame = createFlame();
+      this.flame = document.createElement('div');
+      this.flame.classList.add('flame');
       this.el.appendChild(this.flame);
 
       this.spawn();
@@ -542,7 +494,6 @@
       const screenHeight = window.innerHeight;
 
       // Spawn randomly OUTSIDE safe zone on edges
-      // Pick a random edge: top, right, bottom, left (0-3)
       const edge = Math.floor(Math.random() * 4);
 
       if (edge === 0) { // top edge
@@ -560,7 +511,6 @@
       }
 
       // Target is random point outside safe zone on opposite side
-      // Make sure target is outside safe zone for clear path
       do {
         this.targetX = Math.random() * screenWidth;
         this.targetY = Math.random() * screenHeight;
@@ -619,24 +569,77 @@
     }
   }
 
-  // Comet class
+  // Smoke particle class
+  class SmokeParticle {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.size = Math.random() * 5 + 5;
+      this.opacity = 0.35;
+      this.life = 80 + Math.random() * 40;
+      this.vx = (Math.random() - 0.5) * 0.2;
+      this.vy = -0.3 - Math.random() * 0.1;
+      this.element = document.createElement('div');
+      this.element.classList.add('smoke-trail');
+      this.element.style.width = this.size + 'px';
+      this.element.style.height = this.size + 'px';
+      spaceObjectsContainer.appendChild(this.element);
+      this.updateElement();
+    }
+    updateElement() {
+      this.element.style.transform = `translate(${this.x}px, ${this.y}px)`;
+      this.element.style.opacity = this.opacity;
+      this.element.style.width = this.size + 'px';
+      this.element.style.height = this.size + 'px';
+    }
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      this.opacity -= 0.005;
+      this.life--;
+      this.size *= 0.98;
+      this.updateElement();
+      if (this.opacity <= 0 || this.life <= 0) {
+        this.element.remove();
+        return false;
+      }
+      return true;
+    }
+  }
+
+  // === COMET ===
+  // Comet SVG (bright nucleus + tail)
+  const cometSVG = `
+<svg viewBox="0 0 64 24" width="40" height="15" xmlns="http://www.w3.org/2000/svg" >
+  <defs>
+    <radialGradient id="cometTail" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(20 12) rotate(90) scale(20 5)">
+      <stop offset="0%" stop-color="white" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <ellipse cx="10" cy="12" rx="8" ry="6" fill="url(#cometTail)"/>
+  <circle cx="35" cy="12" r="8" fill="#FFF" />
+  <circle cx="35" cy="12" r="5" fill="#4fc3f7" />
+  <circle cx="35" cy="12" r="3" fill="#0288d1" />
+</svg>
+`;
+
   class Comet {
     constructor() {
       this.el = document.createElement('div');
       this.el.classList.add('space-object', 'comet');
+      this.el.innerHTML = cometSVG;
       spaceObjectsContainer.appendChild(this.el);
-      this.size = 25;
-      this.width = 25;
-      this.height = 40;
 
-      const safeZoneRect = getSafeZoneRect();
-      const margin = 20;
+      this.size = 40;
+      this.width = 40;
+      this.height = 15;
 
       // Spawn random position OUTSIDE safe zone
       do {
-        this.x = Math.random() * window.innerWidth;
-        this.y = Math.random() * window.innerHeight;
-      } while (isInSafeZone(this.x, this.y, this.size));
+        this.x = Math.random() * (window.innerWidth - this.width);
+        this.y = Math.random() * (window.innerHeight - this.height);
+      } while (isInSafeZone(this.x, this.y, this.width));
 
       // Random velocity vector with speed 0.3 to 0.7 px/frame
       const speed = 0.3 + Math.random() * 0.4;
@@ -653,7 +656,7 @@
       this.y += this.vy;
       this.angle += this.angularVelocity;
 
-      // Bounce off edges (screen wrap)
+      // Screen wrap
       if (this.x < -this.width) this.x = window.innerWidth + this.width;
       if (this.x > window.innerWidth + this.width) this.x = -this.width;
       if (this.y < -this.height) this.y = window.innerHeight + this.height;
@@ -664,91 +667,47 @@
     }
   }
 
-  // PLANET class (static)
-  class Planet {
-    constructor(color, size, x, y) {
-      this.el = document.createElement('div');
-      this.el.classList.add('space-object', 'planet', color);
-      this.el.style.width = size + 'px';
-      this.el.style.height = size + 'px';
-      this.x = x;
-      this.y = y;
-      this.el.style.left = x + 'px';
-      this.el.style.top = y + 'px';
-      spaceObjectsContainer.appendChild(this.el);
-    }
-  }
-
-  // Initialize objects
+  // Spawn planets, rockets, comets
+  const planets = [];
   const rockets = [];
   const comets = [];
-  const planets = [];
 
-  // Create some static planets outside safe zone
   function spawnPlanets() {
-    // Clear any existing
     planets.forEach(p => p.el.remove());
     planets.length = 0;
 
-    // Define planet specs [color, size, x, y]
-    const specs = [
-      ['red', 70, 60, 100],
-      ['blue', 80, window.innerWidth - 140, 150],
-      ['green', 65, 120, window.innerHeight - 150],
-      ['orange', 55, window.innerWidth - 110, window.innerHeight - 180],
-      ['purple', 50, window.innerWidth / 2 + 200, 50]
-    ];
-
-    const safeZoneRect = getSafeZoneRect();
-
-    specs.forEach(([color, size, x, y]) => {
-      // Only place if NOT inside safe zone (for future window resize)
-      if (
-        x + size < safeZoneRect.left ||
-        x > safeZoneRect.right ||
-        y + size < safeZoneRect.top ||
-        y > safeZoneRect.bottom
-      ) {
-        planets.push(new Planet(color, size, x, y));
-      }
-    });
+    // Spawn 7 planets randomly outside safe zone
+    for(let i=0; i<7; i++) {
+      planets.push(new Planet());
+    }
   }
 
-  // Spawn rockets and comets
   function spawnObjects() {
-    // Clear existing rockets and comets from DOM
     rockets.forEach(r => r.el.remove());
     rockets.length = 0;
     comets.forEach(c => c.el.remove());
     comets.length = 0;
 
-    // Spawn 5 rockets
-    for (let i=0; i<5; i++) {
+    for(let i=0; i<5; i++) {
       rockets.push(new Rocket());
     }
-    // Spawn 8 comets
-    for (let i=0; i<8; i++) {
+    for(let i=0; i<8; i++) {
       comets.push(new Comet());
     }
   }
 
   function animateObjects() {
-    // Update rockets, remove if out of bounds
-    for (let i = rockets.length -1; i >= 0; i--) {
-      const alive = rockets[i].update();
-      if (!alive) {
+    for(let i = rockets.length - 1; i >= 0; i--) {
+      if(!rockets[i].update()) {
         rockets.splice(i, 1);
         rockets.push(new Rocket());
       }
     }
 
-    // Update comets
     comets.forEach(c => c.update());
-
     requestAnimationFrame(animateObjects);
   }
 
-  // Initial setup
   function setupSpace() {
     spawnPlanets();
     spawnObjects();
@@ -756,13 +715,14 @@
   }
 
   window.addEventListener('resize', () => {
-    // Clear and respawn planets and other objects to adjust for new safe zone
     planets.forEach(p => p.el.remove());
     rockets.forEach(r => r.el.remove());
     comets.forEach(c => c.el.remove());
+
     planets.length = 0;
     rockets.length = 0;
     comets.length = 0;
+
     spawnPlanets();
     spawnObjects();
   });
@@ -830,6 +790,8 @@
     muted = !muted;
     muteToggle.textContent = muted ? '🔇' : '🔊';
   });
+
 </script>
+
 </body>
 </html>
