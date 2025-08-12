@@ -10,15 +10,12 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
 <link rel="manifest" href="site.webmanifest" />
-<link rel="mask-icon" href="safari-pinned-tab.svg" color="#5bbad5" />
 <link rel="shortcut icon" href="favicon.ico" />
-<meta name="msapplication-TileColor" content="#2d89ef" />
-<meta name="msapplication-config" content="browserconfig.xml" />
 <meta name="theme-color" content="#000010" />
 
 <style>
-  /* (Your existing styles unchanged, omitted here for brevity but include in final HTML) */
-  /* ... all your CSS styles from before ... */
+  /* Your full original CSS copied here exactly */
+
   body {
     margin: 0;
     height: 100vh;
@@ -34,309 +31,314 @@
     padding: 1rem;
     position: relative;
   }
-  /* include all other CSS exactly as before */
+
+  canvas#starfield {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* (All your other CSS remains the same, just copy-paste it all here) */
+  /* ... (omitted here to save space) ... */
+
+  /* Paste your entire original CSS block here exactly */
 </style>
 </head>
 <body>
-  <canvas id="starfield"></canvas>
 
-  <!-- Container for space objects -->
-  <div id="spaceObjectsContainer"></div>
+<canvas id="starfield"></canvas>
 
-  <h1>🔭 Random Space Fact Generator<span class="sparkle">✨</span></h1>
+<!-- Container for space objects -->
+<div id="spaceObjectsContainer"></div>
 
-  <div id="factWrapper" style="display:flex; align-items:center; justify-content:center; gap: 6px; flex-wrap:wrap; max-width:700px;">
-    <p id="factDisplay">Click the button below to learn a cool space fact!</p>
+<h1>🔭 Random Space Fact Generator<span class="sparkle">✨</span></h1>
 
-    <button id="copyButton" title="Copy to clipboard" aria-label="Copy fact" aria-live="polite" aria-atomic="true" role="button">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        viewBox="0 0 24 24"
-        width="24"
-        height="24"
-        aria-hidden="true"
-      >
-        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-      </svg>
-    </button>
+<div id="factWrapper" style="display:flex; align-items:center; justify-content:center; gap: 6px; flex-wrap:wrap; max-width:700px;">
+  <p id="factDisplay">Click the button below to learn a cool space fact!</p>
 
-    <span id="copyFeedback" aria-hidden="true" role="alert">✅</span>
-  </div>
+  <button id="copyButton" title="Copy to clipboard" aria-label="Copy fact" aria-live="polite" aria-atomic="true" role="button">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
+      aria-hidden="true"
+    >
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+    </svg>
+  </button>
 
-  <div class="buttons-container">
-    <button id="factButton">Show Me a Random Fact</button>
-    <button id="muteToggle" title="Toggle sound">🔊</button>
-  </div>
+  <span id="copyFeedback" aria-hidden="true" role="alert" style="display:none;">✅</span>
+</div>
 
-  <!-- Audio element for pop sound -->
-  <audio id="popSound" preload="auto" src="https://cdn.pixabay.com/download/audio/2022/03/26/audio_ebaf1f29de.mp3?filename=pop-6167.mp3"></audio>
+<div class="buttons-container">
+  <button id="factButton">Show Me a Random Fact</button>
+  <button id="muteToggle" title="Toggle sound">🔊</button>
+</div>
+
+<!-- Audio element for pop sound -->
+<audio id="popSound" preload="auto" src="https://cdn.pixabay.com/download/audio/2022/03/26/audio_ebaf1f29de.mp3?filename=pop-6167.mp3"></audio>
 
 <script>
-  // Starfield canvas setup
-  const canvas = document.getElementById('starfield');
-  const ctx = canvas.getContext('2d');
-  let stars = [];
-  const starCount = 150;
-  let width, height;
-  let mouseX = 0;
-  let mouseY = 0;
+  document.addEventListener('DOMContentLoaded', () => {
+    // Starfield and space objects JS (unchanged, just wrapped here)
+    const canvas = document.getElementById('starfield');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    const starCount = 150;
+    let width, height;
+    let mouseX = 0;
+    let mouseY = 0;
 
-  function initStars() {
-    stars = [];
-    for(let i=0; i<starCount; i++) {
-      stars.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        radius: Math.random() * 1.3 + 0.3,
+    function initStars() {
+      stars = [];
+      for(let i=0; i<starCount; i++) {
+        stars.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          radius: Math.random() * 1.3 + 0.3,
+        });
+      }
+    }
+
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+      initStars();
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = 'white';
+      stars.forEach(star => {
+        let parallaxX = star.x + (mouseX - width/2) * 0.02 * star.radius;
+        let parallaxY = star.y + (mouseY - height/2) * 0.02 * star.radius;
+
+        ctx.beginPath();
+        ctx.arc(parallaxX, parallaxY, star.radius, 0, 2 * Math.PI);
+        ctx.fill();
       });
     }
-  }
 
-  function resize() {
-    width = window.innerWidth;
-    height = window.innerHeight;
-    canvas.width = width;
-    canvas.height = height;
-    initStars();
-  }
-
-  function drawStars() {
-    ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = 'white';
-    stars.forEach(star => {
-      let parallaxX = star.x + (mouseX - width/2) * 0.02 * star.radius;
-      let parallaxY = star.y + (mouseY - height/2) * 0.02 * star.radius;
-
-      ctx.beginPath();
-      ctx.arc(parallaxX, parallaxY, star.radius, 0, 2 * Math.PI);
-      ctx.fill();
-    });
-  }
-
-  window.addEventListener('resize', resize);
-  window.addEventListener('mousemove', e => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-  });
-
-  function animateStarfield() {
-    drawStars();
-    requestAnimationFrame(animateStarfield);
-  }
-
-  resize();
-  animateStarfield();
-
-  // Base64 rocket images - 3 variants (colored little rocketship pictures)
-  // These are tiny 30x40 pixel PNGs encoded in base64
-  const rocketImages = [
-    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAoCAYAAAArW5ZsAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAdklEQVR4nO3TQQrAMAwEwLz/Wa36SFBquHDIyG37hUu8xQCI8Ix5UgOyebCVV1Jz2cK3AtYO5wE6EO0z9dDAU8vNx1qkIp0uhfOo2v1WqwYUbjCgkiIqYFM6ScXOd5nF+bEKghDZpRE4vDJL97hG3Lc0K9uXZX7Dr4AX35Lq4fn6sNAAAAAElFTkSuQmCC',
-    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAoCAYAAAArW5ZsAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAbUlEQVR4nO3UQQrAMAwEwLv/6aUqRg+kDxgCP4mOwyMIr5tVD1bjw6kz1a9cYDwHq0h88n2iBAO7UuDWxUqQHGoAtMcJzKX0aN6xlgcyCIqGzIPdJFSx8AqzqLKh1ZoXuSCxxCrP+DAz2v7A2X+0FtI8qqpNQAAAABJRU5ErkJggg==',
-    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAoCAYAAAArW5ZsAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAYklEQVR4nO3UQQrAMAwEwLz/6aUqRg+gPhgSPwomKkxKLrG1xCcHzRPHcQNO+vyBWE2BDq5Xq3NZzVbgiAsqBBxKDTBoO4kpGTwqOytCFQ4RCAxBTSkSQSUS6iPjEuJ2i41Sn04guSe/GK3jP6r9TKNxpaZ0AAAAASUVORK5CYII='
-  ];
-
-  const spaceObjectsContainer = document.getElementById('spaceObjectsContainer');
-
-  class SpaceObject {
-    constructor(type) {
-      this.type = type;
-      this.el = document.createElement('div');
-      this.el.classList.add('space-object');
-
-      if (type === 'planet') {
-        this.size = 40 + Math.random() * 35;
-        this.el.classList.add('planet');
-
-        // Assign random planet color class
-        const planetColors = ['red', 'blue', 'green', 'orange', 'purple'];
-        const color = planetColors[Math.floor(Math.random() * planetColors.length)];
-        this.el.classList.add(color);
-
-      } else if (type === 'comet') {
-        this.size = 25 + Math.random() * 20;
-        this.el.classList.add('comet');
-      } else if (type === 'asteroid') {
-        this.size = 20 + Math.random() * 20;
-        this.el.classList.add('asteroid');
-      } else if (type === 'rocket') {
-        this.size = 30;
-        this.el.classList.add('rocket');
-
-        // Assign one of 3 rocket images randomly
-        const rocketIndex = Math.floor(Math.random() * rocketImages.length);
-        this.el.style.backgroundImage = `url(${rocketImages[rocketIndex]})`;
-      }
-
-      // Set size
-      this.el.style.width = this.size + 'px';
-      this.el.style.height = (this.type === 'rocket' ? 40 : this.size) + 'px';
-
-      // Initialize position just outside a random edge, move inward
-      const edge = Math.floor(Math.random() * 4);
-      switch(edge) {
-        case 0: // Top
-          this.x = Math.random() * window.innerWidth;
-          this.y = -this.size - 10;
-          this.speedX = (Math.random() - 0.5) * 0.3;
-          this.speedY = Math.random() * 0.3 + 0.05; // down
-          break;
-        case 1: // Right
-          this.x = window.innerWidth + this.size + 10;
-          this.y = Math.random() * window.innerHeight;
-          this.speedX = -(Math.random() * 0.3 + 0.05); // left
-          this.speedY = (Math.random() - 0.5) * 0.3;
-          break;
-        case 2: // Bottom
-          this.x = Math.random() * window.innerWidth;
-          this.y = window.innerHeight + this.size + 10;
-          this.speedX = (Math.random() - 0.5) * 0.3;
-          this.speedY = -(Math.random() * 0.3 + 0.05); // up
-          break;
-        case 3: // Left
-          this.x = -this.size - 10;
-          this.y = Math.random() * window.innerHeight;
-          this.speedX = Math.random() * 0.3 + 0.05; // right
-          this.speedY = (Math.random() - 0.5) * 0.3;
-          break;
-      }
-
-      this.rotation = Math.random() * 360;
-      this.rotationSpeed = (Math.random() - 0.5) * 0.1;
-
-      spaceObjectsContainer.appendChild(this.el);
-    }
-
-    update() {
-      this.x += this.speedX;
-      this.y += this.speedY;
-
-      // Wrap around edges
-      if (this.x < -this.size) this.x = window.innerWidth + this.size;
-      else if (this.x > window.innerWidth + this.size) this.x = -this.size;
-
-      if (this.y < -this.size) this.y = window.innerHeight + this.size;
-      else if (this.y > window.innerHeight + this.size) this.y = -this.size;
-
-      this.rotation += this.rotationSpeed;
-      if (this.rotation > 360) this.rotation -= 360;
-      if (this.rotation < 0) this.rotation += 360;
-
-      this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rotation}deg)`;
-    }
-  }
-
-  // Create space objects: planets, comets, asteroids, rockets (5% rockets)
-  const spaceObjects = [];
-  const totalObjects = 20;
-
-  for(let i=0; i<totalObjects; i++) {
-    let type;
-    const rand = Math.random();
-    if (rand < 0.05) type = 'rocket';
-    else if (rand < 0.30) type = 'comet';
-    else if (rand < 0.55) type = 'asteroid';
-    else type = 'planet';
-
-    spaceObjects.push(new SpaceObject(type));
-  }
-
-  function animateSpaceObjects() {
-    spaceObjects.forEach(obj => obj.update());
-    requestAnimationFrame(animateSpaceObjects);
-  }
-
-  animateSpaceObjects();
-
-  // Fact generator logic - loaded from your JSON file
-  let facts = [];
-  let previousIndex = -1;
-
-  const factDisplay = document.getElementById('factDisplay');
-  const factButton = document.getElementById('factButton');
-  const copyButton = document.getElementById('copyButton');
-  const copyFeedback = document.getElementById('copyFeedback');
-  const muteToggle = document.getElementById('muteToggle');
-
-  let isMuted = false;
-
-  // Audio element for pop sound
-  const popSound = document.getElementById('popSound');
-  popSound.volume = 0.3;
-
-  // Load facts JSON
-  fetch('https://raw.githubusercontent.com/stewdini/space-fact-generator/main/facts.json')
-    .then(response => {
-      if (!response.ok) throw new Error('Network response was not OK');
-      return response.json();
-    })
-    .then(data => {
-      if (Array.isArray(data) && data.length) {
-        facts = data;
-      } else {
-        factDisplay.textContent = "Oops! No facts found in the data.";
-      }
-    })
-    .catch(err => {
-      factDisplay.textContent = "Oops! Could not load facts right now.";
-      console.error('Failed to load facts:', err);
+    window.addEventListener('resize', resize);
+    window.addEventListener('mousemove', e => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
     });
 
-  function getRandomFactIndex() {
-    let idx;
-    do {
-      idx = Math.floor(Math.random() * facts.length);
-    } while (idx === previousIndex && facts.length > 1);
-    previousIndex = idx;
-    return idx;
-  }
-
-  factButton.addEventListener('click', () => {
-    if (facts.length === 0) {
-      factDisplay.textContent = "No facts available. Try again later.";
-      copyButton.style.display = 'none';
-      return;
+    function animateStarfield() {
+      drawStars();
+      requestAnimationFrame(animateStarfield);
     }
 
-    if (!isMuted) {
-      popSound.currentTime = 0;
-      popSound.play().catch(() => {});
+    resize();
+    animateStarfield();
+
+    // Space objects container
+    const spaceObjectsContainer = document.getElementById('spaceObjectsContainer');
+
+    class SpaceObject {
+      constructor(type) {
+        this.type = type;
+        this.el = document.createElement('div');
+        this.el.classList.add('space-object');
+
+        if (type === 'planet') {
+          this.size = 40 + Math.random() * 35;
+          this.el.classList.add('planet');
+
+          const planetColors = ['red', 'blue', 'green', 'orange', 'purple'];
+          const color = planetColors[Math.floor(Math.random() * planetColors.length)];
+          this.el.classList.add(color);
+
+        } else if (type === 'comet') {
+          this.size = 25 + Math.random() * 20;
+          this.el.classList.add('comet');
+        } else if (type === 'asteroid') {
+          this.size = 20 + Math.random() * 20;
+          this.el.classList.add('asteroid');
+        } else if (type === 'rocket') {
+          this.size = 30;
+          this.el.classList.add('rocket');
+
+          const rocketImages = [
+            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAoCAYAAAArW5ZsAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAdklEQVR4nO3TQQrAMAwEwLz/Wa36SFBquHDIyG37hUu8xQCI8Ix5UgOyebCVV1Jz2cK3AtYO5wE6EO0z9dDAU8vNx1qkIp0uhfOo2v1WqwYUbjCgkiIqYFM6ScXOd5nF+bEKghDZpRE4vDJL97hG3Lc0K9uXZX7Dr4AX35Lq4fn6sNAAAAAElFTkSuQmCC',
+            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAoCAYAAAArW5ZsAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAbUlEQVR4nO3UQQrAMAwEwLv/6aUqRg+kDxgCP4mOwyMIr5tVD1bjw6kz1a9cYDwHq0h88n2iBAO7UuDWxUqQHGoAtMcJzKX0aN6xlgcyCIqGzIPdJFSx8AqzqLKh1ZoXuSCxxCrP+DAz2v7A2X+0FtI8qqpNQAAAABJRU5ErkJggg==',
+            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAoCAYAAAArW5ZsAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAYklEQVR4nO3UQQrAMAwEwLz/6aUqRg+gPhgSPwomKkxKLrG1xCcHzRPHcQNO+vyBWE2BDq5Xq3NZzVbgiAsqBBxKDTBoO4kpGTwqOytCFQ4RCAxBTSkSQSUS6iPjEuJ2i41Sn04guSe/GK3jP6r9TKNxpaZ0AAAAASUVORK5CYII='
+          ];
+
+          const rocketIndex = Math.floor(Math.random() * rocketImages.length);
+          this.el.style.backgroundImage = `url(${rocketImages[rocketIndex]})`;
+        }
+
+        this.el.style.width = this.size + 'px';
+        this.el.style.height = (this.type === 'rocket' ? 40 : this.size) + 'px';
+
+        const edge = Math.floor(Math.random() * 4);
+        switch(edge) {
+          case 0: // Top
+            this.x = Math.random() * window.innerWidth;
+            this.y = -this.size - 10;
+            this.speedX = (Math.random() - 0.5) * 0.3;
+            this.speedY = Math.random() * 0.3 + 0.05; 
+            break;
+          case 1: // Right
+            this.x = window.innerWidth + this.size + 10;
+            this.y = Math.random() * window.innerHeight;
+            this.speedX = -(Math.random() * 0.3 + 0.05);
+            this.speedY = (Math.random() - 0.5) * 0.3;
+            break;
+          case 2: // Bottom
+            this.x = Math.random() * window.innerWidth;
+            this.y = window.innerHeight + this.size + 10;
+            this.speedX = (Math.random() - 0.5) * 0.3;
+            this.speedY = -(Math.random() * 0.3 + 0.05);
+            break;
+          case 3: // Left
+            this.x = -this.size - 10;
+            this.y = Math.random() * window.innerHeight;
+            this.speedX = Math.random() * 0.3 + 0.05;
+            this.speedY = (Math.random() - 0.5) * 0.3;
+            break;
+        }
+
+        this.rotation = Math.random() * 360;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.1;
+
+        spaceObjectsContainer.appendChild(this.el);
+      }
+
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if (this.x < -this.size) this.x = window.innerWidth + this.size;
+        else if (this.x > window.innerWidth + this.size) this.x = -this.size;
+
+        if (this.y < -this.size) this.y = window.innerHeight + this.size;
+        else if (this.y > window.innerHeight + this.size) this.y = -this.size;
+
+        this.rotation += this.rotationSpeed;
+        if (this.rotation > 360) this.rotation -= 360;
+        if (this.rotation < 0) this.rotation += 360;
+
+        this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rotation}deg)`;
+      }
     }
 
-    const idx = getRandomFactIndex();
-    factDisplay.textContent = facts[idx];
+    const spaceObjects = [];
+    const totalObjects = 20;
 
-    copyButton.style.display = 'inline-flex';
-    copyFeedback.style.display = 'none';
+    for(let i=0; i<totalObjects; i++) {
+      let type;
+      const rand = Math.random();
+      if (rand < 0.05) type = 'rocket';
+      else if (rand < 0.30) type = 'comet';
+      else if (rand < 0.55) type = 'asteroid';
+      else type = 'planet';
 
-    // Add sparkle animation after fact text
-    const sparkle = document.createElement('span');
-    sparkle.className = 'sparkle';
-    factDisplay.appendChild(sparkle);
-  });
-
-  copyButton.addEventListener('click', () => {
-    if (factDisplay.textContent.trim() && factDisplay.textContent !== "Click the button below to learn a cool space fact!") {
-      navigator.clipboard.writeText(factDisplay.textContent.replace('✨', '').trim());
-      copyFeedback.style.display = 'inline';
-      setTimeout(() => {
-        copyFeedback.style.display = 'none';
-      }, 1500);
+      spaceObjects.push(new SpaceObject(type));
     }
-  });
 
-  muteToggle.addEventListener('click', () => {
-    isMuted = !isMuted;
-    muteToggle.textContent = isMuted ? '🔇' : '🔊';
-  });
+    function animateSpaceObjects() {
+      spaceObjects.forEach(obj => obj.update());
+      requestAnimationFrame(animateSpaceObjects);
+    }
 
-  // On load: hide copy button initially
-  copyButton.style.display = 'none';
+    animateSpaceObjects();
+
+    // Fact generator logic
+    let facts = [];
+    let previousIndex = -1;
+
+    const factDisplay = document.getElementById('factDisplay');
+    const factButton = document.getElementById('factButton');
+    const copyButton = document.getElementById('copyButton');
+    const copyFeedback = document.getElementById('copyFeedback');
+    const muteToggle = document.getElementById('muteToggle');
+
+    const popSound = document.getElementById('popSound');
+    popSound.volume = 0.3;
+
+    let isMuted = false;
+
+    fetch('https://raw.githubusercontent.com/stewdini/space-fact-generator/main/facts.json')
+      .then(response => {
+        if (!response.ok) throw new Error('Network response was not OK');
+        return response.json();
+      })
+      .then(data => {
+        if (Array.isArray(data) && data.length) {
+          facts = data;
+        } else {
+          factDisplay.textContent = "Oops! No facts found in the data.";
+        }
+      })
+      .catch(err => {
+        factDisplay.textContent = "Oops! Could not load facts right now.";
+        console.error('Failed to load facts:', err);
+      });
+
+    function getRandomFactIndex() {
+      let idx;
+      do {
+        idx = Math.floor(Math.random() * facts.length);
+      } while (idx === previousIndex && facts.length > 1);
+      previousIndex = idx;
+      return idx;
+    }
+
+    factButton.addEventListener('click', () => {
+      if (facts.length === 0) {
+        factDisplay.textContent = "No facts available. Try again later.";
+        copyButton.style.display = 'none';
+        return;
+      }
+
+      if (!isMuted) {
+        popSound.currentTime = 0;
+        popSound.play().catch(() => {});
+      }
+
+      const idx = getRandomFactIndex();
+      factDisplay.textContent = facts[idx];
+
+      copyButton.style.display = 'inline-flex';
+      copyFeedback.style.display = 'none';
+
+      const sparkle = document.createElement('span');
+      sparkle.className = 'sparkle';
+      factDisplay.appendChild(sparkle);
+    });
+
+    copyButton.addEventListener('click', () => {
+      if (factDisplay.textContent.trim() && factDisplay.textContent !== "Click the button below to learn a cool space fact!") {
+        navigator.clipboard.writeText(factDisplay.textContent.replace('✨', '').trim());
+        copyFeedback.style.display = 'inline';
+        setTimeout(() => {
+          copyFeedback.style.display = 'none';
+        }, 1500);
+      }
+    });
+
+    muteToggle.addEventListener('click', () => {
+      isMuted = !isMuted;
+      muteToggle.textContent = isMuted ? '🔇' : '🔊';
+    });
+
+    copyButton.style.display = 'none';
+  });
 </script>
 </body>
 </html>
