@@ -35,24 +35,21 @@
     pointer-events: none;
   }
 
-  /* Container for all space objects (planets, comets, asteroids, rockets, smoke) */
   #spaceObjectsContainer {
     position: fixed;
     top: 0; left: 0;
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 0; /* behind all UI */
+    z-index: 0; /* behind UI */
   }
 
-  /* Space objects base style */
   .space-object {
     position: absolute;
     pointer-events: none;
     will-change: transform;
   }
 
-  /* PLANETS with subtle craters using multiple radial gradients */
   .planet {
     border-radius: 50%;
     box-shadow: 0 0 8px 1px rgba(100,150,255,0.3);
@@ -101,14 +98,12 @@
     box-shadow: 0 0 6px 1px rgba(120, 85, 184, 0.35);
   }
 
-  /* COMETS textured with layered linear gradient, no transparency */
   .comet {
     border-radius: 50% / 60%;
     background: linear-gradient(90deg, #a0f0ff 0%, #66fcf1 30%, #b3ffff 60%, #66fcf1 80%, #a0f0ff 100%);
     box-shadow: 0 0 8px 3px #66fcf1aa;
   }
 
-  /* ASTEROIDS with irregular shape using clip-path and layered radial gradients */
   .asteroid {
     background: radial-gradient(circle at 40% 40%, #997a55 40%, #6b5432 70%);
     clip-path: polygon(
@@ -117,7 +112,7 @@
     box-shadow: 0 0 5px 1px #6b543266;
   }
 
-  /* ROCKETS base style */
+  /* Keep original rocket size and background images as before */
   .space-object.rocket {
     width: 30px !important;
     height: 40px !important;
@@ -125,22 +120,24 @@
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+    position: absolute;
   }
 
-  /* ROCKET flame */
+  /* Flame behind rocket */
   .rocket-flame {
     position: absolute;
-    width: 14px;
-    height: 24px;
-    bottom: -18px;
+    width: 12px;
+    height: 18px;
+    bottom: -15px;
     left: 50%;
     transform: translateX(-50%);
     background: radial-gradient(ellipse at center, #ffae42 0%, #d95c00 80%);
     filter: drop-shadow(0 0 4px #ffae42);
     border-radius: 50% 50% 40% 40% / 100% 100% 50% 50%;
     opacity: 0.8;
-    animation: flameFlicker 0.25s infinite alternate;
+    animation: flameFlicker 0.3s infinite alternate;
     pointer-events: none;
+    z-index: -1; /* behind rocket */
   }
 
   @keyframes flameFlicker {
@@ -148,16 +145,16 @@
     100% { transform: translateX(-50%) scaleY(1.2); opacity: 1; }
   }
 
-  /* SMOKE PUFF style */
+  /* Smoke puff style */
   .smoke-puff {
     position: absolute;
     background: radial-gradient(circle, rgba(200,200,200,0.3) 0%, rgba(150,150,150,0.05) 80%);
     border-radius: 50%;
     pointer-events: none;
     filter: blur(3px);
+    z-index: 0;
   }
 
-  /* Heading and sparkle styles */
   h1 {
     font-size: 3rem;
     margin-bottom: 1rem;
@@ -181,7 +178,6 @@
     50% { opacity: 0.5; transform: rotate(20deg) scale(1.3); }
   }
 
-  /* Fact display container */
   #factWrapper {
     position: relative;
     display: flex;
@@ -210,19 +206,13 @@
     opacity: 1;
   }
 
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  /* Copy button and feedback */
   #copyButton {
     background: none;
     border: none;
     cursor: pointer;
     padding: 0;
     margin-left: 4px;
-    display: none; /* hidden initially */
+    display: none;
     color: #ccc;
     transition: color 0.2s ease, transform 0.2s ease;
     width: 24px;
@@ -244,7 +234,6 @@
     align-self: center;
   }
 
-  /* Buttons container */
   .buttons-container {
     display: inline-flex;
     align-items: center;
@@ -254,7 +243,6 @@
     z-index: 2;
   }
 
-  /* Fact Button styles */
   #factButton {
     padding: 14px 35px;
     font-size: 1.3rem;
@@ -294,7 +282,6 @@
     box-shadow: 0 0 10px #45a29e99;
   }
 
-  /* Mute toggle icon */
   #muteToggle {
     background: none;
     border: none;
@@ -316,7 +303,6 @@
 <body>
   <canvas id="starfield"></canvas>
 
-  <!-- Container for space objects -->
   <div id="spaceObjectsContainer"></div>
 
   <h1>🔭 Random Space Fact Generator<span class="sparkle">✨</span></h1>
@@ -406,11 +392,19 @@
   resize();
   animateStarfield();
 
-  // Base64 rocket SVG images - 3 variants (simple rocket SVG data URLs with color)
+  // Your original rocket images as background URLs (replace these URLs with your actual rocket SVG images or data URIs)
+  const rocketImages = [
+    'rocket1.svg',
+    'rocket2.svg',
+    'rocket3.svg',
+  ];
+
+  // For demonstration, I’m using small placeholder SVG data URIs for rockets
+  // Replace these with your original rocket images paths or data URIs
   const rocketSvgs = [
-    'data:image/svg+xml;utf8,<svg width="24" height="32" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="%2366fcf1" d="M12 0L14.9 6.4L23 8L17 14.6L18.5 23L12 19.6L5.5 23L7 14.6L1 8L9.1 6.4L12 0Z"/></svg>',
-    'data:image/svg+xml;utf8,<svg width="24" height="32" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="%23ff7f50" d="M12 0L14.9 6.4L23 8L17 14.6L18.5 23L12 19.6L5.5 23L7 14.6L1 8L9.1 6.4L12 0Z"/></svg>',
-    'data:image/svg+xml;utf8,<svg width="24" height="32" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="%239b59b6" d="M12 0L14.9 6.4L23 8L17 14.6L18.5 23L12 19.6L5.5 23L7 14.6L1 8L9.1 6.4L12 0Z"/></svg>'
+    'data:image/svg+xml;utf8,<svg width="30" height="40" viewBox="0 0 30 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="%2366fcf1" d="M15 0L18.6 9L30 10.9L21.8 19.8L24 34L15 28L6 34L8.2 19.8L0 10.9L11.4 9L15 0Z"/></svg>',
+    'data:image/svg+xml;utf8,<svg width="30" height="40" viewBox="0 0 30 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="%23ff7f50" d="M15 0L18.6 9L30 10.9L21.8 19.8L24 34L15 28L6 34L8.2 19.8L0 10.9L11.4 9L15 0Z"/></svg>',
+    'data:image/svg+xml;utf8,<svg width="30" height="40" viewBox="0 0 30 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="%239b59b6" d="M15 0L18.6 9L30 10.9L21.8 19.8L24 34L15 28L6 34L8.2 19.8L0 10.9L11.4 9L15 0Z"/></svg>'
   ];
 
   const spaceObjectsContainer = document.getElementById('spaceObjectsContainer');
@@ -422,10 +416,10 @@
       this.el.classList.add('space-object');
 
       if (type === 'planet') {
-        this.size = 40 + Math.random() * 35;
+        this.size = 40 + Math.random() * 40;
         this.el.classList.add('planet');
-
-        const planetColors = ['red', 'blue', 'green', 'orange', 'purple'];
+        // Random color class
+        const planetColors = ['red','blue','green','orange','purple'];
         const color = planetColors[Math.floor(Math.random() * planetColors.length)];
         this.el.classList.add(color);
         this.el.style.width = this.size + 'px';
@@ -444,16 +438,15 @@
         this.el.style.height = this.size + 'px';
       }
       else if (type === 'rocket') {
-        this.sizeX = 24;
-        this.sizeY = 32;
+        this.sizeX = 30;  // Keep original size you used before
+        this.sizeY = 40;
         this.el.classList.add('rocket');
-        // Random rocket SVG from the set
         this.rocketSvgIndex = Math.floor(Math.random() * rocketSvgs.length);
-        this.el.style.backgroundImage = `url(${rocketSvgs[this.rocketSvgIndex]})`;
+        this.el.style.backgroundImage = `url("${rocketSvgs[this.rocketSvgIndex]}")`;
         this.el.style.width = this.sizeX + 'px';
         this.el.style.height = this.sizeY + 'px';
 
-        // Flame element
+        // Create flame element behind the rocket
         this.flameEl = document.createElement('div');
         this.flameEl.classList.add('rocket-flame');
         this.el.appendChild(this.flameEl);
@@ -465,23 +458,22 @@
         for(let i=0; i<this.maxTrailLength; i++) {
           const puff = document.createElement('div');
           puff.classList.add('smoke-puff');
-          puff.style.width = '10px';
-          puff.style.height = '10px';
+          puff.style.width = '12px';
+          puff.style.height = '12px';
           puff.style.opacity = '0';
           spaceObjectsContainer.appendChild(puff);
           this.smokeElements.push(puff);
         }
       }
 
-      // Initial position and speed
       this.x = Math.random() * window.innerWidth;
       this.y = Math.random() * window.innerHeight;
 
-      this.speedX = (Math.random() * 1.4 + 0.1) * (Math.random() < 0.5 ? -1 : 1);
-      this.speedY = (Math.random() * 1.4 + 0.1) * (Math.random() < 0.5 ? -1 : 1);
+      // Speed with direction
+      this.speedX = (Math.random() * 1.4 + 0.2) * (Math.random() < 0.5 ? -1 : 1);
+      this.speedY = (Math.random() * 1.4 + 0.2) * (Math.random() < 0.5 ? -1 : 1);
 
-      // For rotation (rockets only)
-      this.rotation = 0;
+      this.rotation = 0;  // degrees rotation for rockets
 
       spaceObjectsContainer.appendChild(this.el);
     }
@@ -490,8 +482,8 @@
       this.x += this.speedX;
       this.y += this.speedY;
 
-      // Bounce off edges for planets, comets, asteroids
       if(this.type !== 'rocket') {
+        // Wrap planets, comets, asteroids
         if(this.x < -this.size) this.x = window.innerWidth + this.size;
         if(this.x > window.innerWidth + this.size) this.x = -this.size;
         if(this.y < -this.size) this.y = window.innerHeight + this.size;
@@ -500,49 +492,50 @@
         this.el.style.transform = `translate(${this.x}px, ${this.y}px)`;
       }
       else {
-        // ROCKET updates
+        // Rockets
 
-        // Calculate angle so rocket faces movement direction
+        // Calculate angle so rocket points in movement direction
         let angleRad = Math.atan2(this.speedY, this.speedX);
-        let angleDeg = angleRad * (180 / Math.PI) + 90; // +90 because rocket SVG points up by default
+        let angleDeg = angleRad * (180 / Math.PI) + 90; // because rocket points up in SVG
         this.rotation = angleDeg;
 
-        // Apply transform with rotation
+        // Rotate and position rocket
         this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rotation}deg)`;
 
-        // Smoke trail position behind rocket (offset backwards on velocity vector)
-        const offsetDistance = 15;
-        const smokeX = this.x - Math.cos(angleRad) * offsetDistance;
-        const smokeY = this.y - Math.sin(angleRad) * offsetDistance;
+        // Position flame behind rocket (opposite direction of movement)
+        this.flameEl.style.transform = `translateX(-50%) translateY(15px) scaleY(1.1) rotate(0deg)`;
 
-        // Add current position to smoke trail
-        this.smokeTrail.push({ x: smokeX, y: smokeY });
+        // Smoke trail position: behind rocket along velocity vector
+        const offsetDist = 18;
+        const smokeX = this.x - Math.cos(angleRad) * offsetDist;
+        const smokeY = this.y - Math.sin(angleRad) * offsetDist;
+
+        // Add smoke position
+        this.smokeTrail.push({x: smokeX, y: smokeY});
 
         // Limit smoke trail length
-        if(this.smokeTrail.length > this.maxTrailLength) {
-          this.smokeTrail.shift();
-        }
+        if(this.smokeTrail.length > this.maxTrailLength) this.smokeTrail.shift();
 
-        // Update smoke puffs: position, opacity, size
-        this.smokeTrail.forEach((pos, index) => {
-          const puff = this.smokeElements[index];
+        // Update smoke puff positions and styles
+        this.smokeTrail.forEach((pos, idx) => {
+          const puff = this.smokeElements[idx];
           if(!puff) return;
 
           puff.style.left = pos.x + 'px';
           puff.style.top = pos.y + 'px';
 
-          // Opacity fades from ~0.4 (newest) to near 0 (oldest)
-          const opacity = (index + 1) / this.smokeTrail.length;
-          puff.style.opacity = opacity * 0.4;
+          // Newest puff is most opaque
+          const opacity = (idx + 1) / this.smokeTrail.length * 0.4;
+          puff.style.opacity = opacity;
 
-          // Size subtly smaller with age (30% to 100%)
-          const baseSize = 12;
-          const size = baseSize * (opacity * 0.7 + 0.3);
+          // Size fades smaller for older puffs
+          const baseSize = 14;
+          const size = baseSize * (opacity * 0.6 + 0.4);
           puff.style.width = size + 'px';
           puff.style.height = size + 'px';
         });
 
-        // Wrap rockets around edges
+        // Wrap rockets at edges
         if(this.x < -this.sizeX) this.x = window.innerWidth + this.sizeX;
         if(this.x > window.innerWidth + this.sizeX) this.x = -this.sizeX;
         if(this.y < -this.sizeY) this.y = window.innerHeight + this.sizeY;
@@ -551,38 +544,22 @@
     }
   }
 
-  // Create multiple space objects
-  let spaceObjects = [];
+  // Create objects
+  const spaceObjects = [];
 
-  // Planets: 10
-  for(let i=0; i<10; i++) {
-    spaceObjects.push(new SpaceObject('planet'));
+  for(let i=0; i<10; i++) spaceObjects.push(new SpaceObject('planet'));
+  for(let i=0; i<6; i++) spaceObjects.push(new SpaceObject('comet'));
+  for(let i=0; i<8; i++) spaceObjects.push(new SpaceObject('asteroid'));
+  for(let i=0; i<6; i++) spaceObjects.push(new SpaceObject('rocket'));
+
+  function animate() {
+    spaceObjects.forEach(o => o.update());
+    requestAnimationFrame(animate);
   }
 
-  // Comets: 6
-  for(let i=0; i<6; i++) {
-    spaceObjects.push(new SpaceObject('comet'));
-  }
+  animate();
 
-  // Asteroids: 8
-  for(let i=0; i<8; i++) {
-    spaceObjects.push(new SpaceObject('asteroid'));
-  }
-
-  // Rockets: 6
-  for(let i=0; i<6; i++) {
-    spaceObjects.push(new SpaceObject('rocket'));
-  }
-
-  // Animate all space objects
-  function animateSpaceObjects() {
-    spaceObjects.forEach(obj => obj.update());
-    requestAnimationFrame(animateSpaceObjects);
-  }
-
-  animateSpaceObjects();
-
-  // Facts and UI logic
+  // Fact button and logic
   const factButton = document.getElementById('factButton');
   const factDisplay = document.getElementById('factDisplay');
   const copyButton = document.getElementById('copyButton');
@@ -590,11 +567,10 @@
   const muteToggle = document.getElementById('muteToggle');
   let soundMuted = false;
 
-  // Sound effect for button click
+  // Sound effect
   const beepSound = new Audio('https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg');
   beepSound.volume = 0.3;
 
-  // Facts array
   const spaceFacts = [
     "The largest volcano in the solar system is Olympus Mons on Mars.",
     "Venus rotates in the opposite direction to most planets.",
@@ -608,11 +584,10 @@
     "Pluto is classified as a dwarf planet, not a major planet."
   ];
 
-  // Show new fact function
   function showFact() {
     if (!soundMuted) beepSound.play();
-    const randomIndex = Math.floor(Math.random() * spaceFacts.length);
-    factDisplay.textContent = spaceFacts[randomIndex];
+    const idx = Math.floor(Math.random() * spaceFacts.length);
+    factDisplay.textContent = spaceFacts[idx];
     factDisplay.classList.add('show');
     copyButton.style.display = 'inline-block';
     copyFeedback.style.display = 'none';
@@ -620,22 +595,17 @@
 
   factButton.addEventListener('click', showFact);
 
-  // Copy fact to clipboard
   copyButton.addEventListener('click', () => {
     navigator.clipboard.writeText(factDisplay.textContent).then(() => {
       copyFeedback.style.display = 'inline';
-      setTimeout(() => {
-        copyFeedback.style.display = 'none';
-      }, 1500);
+      setTimeout(() => copyFeedback.style.display = 'none', 1500);
     });
   });
 
-  // Mute toggle
   muteToggle.addEventListener('click', () => {
     soundMuted = !soundMuted;
     muteToggle.textContent = soundMuted ? '🔇' : '🔊';
   });
 </script>
-
 </body>
 </html>
