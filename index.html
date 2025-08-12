@@ -50,7 +50,7 @@
     will-change: transform;
   }
 
-  /* PLANETS with subtle craters using multiple radial gradients */
+  /* PLANETS with subtle craters */
   .planet {
     border-radius: 50%;
     box-shadow: 0 0 8px 1px rgba(100,150,255,0.3);
@@ -99,14 +99,14 @@
     box-shadow: 0 0 6px 1px rgba(120, 85, 184, 0.35);
   }
 
-  /* COMETS textured with layered linear gradient, no transparency */
+  /* COMETS textured */
   .comet {
     border-radius: 50% / 60%;
     background: linear-gradient(90deg, #a0f0ff 0%, #66fcf1 30%, #b3ffff 60%, #66fcf1 80%, #a0f0ff 100%);
     box-shadow: 0 0 8px 3px #66fcf1aa;
   }
 
-  /* ASTEROIDS with irregular shape using clip-path and layered radial gradients */
+  /* ASTEROIDS irregular */
   .asteroid {
     background: radial-gradient(circle at 40% 40%, #997a55 40%, #6b5432 70%);
     clip-path: polygon(
@@ -115,7 +115,7 @@
     box-shadow: 0 0 5px 1px #6b543266;
   }
 
-  /* ROCKETS: base styles */
+  /* ROCKET base styles */
   .space-object.rocket {
     width: 30px !important;
     height: 40px !important;
@@ -123,9 +123,57 @@
     background-repeat: no-repeat !important;
     background-position: center !important;
     filter: drop-shadow(0 0 1.5px #fff9);
+    transform-origin: center 70%; /* pivot around flame base */
   }
 
-  /* Heading and sparkle styles */
+  /* Flame behind rocket */
+  .rocket-flame {
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 24px;
+    background: radial-gradient(ellipse 50% 70% at 50% 80%, #ff5722, #ff9800, transparent 70%);
+    filter: drop-shadow(0 0 6px #ff6e22);
+    border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%;
+    animation: flameFlicker 0.25s infinite alternate;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  @keyframes flameFlicker {
+    0% { transform: translateX(-50%) scaleY(1); opacity: 0.85; }
+    100% { transform: translateX(-50%) scaleY(1.3); opacity: 0.5; }
+  }
+
+  /* Smoke trail container (fixed above canvas) */
+  #smokeTrailContainer {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 0;
+  }
+
+  .smoke-puff {
+    position: fixed;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(1.5px);
+    opacity: 0.2;
+    animation: puffFadeOut 3s forwards;
+  }
+
+  @keyframes puffFadeOut {
+    0% { opacity: 0.2; transform: scale(1); }
+    100% { opacity: 0; transform: scale(2); }
+  }
+
+  /* Heading and sparkle */
   h1 {
     font-size: 3rem;
     margin-bottom: 1rem;
@@ -284,6 +332,9 @@
 <body>
   <canvas id="starfield"></canvas>
 
+  <!-- Smoke trail container -->
+  <div id="smokeTrailContainer"></div>
+
   <!-- Container for space objects -->
   <div id="spaceObjectsContainer"></div>
 
@@ -319,7 +370,7 @@
   </div>
 
 <script>
-  // Starfield canvas setup
+  // Starfield canvas setup (same as before)
   const canvas = document.getElementById('starfield');
   const ctx = canvas.getContext('2d');
   let stars = [];
@@ -377,7 +428,7 @@
   // SVG base64 rocket images (colored, small 30x40)
   const rocketSVGs = [
     'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAzMCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTExIDE4TDExIDI1TDIwIDI1TDIwIDE4TDExIDE4WiIgZmlsbD0iI0YzNTNDMyIvPgo8cGF0aCBkPSJNMTQgMzFDMTMgMzEgMTIgMzEgMTIgMzBMMTggMzBMMTggMzFDMTcgMzEgMTYgMzEgMTUgMzFIMTRaIiBmaWxsPSIjRTk3QzYzIi8+CjxwYXRoIGQ9Ik0xNSA3TDIwIDE0TDExIDE0TDE1IDdaIiBmaWxsPSIjRjYxQ0I0Ii8+CjxwYXRoIGQ9Ik0xNSA3QzE4IDExIDE5IDE3IDE4IDIxQzE2IDIxIDE0IDIxIDEyIDIxQzExIDE3IDEyIDExIDE1IDdaIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz4=',
-    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAzMCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTExIDE4TDExIDI1TDIwIDI1TDIwIDE4TDExIDE4WiIgZmlsbD0iI0Y5OTlGQSIvPgo8cGF0aCBkPSJNMTQgMzFDMTMgMzEgMTIgMzEgMTIgMzBMMTggMzBMMTggMzFDMTcgMzEgMTYgMzEgMTUgMzFIMTRaIiBmaWxsPSIjNjZFRjAxIi8+CjxwYXRoIGQ9Ik0xNSA3TDIwIDE0TDExIDE0TDE1IDdaIiBmaWxsPSIjMDA3Q0ZGIi8+CjxwYXRoIGQ9Ik0xNSA3QzE4IDExIDE5IDE3IDE4IDIxQzE2IDIxIDE0IDIxIDEyIDIxQzExIDE3IDEyIDExIDE1IDdaIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz4=',
+    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAzMCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTExIDE4TDExIDI1TDIwIDI1TDIwIDE4TDExIDE4WiIgZmlsbD0iIzAzNjRDQyIvPgo8cGF0aCBkPSJNMTQgMzFDMTMgMzEgMTIgMzEgMTIgMzBMMTggMzBMMTggMzFDMTcgMzEgMTYgMzEgMTUgMzFIMTRaIiBmaWxsPSIjMDlGMzJGIi8+CjxwYXRoIGQ9Ik0xNSA3TDIwIDE0TDExIDE0TDE1IDdaIiBmaWxsPSIjMDdGQjM1Ii8+CjxwYXRoIGQ9Ik0xNSA3QzE4IDExIDE5IDE3IDE4IDIxQzE2IDIxIDE0IDIxIDEyIDIxQzExIDE3IDEyIDExIDE1IDdaIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz4=',
     'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAzMCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTExIDE4TDExIDI1TDIwIDI1TDIwIDE4TDExIDE4WiIgZmlsbD0iIzAwNzBDRCIvPgo8cGF0aCBkPSJNMTQgMzFDMTMgMzEgMTIgMzEgMTIgMzBMMTggMzBMMTggMzFDMTcgMzEgMTYgMzEgMTUgMzFIMTRaIiBmaWxsPSIjMDk2RkY3Ii8+CjxwYXRoIGQ9Ik0xNSA3TDIwIDE0TDExIDE0TDE1IDdaIiBmaWxsPSIjMDdGQjM1Ii8+CjxwYXRoIGQ9Ik0xNSA3QzE4IDExIDE5IDE3IDE4IDIxQzE2IDIxIDE0IDIxIDEyIDIxQzExIDE3IDEyIDExIDE1IDdaIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz4='
   ];
 
@@ -388,7 +439,7 @@
       this.y = Math.random() * window.innerHeight;
       this.speedX = (Math.random() - 0.5) * 0.7;
       this.speedY = (Math.random() - 0.5) * 0.7;
-      this.rotation = Math.random() * 360;
+      this.rotation = 0; // will be calculated for rockets
       this.rotationSpeed = (Math.random() - 0.5) * 0.1;
 
       this.el = document.createElement('div');
@@ -420,6 +471,14 @@
         // Choose a random rocket SVG
         const idx = Math.floor(Math.random() * rocketSVGs.length);
         this.el.style.backgroundImage = `url(${rocketSVGs[idx]})`;
+
+        // Create flame element behind rocket
+        this.flame = document.createElement('div');
+        this.flame.classList.add('rocket-flame');
+        this.el.appendChild(this.flame);
+
+        // For smoke trail positions
+        this.smokePositions = [];
       }
 
       document.getElementById('spaceObjectsContainer').appendChild(this.el);
@@ -435,17 +494,53 @@
       if (this.y < -this.size) this.y = window.innerHeight + this.size;
       else if (this.y > window.innerHeight + this.size) this.y = -this.size;
 
-      this.rotation += this.rotationSpeed;
-      if (this.rotation > 360) this.rotation -= 360;
-      if (this.rotation < 0) this.rotation += 360;
-
       if (this.type === 'rocket') {
+        // Calculate rotation angle in degrees, +90 to point the rocket 'upwards' visually
+        const angleRad = Math.atan2(this.speedY, this.speedX);
+        const angleDeg = angleRad * (180 / Math.PI);
+        this.rotation = angleDeg;
+
         // Rotate rocket to face direction of movement
-        const angleDeg = Math.atan2(this.speedY, this.speedX) * (180 / Math.PI);
-        this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${angleDeg}deg)`;
+        this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rotation}deg)`;
+
+        // Add smoke puff behind rocket
+        this.addSmokePuff();
+
       } else {
+        // Planets/comets/asteroids rotate slowly randomly
+        this.rotation += this.rotationSpeed;
+        if (this.rotation > 360) this.rotation -= 360;
+        if (this.rotation < 0) this.rotation += 360;
+
         this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rotation}deg)`;
       }
+    }
+
+    addSmokePuff() {
+      // Create a smoke puff element behind rocket based on current position and angle
+      const container = document.getElementById('smokeTrailContainer');
+      const puff = document.createElement('div');
+      puff.classList.add('smoke-puff');
+
+      // Position puff behind rocket opposite to velocity vector with some randomness
+      const offsetDistance = this.size * 0.6;
+      // Calculate offset coordinates based on rocket rotation (pointing forward)
+      const offsetX = this.x - Math.cos(this.rotation * Math.PI / 180) * offsetDistance + (Math.random() - 0.5) * 8;
+      const offsetY = this.y - Math.sin(this.rotation * Math.PI / 180) * offsetDistance + (Math.random() - 0.5) * 8;
+
+      // Size variation for puff
+      const size = 8 + Math.random() * 6;
+      puff.style.width = size + 'px';
+      puff.style.height = size + 'px';
+      puff.style.left = offsetX + 'px';
+      puff.style.top = offsetY + 'px';
+
+      container.appendChild(puff);
+
+      // Remove puff after animation ends (3s)
+      puff.addEventListener('animationend', () => {
+        puff.remove();
+      });
     }
   }
 
