@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Random Space Fact Generator | Space Simplified</title>
 
-<!-- Favicon links -->
+<!-- Favicon links added here -->
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
@@ -14,9 +14,10 @@
 <link rel="shortcut icon" href="favicon.ico" />
 <meta name="msapplication-TileColor" content="#2b5797" />
 <meta name="msapplication-config" content="browserconfig.xml" />
-<meta name="theme-color" content="#000010" />
+<meta name="theme-color" content="#000000" />
 
 <style>
+  /* Your full original styles here unchanged */
   body {
     margin: 0;
     height: 100vh;
@@ -375,6 +376,7 @@
   animateStarfield();
 
   // Base64 rocket images - 3 variants (colored little rocketship pictures)
+  // These are tiny 30x40 pixel PNGs encoded in base64
   const rocketImages = [
     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAoCAYAAAArW5ZsAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAdklEQVR4nO3TQQrAMAwEwLz/Wa36SFBquHDIyG37hUu8xQCI8Ix5UgOyebCVV1Jz2cK3AtYO5wE6EO0z9dDAU8vNx1qkIp0uhfOo2v1WqwYUbjCgkiIqYFM6ScXOd5nF+bEKghDZpRE4vDJL97hG3Lc0K9uXZX7Dr4AX35Lq4fn6sNAAAAAElFTkSuQmCC',
     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAoCAYAAAArW5ZsAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAbUlEQVR4nO3UQQrAMAwEwLv/6aUqRg+kDxgCP4mOwyMIr5tVD1bjw6kz1a9cYDwHq0h88n2iBAO7UuDWxUqQHGoAtMcJzKX0aN6xlgcyCIqGzIPdJFSx8AqzqLKh1ZoXuSCxxCrP+DAz2v7A2X+0FtI8qqpNQAAAABJRU5ErkJggg==',
@@ -383,8 +385,6 @@
 
   const spaceObjectsContainer = document.getElementById('spaceObjectsContainer');
 
-<script>
-  // Continue SpaceObject class from before
   class SpaceObject {
     constructor(type) {
       this.type = type;
@@ -451,7 +451,6 @@
     }
   }
 
-  // Create multiple space objects
   const spaceObjects = [];
 
   const typesCount = {
@@ -466,7 +465,6 @@
   for (let i = 0; i < typesCount.asteroid; i++) spaceObjects.push(new SpaceObject('asteroid'));
   for (let i = 0; i < typesCount.rocket; i++) spaceObjects.push(new SpaceObject('rocket'));
 
-  // Animate space objects drifting slowly
   function animateSpaceObjects() {
     spaceObjects.forEach(obj => obj.update());
     requestAnimationFrame(animateSpaceObjects);
@@ -474,7 +472,6 @@
 
   animateSpaceObjects();
 
-  // Facts array for the fact generator
   const facts = [
     "The largest volcano in our solar system is Olympus Mons on Mars, standing about 22 kilometers high.",
     "A day on Venus is longer than a year on Venus.",
@@ -493,14 +490,13 @@
     "The Voyager 1 spacecraft is the farthest human-made object from Earth."
   ];
 
-  // Fact display and buttons
   const factDisplay = document.getElementById('factDisplay');
   const factButton = document.getElementById('factButton');
   const copyButton = document.getElementById('copyButton');
   const copyFeedback = document.getElementById('copyFeedback');
   const muteToggle = document.getElementById('muteToggle');
 
-  // Audio setup
+  // Audio setup - use short beep, volume 0.35, don't loop
   const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
   audio.volume = 0.35;
   audio.loop = false;
@@ -512,10 +508,9 @@
   });
 
   factButton.addEventListener('click', () => {
-    // Disable button while loading fact
     factButton.disabled = true;
 
-    // Pick random fact different from current
+    // Pick a new random fact different from current
     let newFact;
     do {
       newFact = facts[Math.floor(Math.random() * facts.length)];
@@ -526,12 +521,9 @@
       factDisplay.textContent = newFact;
       factDisplay.classList.add('show');
 
-      // Enable copy button once fact is visible
       copyButton.style.display = 'inline-block';
 
-      // Play sound if not muted
       if (!muted) {
-        // To comply with browser autoplay policy, play sound after user interaction (button click)
         audio.currentTime = 0;
         audio.play().catch(() => {});
       }
@@ -540,11 +532,9 @@
     }, 300);
   });
 
-  // Clipboard copy
   copyButton.addEventListener('click', () => {
     if (!factDisplay.textContent) return;
     navigator.clipboard.writeText(factDisplay.textContent).then(() => {
-      // Show checkmark feedback
       copyFeedback.style.display = 'inline-block';
       setTimeout(() => {
         copyFeedback.style.display = 'none';
@@ -552,17 +542,14 @@
     });
   });
 
-  // Initially hide copy button
   copyButton.style.display = 'none';
 
-  // Accessibility: add aria-live for fact display changes
+  // Accessibility aria-live for fact changes
   factDisplay.setAttribute('aria-live', 'polite');
   factDisplay.setAttribute('aria-atomic', 'true');
 
-  // On first load, fade in initial message
   factDisplay.classList.add('show');
 
-  // Resize handler for space objects positions (keep them inside viewport)
   window.addEventListener('resize', () => {
     spaceObjects.forEach(obj => {
       obj.x = Math.min(obj.x, window.innerWidth - obj.size);
