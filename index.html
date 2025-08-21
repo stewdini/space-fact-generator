@@ -1,196 +1,197 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Random Space Fact Generator | Space Simplified</title>
   <style>
     body {
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
-      background: black;
       overflow: hidden;
+      background: radial-gradient(circle at bottom, #000010, #000000);
       color: white;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    .container {
+      position: relative;
       text-align: center;
-    }
-
-    h1 {
-      margin-top: 20px;
-    }
-
-    #factDisplay {
-      font-size: 1.5rem;
-      margin: 20px;
-      min-height: 80px;
+      background: rgba(0,0,0,0.6);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0px 0px 20px rgba(255,255,255,0.3);
     }
 
     button {
+      margin-top: 15px;
       padding: 10px 20px;
-      font-size: 1rem;
-      cursor: pointer;
       border: none;
-      border-radius: 8px;
-      background: #444;
+      background: #1e90ff;
       color: white;
-      transition: background 0.3s;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
     }
 
     button:hover {
-      background: #666;
-    }
-
-    /* Background objects */
-    .space-object {
-      position: absolute;
-      pointer-events: none;
-      will-change: transform;
-    }
-
-    .rocket {
-      width: 50px;
-      height: auto;
-    }
-
-    .asteroid {
-      width: 40px;
-      height: auto;
-    }
-
-    .planet {
-      width: 80px;
-      height: auto;
-    }
-
-    /* Smoke puff */
-    .smoke {
-      position: absolute;
-      width: 15px;
-      height: 15px;
-      background: rgba(200, 200, 200, 0.7);
-      border-radius: 50%;
-      pointer-events: none;
-      animation: puff 1s forwards;
-    }
-
-    @keyframes puff {
-      0% {
-        transform: scale(0.5);
-        opacity: 0.8;
-      }
-      100% {
-        transform: scale(2);
-        opacity: 0;
-      }
+      background: #63b3ff;
     }
   </style>
 </head>
 <body>
-  <h1>Random Space Fact Generator</h1>
-  <div id="factDisplay">Press the button to learn a cool space fact!</div>
-  <button onclick="generateFact()">New Fact</button>
-
-  <!-- Background container -->
-  <div id="background"></div>
+  <canvas id="space"></canvas>
+  <div class="container">
+    <h1>🚀 Random Space Fact Generator 🌌</h1>
+    <p id="fact">Click below to discover a space fact!</p>
+    <button onclick="newFact()">New Fact</button>
+  </div>
 
   <script>
-    const facts = [
-      "A day on Venus is longer than a year on Venus.",
-      "Neutron stars can spin 600 times per second.",
-      "There may be a planet made of diamonds.",
-      "Space is completely silent.",
-      "The largest known volcano is on Mars.",
-      "A spoonful of neutron star weighs about a billion tons.",
-      "There are more trees on Earth than stars in the Milky Way.",
-      "Saturn could float in water—it’s mostly gas!",
-      "The footprints on the Moon could last 100 million years.",
-      "One million Earths could fit inside the Sun."
-    ];
+    const canvas = document.getElementById("space");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-    function generateFact() {
-      const randomIndex = Math.floor(Math.random() * facts.length);
-      document.getElementById("factDisplay").textContent = facts[randomIndex];
-    }
-
-    const background = document.getElementById("background");
+    // ---------- Space Objects ----------
     const rockets = [];
+    const smokeParticles = [];
     const asteroids = [];
+    const planets = [];
 
-    // Create planets (static)
-    function createPlanet() {
-      const planet = document.createElement("img");
-      planet.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/600px-OSIRIS_Mars_true_color.jpg";
-      planet.classList.add("space-object", "planet");
-      planet.style.top = Math.random() * window.innerHeight + "px";
-      planet.style.left = Math.random() * window.innerWidth + "px";
-      background.appendChild(planet);
+    // Load images
+    const rocketImg = new Image();
+    rocketImg.src = "https://i.imgur.com/Ji8gG6T.png"; // rocket
+
+    const asteroidImg = new Image();
+    asteroidImg.src = "https://i.imgur.com/o4u7lGv.png"; // asteroid
+
+    const planetImg = new Image();
+    planetImg.src = "https://i.imgur.com/3oQpFqM.png"; // planet
+
+    // ---------- Object Classes ----------
+    class Rocket {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = canvas.height + 50;
+        this.speed = 1 + Math.random() * 1.5;
+        this.size = 40 + Math.random() * 20;
+      }
+      update() {
+        this.y -= this.speed;
+        // spawn smoke behind rocket
+        smokeParticles.push(new Smoke(this.x + this.size/2, this.y + this.size));
+        if (this.y < -this.size) this.reset();
+      }
+      draw() {
+        ctx.drawImage(rocketImg, this.x, this.y, this.size, this.size);
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = canvas.height + 50;
+      }
     }
 
-    // Create rockets
-    function createRocket() {
-      const rocket = document.createElement("img");
-      rocket.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Emoji_u1f680.svg/512px-Emoji_u1f680.svg.png";
-      rocket.classList.add("space-object", "rocket");
-      rocket.x = -60;
-      rocket.y = Math.random() * window.innerHeight;
-      rocket.speed = 1 + Math.random() * 2;
-      background.appendChild(rocket);
-      rockets.push(rocket);
-
-      // Smoke generator
-      setInterval(() => {
-        if (document.body.contains(rocket)) {
-          const smoke = document.createElement("div");
-          smoke.classList.add("smoke");
-          smoke.style.left = rocket.x + "px";
-          smoke.style.top = rocket.y + 20 + "px";
-          background.appendChild(smoke);
-          setTimeout(() => smoke.remove(), 1000);
-        }
-      }, 200);
+    class Smoke {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.alpha = 1;
+        this.size = 8 + Math.random() * 5;
+      }
+      update() {
+        this.y += 0.5;
+        this.alpha -= 0.02;
+      }
+      draw() {
+        ctx.fillStyle = `rgba(200,200,200,${this.alpha})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
 
-    // Create asteroids
-    function createAsteroid() {
-      const asteroid = document.createElement("img");
-      asteroid.src = "https://upload.wikimedia.org/wikipedia/commons/1/18/433_Eros_-_GPN-2000-000481.jpg";
-      asteroid.classList.add("space-object", "asteroid");
-      asteroid.x = Math.random() * window.innerWidth;
-      asteroid.y = -60;
-      asteroid.speed = 0.5 + Math.random() * 1.5;
-      background.appendChild(asteroid);
-      asteroids.push(asteroid);
+    class Asteroid {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = -50;
+        this.speed = 0.5 + Math.random() * 1.2;
+        this.size = 40 + Math.random() * 40;
+      }
+      update() {
+        this.y += this.speed;
+        if (this.y > canvas.height + this.size) this.reset();
+      }
+      draw() {
+        ctx.drawImage(asteroidImg, this.x, this.y, this.size, this.size);
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = -this.size;
+      }
     }
 
-    // Smooth animation loop
+    class Planet {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = 80 + Math.random() * 80;
+      }
+      draw() {
+        ctx.drawImage(planetImg, this.x, this.y, this.size, this.size);
+      }
+    }
+
+    // ---------- Populate ----------
+    for (let i = 0; i < 4; i++) rockets.push(new Rocket());
+    for (let i = 0; i < 5; i++) asteroids.push(new Asteroid());
+    for (let i = 0; i < 3; i++) planets.push(new Planet());
+
+    // ---------- Animation Loop ----------
     function animate() {
-      rockets.forEach((rocket) => {
-        rocket.x += rocket.speed;
-        if (rocket.x > window.innerWidth + 60) {
-          rocket.x = -60;
-          rocket.y = Math.random() * window.innerHeight;
-        }
-        rocket.style.transform = `translate(${rocket.x}px, ${rocket.y}px)`;
-      });
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      asteroids.forEach((asteroid) => {
-        asteroid.y += asteroid.speed;
-        if (asteroid.y > window.innerHeight + 60) {
-          asteroid.y = -60;
-          asteroid.x = Math.random() * window.innerWidth;
-        }
-        asteroid.style.transform = `translate(${asteroid.x}px, ${asteroid.y}px)`;
+      planets.forEach(p => p.draw());
+      rockets.forEach(r => { r.update(); r.draw(); });
+      asteroids.forEach(a => { a.update(); a.draw(); });
+
+      smokeParticles.forEach((s, i) => {
+        s.update();
+        s.draw();
+        if (s.alpha <= 0) smokeParticles.splice(i, 1);
       });
 
       requestAnimationFrame(animate);
     }
-
-    // Initialize
-    for (let i = 0; i < 2; i++) createPlanet();
-    for (let i = 0; i < 2; i++) createRocket();
-    for (let i = 0; i < 3; i++) createAsteroid();
-
     animate();
+
+    // ---------- Facts ----------
+    const facts = [
+      "A day on Venus is longer than a year on Venus.",
+      "Neutron stars are so dense that a sugar-cube-sized piece weighs as much as all humanity.",
+      "There are more trees on Earth than stars in the Milky Way.",
+      "Saturn could float in water because it’s mostly made of gas.",
+      "One million Earths could fit inside the Sun."
+    ];
+
+    function newFact() {
+      const fact = facts[Math.floor(Math.random() * facts.length)];
+      document.getElementById("fact").textContent = fact;
+    }
   </script>
 </body>
 </html>
