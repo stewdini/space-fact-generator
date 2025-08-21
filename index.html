@@ -284,10 +284,10 @@ class SpaceObject{
       this.el.style.backgroundImage=`url(${rocketImages[0]})`;
       const edge=Math.floor(Math.random()*4);
       switch(edge){
-        case 0:this.x=Math.random()*window.innerWidth;this.y=-50;this.speedX=(Math.random()-0.5)*0.6;this.speedY=1.5+Math.random()*0.5;break;
-        case 1:this.x=window.innerWidth+50;this.y=Math.random()*window.innerHeight;this.speedX=-(1.5+Math.random()*0.5);this.speedY=(Math.random()-0.5)*0.6;break;
-        case 2:this.x=Math.random()*window.innerWidth;this.y=window.innerHeight+50;this.speedX=(Math.random()-0.5)*0.6;this.speedY=-(1.5+Math.random()*0.5);break;
-        case 3:this.x=-50;this.y=Math.random()*window.innerHeight;this.speedX=1.5+Math.random()*0.5;this.speedY=(Math.random()-0.5)*0.6;break;
+        case 0:this.x=Math.random()*window.innerWidth;this.y=-50;this.speedX=(Math.random()-0.5)*0.6;this.speedY=2+Math.random()*0.5;break;
+        case 1:this.x=window.innerWidth+50;this.y=Math.random()*window.innerHeight;this.speedX=-(2+Math.random()*0.5);this.speedY=(Math.random()-0.5)*0.6;break;
+        case 2:this.x=Math.random()*window.innerWidth;this.y=window.innerHeight+50;this.speedX=(Math.random()-0.5)*0.6;this.speedY=-(2+Math.random()*0.5);break;
+        case 3:this.x=-50;this.y=Math.random()*window.innerHeight;this.speedX=2+Math.random()*0.5;this.speedY=(Math.random()-0.5)*0.6;break;
       }
       this.rotation=0;
     }
@@ -324,8 +324,8 @@ class SpaceObject{
 
     const rocketCenterX=this.x+20;
     const rocketCenterY=this.y+20;
-    const engineOffsetX=0;
-    const engineOffsetY=20;
+    const engineOffsetX=0 + (Math.random()-0.5)*4; // slight X randomness
+    const engineOffsetY=20 + (Math.random()*3); // slight Y randomness
     const rad=this.rotation*Math.PI/180;
     const rotatedOffsetX=engineOffsetX*Math.cos(rad)-engineOffsetY*Math.sin(rad);
     const rotatedOffsetY=engineOffsetX*Math.sin(rad)+engineOffsetY*Math.cos(rad);
@@ -333,14 +333,14 @@ class SpaceObject{
     smoke.style.top=rocketCenterY+rotatedOffsetY-7+'px';
 
     let opacity=0.35+Math.random()*0.3;
-    let scale=0.5+Math.random()*0.3;
+    let scale=0.4+Math.random()*0.3;
     let frame=0;
-    const lifetime=50;
-    const speed=0.12;
+    const lifetime=50 + Math.floor(Math.random()*15);
+    const speed=0.12 + Math.random()*0.05;
     function animateSmoke(){
       if(frame>=lifetime){smoke.remove();return;}
-      const moveX=-Math.sin(rad)*frame*speed;
-      const moveY=Math.cos(rad)*frame*speed;
+      const moveX=-Math.sin(rad)*frame*speed + (Math.random()-0.5)*0.6;
+      const moveY=Math.cos(rad)*frame*speed + (Math.random()-0.5)*0.6;
       smoke.style.transform=`rotate(${rad}rad) translate(${moveX}px,${moveY}px) scale(${scale})`;
       smoke.style.opacity=opacity;
       opacity-=0.008;
