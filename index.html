@@ -250,16 +250,16 @@ class SpaceObject{
   }
 
   createSmoke(){
-    const smoke=document.createElement('div'); 
-    smoke.classList.add('smoke'); 
+    const smoke=document.createElement('div');
+    smoke.classList.add('smoke');
     spaceObjectsContainer.appendChild(smoke);
 
-    // Dynamic position under rocket
-    const smokeX = this.x + this.size/2 - 7;
-    const smokeY = this.y + this.size - 5;
+    const angleRad = Math.atan2(this.speedY, this.speedX);
+    const tipX = this.x + this.size/2 - Math.cos(angleRad) * (this.size/2);
+    const tipY = this.y + this.size/2 - Math.sin(angleRad) * (this.size/2);
 
-    smoke.style.left = smokeX + 'px';
-    smoke.style.top = smokeY + 'px';
+    smoke.style.left = tipX - 7 + 'px';
+    smoke.style.top = tipY - 7 + 'px';
 
     let opacity = 0.35 + Math.random()*0.25;
     let scale = 0.4 + Math.random()*0.3;
@@ -267,15 +267,15 @@ class SpaceObject{
     const lifetime = 60 + Math.floor(Math.random()*20);
     const speed = 0.12 + Math.random()*0.05;
 
-    function animateSmoke(){
+    const animateSmoke = () => {
       if(frame>=lifetime){smoke.remove(); return;}
-      smoke.style.transform = `translateY(-${frame * speed * 10}px) scale(${scale})`;
+      smoke.style.transform = `translate(${frame * Math.sin(angleRad) * -speed}px,${frame * Math.cos(angleRad) * speed}px) scale(${scale})`;
       smoke.style.opacity = opacity;
       opacity -= 0.006;
       scale += 0.004;
       frame++;
       requestAnimationFrame(animateSmoke);
-    }
+    };
     animateSmoke();
   }
 
@@ -291,12 +291,12 @@ class SpaceObject{
       if(this.rotation>360)this.rotation-=360;
       else if(this.rotation<0)this.rotation+=360;
     } else if(this.type==='rocket'){
+      this.rotation = Math.atan2(this.speedY, this.speedX) * 180 / Math.PI + 90;
+      if(Math.random()<0.3) this.createSmoke();
       if(this.x<-100||this.x>width+100||this.y<-100||this.y>height+100){
         this.el.remove();
         return false;
       }
-      this.rotation = Math.atan2(this.speedY, this.speedX) * 180 / Math.PI + 90;
-      if(Math.random()<0.3) this.createSmoke();
     }
 
     this.updatePosition();
