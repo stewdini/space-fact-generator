@@ -38,7 +38,6 @@ canvas#starfield {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  /* removed transition to fix jitter */
 }
 
 .planet {
@@ -220,6 +219,7 @@ class SpaceObject{
     this.type=type;
     this.el=document.createElement('div');
     this.el.classList.add('space-object');
+
     if(type==='planet'){
       this.size=40+Math.random()*35;
       this.el.classList.add('planet');
@@ -228,29 +228,35 @@ class SpaceObject{
       do{this.x=Math.random()*window.innerWidth;this.y=Math.random()*window.innerHeight;}while(this.x>width/2-150 && this.x<width/2+150 && this.y>height/2-150 && this.y<height/2+150);
       this.speedX=0;this.speedY=0;this.rotation=0;this.rotationSpeed=0;
       this.el.style.width=this.size+'px';this.el.style.height=this.size+'px';this.el.style.transformOrigin='50% 50%';
-    }else if(type==='asteroid'){
+    } else if(type==='asteroid'){
       this.size=30+Math.random()*20;
       this.el.style.backgroundImage=`url(${asteroidImages[Math.floor(Math.random()*asteroidImages.length)]})`;
       this.el.style.width=this.size+'px';this.el.style.height=this.size+'px';
       this.x=Math.random()*window.innerWidth;this.y=Math.random()*window.innerHeight;
-      this.speedX=(Math.random()-0.5)*0.5;  // slightly faster and smooth
-      this.speedY=(Math.random()-0.5)*0.5;
+      this.speedX=(Math.random()-0.5)*0.5;this.speedY=(Math.random()-0.5)*0.5;
       this.rotation=Math.random()*360;
       this.rotationSpeed=(Math.random()-0.5)*0.2;
       this.el.style.transformOrigin='50% 50%';
-    }else if(type==='rocket'){
+      this.targetX = this.x;
+      this.targetY = this.y;
+      this.smoothFactor = 0.03;
+    } else if(type==='rocket'){
       this.size=40; this.el.style.width='40px'; this.el.style.height='40px';
       this.el.style.backgroundImage=`url(${rocketImages[0]})`;
       const edge=Math.floor(Math.random()*4);
       switch(edge){
-        case 0:this.x=Math.random()*width;this.y=-50;this.speedX=(Math.random()-0.5)*0.5;this.speedY=2+Math.random()*0.5;break; // faster
-        case 1:this.x=width+50;this.y=Math.random()*height;this.speedX=-(2+Math.random()*0.5);this.speedY=(Math.random()-0.5)*0.5;break;
-        case 2:this.x=Math.random()*width;this.y=height+50;this.speedX=(Math.random()-0.5)*0.5;this.speedY=-(2+Math.random()*0.5);break;
-        case 3:this.x=-50;this.y=Math.random()*height;this.speedX=2+Math.random()*0.5;this.speedY=(Math.random()-0.5)*0.5;break;
+        case 0:this.x=Math.random()*width;this.y=-50;this.speedX=(Math.random()-0.5)*0.5;this.speedY=1.5+Math.random()*0.5;break;
+        case 1:this.x=width+50;this.y=Math.random()*height;this.speedX=-(1.5+Math.random()*0.5);this.speedY=(Math.random()-0.5)*0.5;break;
+        case 2:this.x=Math.random()*width;this.y=height+50;this.speedX=(Math.random()-0.5)*0.5;this.speedY=-(1.5+Math.random()*0.5);break;
+        case 3:this.x=-50;this.y=Math.random()*height;this.speedX=1.5+Math.random()*0.5;this.speedY=(Math.random()-0.5)*0.5;break;
       }
       this.rotation=0;this.rotationSpeed=0;
       this.el.style.transformOrigin='50% 50%';
+      this.targetX = this.x;
+      this.targetY = this.y;
+      this.smoothFactor = 0.08;
     }
+
     this.updatePosition();
     spaceObjectsContainer.appendChild(this.el);
   }
@@ -279,15 +285,30 @@ class SpaceObject{
   }
 
   update(){
-    this.x+=this.speedX;this.y+=this.speedY;
-    if(this.type==='planet'){this.rotation+=0.02;if(this.rotation>360)this.rotation-=360;this.el.style.transform=`rotate(${this.rotation}deg)`;}
-    else if(this.type==='asteroid'){this.rotation+=this.rotationSpeed;if(this.rotation>360)this.rotation-=360;else if(this.rotation<0)this.rotation+=360;this.el.style.transform=`rotate(${this.rotation}deg)`;}
-    else if(this.type==='rocket'){
-      if(this.x<-100||this.x>width+100||this.y<-100||this.y>height+100){this.el.remove();return false;}
-      this.rotation=Math.atan2(this.speedY,this.speedX)*180/Math.PI+90;this.el.style.transform=`rotate(${this.rotation}deg)`;
-      if(Math.random()<0.3)this.createSmoke();
+    if(this.type==='planet'){
+      this.rotation+=0.02;
+      if(this.rotation>360) this.rotation-=360;
+      this.el.style.transform=`rotate(${this.rotation}deg)`;
+    } else {
+      this.targetX += this.speedX;
+      this.targetY += this.speedY;
+      this.x += (this.targetX - this.x) * this.smoothFactor;
+      this.y += (this.targetY - this.y) * this.smoothFactor;
+
+      if(this.type==='asteroid'){
+        this.rotation+=this.rotationSpeed;
+        if(this.rotation>360)this.rotation-=360;
+        else if(this.rotation<0)this.rotation+=360;
+        this.el.style.transform=`rotate(${this.rotation}deg)`;
+      } else if(this.type==='rocket'){
+        if(this.x<-100||this.x>width+100||this.y<-100||this.y>height+100){this.el.remove();return false;}
+        this.rotation=Math.atan2(this.speedY,this.speedX)*180/Math.PI+90;
+        this.el.style.transform=`rotate(${this.rotation}deg)`;
+        if(Math.random()<0.3)this.createSmoke();
+      }
     }
-    this.updatePosition();return true;
+    this.updatePosition();
+    return true;
   }
 }
 
