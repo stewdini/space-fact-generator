@@ -34,7 +34,7 @@ canvas#starfield {
   position: fixed;
   pointer-events: none;
   z-index: 0;
-  will-change: transform, opacity;
+  will-change: transform;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -203,8 +203,15 @@ function animateStarfield(){drawStars();requestAnimationFrame(animateStarfield);
 resize();animateStarfield();
 
 // Images
-const rocketImages=['https://stewdini.github.io/space-fact-generator/images/rocket1.png','https://stewdini.github.io/space-fact-generator/images/rocket2.png'];
-const asteroidImages=['https://stewdini.github.io/space-fact-generator/images/asteroid1.png','https://stewdini.github.io/space-fact-generator/images/asteroid2.png','https://stewdini.github.io/space-fact-generator/images/asteroid3.png'];
+const rocketImages=[
+  'https://stewdini.github.io/space-fact-generator/images/rocket1.png',
+  'https://stewdini.github.io/space-fact-generator/images/rocket2.png'
+];
+const asteroidImages=[
+  'https://stewdini.github.io/space-fact-generator/images/asteroid1.png',
+  'https://stewdini.github.io/space-fact-generator/images/asteroid2.png',
+  'https://stewdini.github.io/space-fact-generator/images/asteroid3.png'
+];
 const spaceObjectsContainer=document.getElementById('spaceObjectsContainer');
 
 class SpaceObject{
@@ -219,71 +226,84 @@ class SpaceObject{
       this.el.classList.add(colors[Math.floor(Math.random()*colors.length)]);
       do{this.x=Math.random()*window.innerWidth;this.y=Math.random()*window.innerHeight;}while(this.x>width/2-150 && this.x<width/2+150 && this.y>height/2-150 && this.y<height/2+150);
       this.speedX=0;this.speedY=0;this.rotation=0;this.rotationSpeed=0;
-      this.el.style.width=this.size+'px';this.el.style.height=this.size+'px';
-      this.el.style.transformOrigin='50% 50%';
+      this.el.style.width=this.size+'px';this.el.style.height=this.size+'px';this.el.style.transformOrigin='50% 50%';
     }else if(type==='asteroid'){
       this.size=30+Math.random()*20;
       this.el.style.backgroundImage=`url(${asteroidImages[Math.floor(Math.random()*asteroidImages.length)]})`;
       this.el.style.width=this.size+'px';this.el.style.height=this.size+'px';
       this.x=Math.random()*window.innerWidth;this.y=Math.random()*window.innerHeight;
-      this.speedX=(Math.random()-0.5)*0.3;this.speedY=(Math.random()-0.5)*0.3;
+      this.speedX=(Math.random()-0.5)*0.2;this.speedY=(Math.random()-0.5)*0.2;
       this.rotation=Math.random()*360;
-      this.rotationSpeed=(Math.random()-0.5)*0.3;
+      this.rotationSpeed=(Math.random()-0.5)*0.2;
+      this.displayX=this.x;this.displayY=this.y;
       this.el.style.transformOrigin='50% 50%';
     }else if(type==='rocket'){
       this.size=40; this.el.style.width='40px'; this.el.style.height='40px';
       this.el.style.backgroundImage=`url(${rocketImages[0]})`;
       const edge=Math.floor(Math.random()*4);
       switch(edge){
-        case 0:this.x=Math.random()*width;this.y=-50;this.speedX=(Math.random()-0.5)*0.6;this.speedY=1.7+Math.random()*0.5;break;
-        case 1:this.x=width+50;this.y=Math.random()*height;this.speedX=-(1.7+Math.random()*0.5);this.speedY=(Math.random()-0.5)*0.6;break;
-        case 2:this.x=Math.random()*width;this.y=height+50;this.speedX=(Math.random()-0.5)*0.6;this.speedY=-(1.7+Math.random()*0.5);break;
-        case 3:this.x=-50;this.y=Math.random()*height;this.speedX=1.7+Math.random()*0.5;this.speedY=(Math.random()-0.5)*0.6;break;
+        case 0:this.x=Math.random()*width;this.y=-50;this.speedX=(Math.random()-0.5)*0.5;this.speedY=1.5+Math.random()*0.5;break;
+        case 1:this.x=width+50;this.y=Math.random()*height;this.speedX=-(1.5+Math.random()*0.5);this.speedY=(Math.random()-0.5)*0.5;break;
+        case 2:this.x=Math.random()*width;this.y=height+50;this.speedX=(Math.random()-0.5)*0.5;this.speedY=-(1.5+Math.random()*0.5);break;
+        case 3:this.x=-50;this.y=Math.random()*height;this.speedX=1.5+Math.random()*0.5;this.speedY=(Math.random()-0.5)*0.5;break;
       }
       this.rotation=0;this.rotationSpeed=0;
+      this.displayX=this.x;this.displayY=this.y;
       this.el.style.transformOrigin='50% 50%';
-      this.smokeOffset={x:0, y:20};
     }
-    this.displayX=this.x; this.displayY=this.y; // for smooth movement
+    this.updatePosition();
     spaceObjectsContainer.appendChild(this.el);
+  }
+
+  updatePosition(){
+    this.el.style.left=this.displayX+'px';
+    this.el.style.top=this.displayY+'px';
   }
 
   createSmoke(){
     const smoke=document.createElement('div');smoke.classList.add('smoke');spaceObjectsContainer.appendChild(smoke);
+    const offsetX=0, offsetY=20; // bottom middle
     const rad=this.rotation*Math.PI/180;
-    let frame=0,lifetime=60+Math.floor(Math.random()*20);
-    const baseX=this.displayX+this.smokeOffset.x+this.size/2;
-    const baseY=this.displayY+this.smokeOffset.y+this.size/2;
-    let opacity=0.35+Math.random()*0.25, scale=0.4+Math.random()*0.3, speed=0.12+Math.random()*0.05, curve=Math.random()*0.4-0.2;
+    let centerX=this.displayX + 20; // bottom middle X
+    let centerY=this.displayY + 20; // bottom middle Y
+    const rotatedX=offsetX*Math.cos(rad)-offsetY*Math.sin(rad);
+    const rotatedY=offsetX*Math.sin(rad)+offsetY*Math.cos(rad);
+    smoke.style.left=centerX+rotatedX-7+'px';
+    smoke.style.top=centerY+rotatedY-7+'px';
+
+    let opacity=0.35+Math.random()*0.25,scale=0.4+Math.random()*0.3,frame=0,lifetime=60+Math.floor(Math.random()*20),speed=0.12+Math.random()*0.05,curve=Math.random()*0.4-0.2;
     function animateSmoke(){
       if(frame>=lifetime){smoke.remove();return;}
       const moveX=-Math.sin(rad)*frame*speed+curve*frame;
       const moveY=Math.cos(rad)*frame*speed;
       smoke.style.transform=`rotate(${rad}rad) translate(${moveX}px,${moveY}px) scale(${scale})`;
-      smoke.style.left=baseX-7+'px';
-      smoke.style.top=baseY-7+'px';
       smoke.style.opacity=opacity;
-      opacity-=0.006; scale+=0.004; frame++;
+      opacity-=0.006;scale+=0.004;frame++;
       requestAnimationFrame(animateSmoke);
     }
     animateSmoke();
   }
 
   update(){
-    this.x+=this.speedX; this.y+=this.speedY;
-    if(this.type==='planet'){this.rotation+=0.02; this.el.style.transform=`translate3d(${this.displayX}px,${this.displayY}px,0) rotate(${this.rotation}deg)`;}
-    else if(this.type==='asteroid'){this.rotation+=this.rotationSpeed; this.el.style.transform=`translate3d(${this.displayX}px,${this.displayY}px,0) rotate(${this.rotation}deg)`;}
-    else if(this.type==='rocket'){
+    // smooth display interpolation
+    this.displayX+=(this.x-this.displayX)*0.2;
+    this.displayY+=(this.y-this.displayY)*0.2;
+
+    if(this.type==='planet'){
+      this.rotation+=0.02;if(this.rotation>360)this.rotation-=360;
+      this.el.style.transform=`rotate(${this.rotation}deg)`;
+    } else if(this.type==='asteroid'){
+      this.rotation+=this.rotationSpeed;
+      if(this.rotation>360)this.rotation-=360;
+      else if(this.rotation<0)this.rotation+=360;
+      this.el.style.transform=`rotate(${this.rotation}deg)`;
+    } else if(this.type==='rocket'){
       if(this.x<-100||this.x>width+100||this.y<-100||this.y>height+100){this.el.remove();return false;}
       this.rotation=Math.atan2(this.speedY,this.speedX)*180/Math.PI+90;
-      this.el.style.transform=`translate3d(${this.displayX}px,${this.displayY}px,0) rotate(${this.rotation}deg)`;
+      this.el.style.transform=`rotate(${this.rotation}deg)`;
       if(Math.random()<0.3)this.createSmoke();
     }
-    // Smooth interpolation
-    const smoothFactor=0.15;
-    this.displayX+= (this.x - this.displayX)*smoothFactor;
-    this.displayY+= (this.y - this.displayY)*smoothFactor;
-    return true;
+    this.updatePosition();return true;
   }
 }
 
@@ -295,7 +315,11 @@ for(let i=0;i<4;i++)spaceObjects.push(new SpaceObject('rocket'));
 function animateSpaceObjects(){
   for(let i=spaceObjects.length-1;i>=0;i--){
     const alive=spaceObjects[i].update();
-    if(alive===false){const type=spaceObjects[i]?.type||'rocket';spaceObjects.splice(i,1);spaceObjects.push(new SpaceObject(type));}
+    if(alive===false){
+      const type=spaceObjects[i]?.type||'rocket';
+      spaceObjects.splice(i,1);
+      spaceObjects.push(new SpaceObject(type));
+    }
   }
   requestAnimationFrame(animateSpaceObjects);
 }
