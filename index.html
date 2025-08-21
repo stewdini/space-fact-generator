@@ -1,219 +1,364 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Space Fact Generator</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Random Space Fact Generator | Space Simplified</title>
 <style>
 body {
-    margin: 0;
-    overflow: hidden;
-    background: #000;
-    color: #fff;
-    font-family: sans-serif;
+  margin: 0;
+  height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #e0e0e0;
+  background: #000010;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 1rem;
+  position: relative;
 }
-.stars {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    /* static starfield using repeated radial gradients:contentReference[oaicite:0]{index=0} */
-    background-image:
-        radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
-        radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
-        radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)),
-        radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
-        radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0)),
-        radial-gradient(2px 2px at 160px 120px, #ddd, rgba(0,0,0,0));
-    background-repeat: repeat;
-    background-size: 200px 200px;
+
+canvas#starfield {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
 }
+
+.space-object {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  transform: translate3d(0,0,0);
+}
+
 .planet {
-    position: absolute;
-    z-index: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 8px 1px rgba(100,150,255,0.3);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
 }
-.planet1 { top: 20px; left: 20px; width: 150px; }
-.planet2 { bottom: 20px; right: 20px; width: 150px; }
-.rocket {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    transform-origin: 50% 100%; /* bottom center (engine):contentReference[oaicite:1]{index=1} */
-    z-index: 1;
-}
-.rocket img {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-.asteroid {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    background: #666;
-    border-radius: 60% 40% 50% 60% / 50% 60% 40% 50%;
-    z-index: 1;
-}
-.smoke {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    background: radial-gradient(circle, rgba(200,200,200,0.8) 0%, rgba(150,150,150,0.4) 50%, rgba(100,100,100,0) 100%);
-    border-radius: 50%;
-    z-index: 1;
-    pointer-events: none;
-}
+
+.planet.red { background-color: #b0413e; }
+.planet.blue { background-color: #4b7dad; }
+.planet.green { background-color: #4ca36c; }
+.planet.orange { background-color: #d17f3c; }
+.planet.purple { background-color: #7855b8; }
+
 h1 {
-    text-align: center;
-    margin: 20px 0 10px 0;
-    z-index: 2;
-    position: relative;
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 10;
+  text-shadow: 0 0 8px #66fcf1;
 }
-#fact {
-    margin: 10px auto;
-    max-width: 600px;
-    padding: 10px;
-    text-align: center;
-    font-size: 1.2em;
-    z-index: 2;
-    position: relative;
+
+.sparkle {
+  display: inline-block;
+  animation: sparkleAnim 2s linear infinite;
+  font-size: 2.2rem;
+  color: #66fcf1;
+  margin-left: 0.3em;
+  position: relative;
+  top: 5px;
 }
-#controls {
-    text-align: center;
-    margin: 10px;
-    z-index: 2;
-    position: relative;
+
+@keyframes sparkleAnim {
+  0%, 100% { opacity: 1; transform: rotate(0deg) scale(1); }
+  50% { opacity: 0.5; transform: rotate(20deg) scale(1.3); }
 }
-button {
-    padding: 6px 12px;
-    margin: 0 5px;
-    font-size: 1em;
+
+#factWrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  max-width: 700px;
+  z-index: 10;
+}
+
+#factDisplay {
+  font-size: 1.4rem;
+  margin: 2rem 0;
+  line-height: 1.6;
+  position: relative;
+  opacity: 0;
+  animation: fadeIn 1s forwards;
+  text-shadow: 0 0 6px #45a29eaa;
+  max-width: 600px;
+  word-wrap: break-word;
+}
+
+#factDisplay.show { animation: fadeIn 1s forwards; opacity: 1; }
+
+#copyButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 4px;
+  display: none;
+  color: #ccc;
+  transition: color 0.2s ease, transform 0.2s ease;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+#copyButton:hover { color: #fff; transform: scale(1.2); }
+
+#copyFeedback {
+  font-size: 1.5rem;
+  color: #66fcf1;
+  margin-left: 8px;
+  user-select: none;
+  display: none;
+  align-self: center;
+}
+
+.buttons-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 1rem;
+  position: relative;
+  z-index: 10;
+}
+
+#factButton {
+  padding: 14px 35px;
+  font-size: 1.3rem;
+  border: none;
+  border-radius: 10px;
+  background-color: #1f2833;
+  color: #66fcf1;
+  cursor: pointer;
+  transition: background-color 0.4s ease, box-shadow 0.4s ease, transform 0.2s ease;
+  box-shadow: 0 0 12px #45a29e99;
+  animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+#factButton:disabled { cursor: not-allowed; opacity: 0.5; animation: none; box-shadow: none; background-color: #0a141b; color: #444; }
+
+@keyframes pulseGlow {
+  0%,100%{ box-shadow:0 0 12px #45a29e99,0 0 20px #66fcf1cc; }
+  50%{ box-shadow:0 0 20px #45a29ecc,0 0 30px #66fcf1ff; }
+}
+
+#factButton:hover:not(:disabled) { background-color:#45a29e; box-shadow:0 0 30px #66fcf1ff; transform: scale(1.05); animation:none; }
+#factButton:active:not(:disabled) { transform: scale(0.95); box-shadow:0 0 10px #45a29e99; }
+
+#muteToggle { background:none; border:none; font-size:1.4rem; cursor:pointer; color:#66fcf1; padding:0; margin:0 0 0 12px; line-height:1; user-select:none; transition: transform 0.2s ease; }
+#muteToggle:hover { transform: scale(1.2); }
+
+.smoke {
+  position: fixed;
+  width: 14px;
+  height: 14px;
+  background: rgba(180,180,180,0.3);
+  border-radius: 50%;
+  filter: blur(3px);
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform, opacity;
+  transform-origin: center center;
 }
 </style>
 </head>
 <body>
-<div class="stars"></div>
-<img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Jupiter_%28transparent%29.png" class="planet planet1" alt="Planet Jupiter">
-<img src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Saturn_transparent.png" class="planet planet2" alt="Planet Saturn">
-<div class="rocket" id="rocket0"><img src="https://stewdini.github.io/space-fact-generator/images/rocket1.png" alt="Rocket"></div>
-<div class="rocket" id="rocket1"><img src="https://stewdini.github.io/space-fact-generator/images/rocket1.png" alt="Rocket"></div>
-<div class="asteroid" id="ast0"></div>
-<div class="asteroid" id="ast1"></div>
-<div class="asteroid" id="ast2"></div>
-<h1>Space Facts</h1>
-<div id="fact">Click "Generate Fact" to see a space fact.</div>
-<div id="controls">
-  <button id="generate">Generate Fact</button>
-  <button id="copy">Copy Fact</button>
+<canvas id="starfield"></canvas>
+<div id="spaceObjectsContainer"></div>
+<h1>🔭 Random Space Fact Generator<span class="sparkle">✨</span></h1>
+<div id="factWrapper">
+  <p id="factDisplay">Click the button below to learn a cool space fact!</p>
+  <button id="copyButton">Copy</button>
+  <span id="copyFeedback">✅</span>
 </div>
-<script>
-// Smooth animation with requestAnimationFrame:contentReference[oaicite:2]{index=2}, using translate3d for GPU acceleration:contentReference[oaicite:3]{index=3}.
-let rockets = [
-    { x: 100, y: window.innerHeight - 40, vx: 0, vy: -2, elem: document.getElementById('rocket0'), frame: 0 },
-    { x: window.innerWidth - 100, y: 40, vx: 0, vy: 2, elem: document.getElementById('rocket1'), frame: 0 }
-];
-let asteroids = [
-    { x: 0, y: 150, vx: 1.5, vy: 0.5, elem: document.getElementById('ast0') },
-    { x: window.innerWidth - 50, y: 300, vx: -1.2, vy: 0.3, elem: document.getElementById('ast1') },
-    { x: 200, y: window.innerHeight - 50, vx: 0.8, vy: -1, elem: document.getElementById('ast2') }
-];
-let smokes = [];
+<div class="buttons-container">
+  <button id="factButton">Show Me a Random Fact</button>
+  <button id="muteToggle">🔊</button>
+</div>
 
-// Fact generator data
-const facts = [
-    "Space is completely silent; there is no atmosphere in space, so sound cannot travel.",
-    "Venus is the hottest planet, even though Mercury is closer to the Sun.",
-    "A day on Venus is longer than a year on Venus due to its slow rotation.",
-    "Neutron stars can spin 600 times per second.",
-    "There are more stars in the universe than grains of sand on Earth.",
-    "One million Earths could fit inside the Sun.",
-    "Saturn is so light it would float on water.",
-    "A day on Neptune lasts about 16 hours.",
-    "Jupiter's Great Red Spot is a storm at least 350 years old.",
-    "The Milky Way will collide with Andromeda in about 4 billion years."
-];
-function generateFact() {
-    let text = facts[Math.floor(Math.random() * facts.length)];
-    document.getElementById('fact').innerText = text;
-}
-document.getElementById('generate').addEventListener('click', generateFact);
-// Copy to clipboard using Clipboard API:contentReference[oaicite:4]{index=4}
-document.getElementById('copy').addEventListener('click', () => {
-    let text = document.getElementById('fact').innerText;
-    if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).catch(err => console.error(err));
-    } else {
-        let ta = document.createElement('textarea');
-        ta.value = text;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
+<script>
+// === STARFIELD ===
+const canvas=document.getElementById('starfield'), ctx=canvas.getContext('2d');
+let stars=[], width, height, mouseX=0, mouseY=0;
+const starCount=150;
+function initStars(){stars=[]; for(let i=0;i<starCount;i++){stars.push({x:Math.random()*width,y:Math.random()*height,radius:Math.random()*1.3+0.3});}}
+function resize(){width=window.innerWidth;height=window.innerHeight;canvas.width=width;canvas.height=height;initStars();}
+function drawStars(){ctx.clearRect(0,0,width,height);ctx.fillStyle='white';stars.forEach(star=>{let parallaxX=star.x+(mouseX-width/2)*0.02*star.radius;let parallaxY=star.y+(mouseY-height/2)*0.02*star.radius;ctx.beginPath();ctx.arc(parallaxX,parallaxY,star.radius,0,2*Math.PI);ctx.fill();});}
+window.addEventListener('resize',resize);
+window.addEventListener('mousemove',e=>{mouseX=e.clientX;mouseY=e.clientY;});
+function animateStarfield(){drawStars();requestAnimationFrame(animateStarfield);}
+resize();animateStarfield();
+
+// === SPACE OBJECTS WITH ROCKETS + SMOKE ===
+const rocketImages=['https://stewdini.github.io/space-fact-generator/images/rocket1.png'];
+const asteroidImages=['https://stewdini.github.io/space-fact-generator/images/asteroid1.png','https://stewdini.github.io/space-fact-generator/images/asteroid2.png','https://stewdini.github.io/space-fact-generator/images/asteroid3.png'];
+const spaceObjectsContainer=document.getElementById('spaceObjectsContainer');
+
+class SpaceObject{
+  constructor(type){
+    this.type=type;
+    this.el=document.createElement('div');
+    this.el.classList.add('space-object');
+    if(type==='planet'){
+      this.size=40+Math.random()*35;
+      this.el.classList.add('planet');
+      const colors=['red','blue','green','orange','purple'];
+      this.el.classList.add(colors[Math.floor(Math.random()*colors.length)]);
+      do{this.x=Math.random()*width;this.y=Math.random()*height;}while(this.x>width/2-150 && this.x<width/2+150 && this.y>height/2-150 && this.y<height/2+150);
+      this.speedX=0; this.speedY=0; this.rotation=0; this.rotationSpeed=0.02;
+      this.el.style.width=this.size+'px'; this.el.style.height=this.size+'px';
+    } else if(type==='asteroid'){
+      this.size=30+Math.random()*20;
+      this.el.style.backgroundImage=`url(${asteroidImages[Math.floor(Math.random()*asteroidImages.length)]})`;
+      this.el.style.width=this.size+'px'; this.el.style.height=this.size+'px';
+      this.x=Math.random()*width; this.y=Math.random()*height;
+      this.speedX=(Math.random()-0.5)*1; this.speedY=(Math.random()-0.5)*1;
+      this.rotation=Math.random()*360; this.rotationSpeed=(Math.random()-0.5)*0.3;
+    } else if(type==='rocket'){
+      this.size=40; this.el.style.width='40px'; this.el.style.height='40px';
+      this.el.style.backgroundImage=`url(${rocketImages[0]})`;
+      const edge=Math.floor(Math.random()*4);
+      switch(edge){
+        case 0:this.x=Math.random()*width;this.y=-50;this.speedX=(Math.random()-0.5)*0.5;this.speedY=1.7+Math.random()*0.5;break;
+        case 1:this.x=width+50;this.y=Math.random()*height;this.speedX=-(1.7+Math.random()*0.5);this.speedY=(Math.random()-0.5)*0.5;break;
+        case 2:this.x=Math.random()*width;this.y=height+50;this.speedX=(Math.random()-0.5)*0.5;this.speedY=-(1.7+Math.random()*0.5);break;
+        case 3:this.x=-50;this.y=Math.random()*height;this.speedX=1.7+Math.random()*0.5;this.speedY=(Math.random()-0.5)*0.5;break;
+      }
+      this.rotation=0;
     }
+    this.updatePosition();
+    spaceObjectsContainer.appendChild(this.el);
+  }
+
+  updatePosition(){
+    this.el.style.transform=`translate3d(${this.x}px,${this.y}px,0) rotate(${this.rotation}deg)`;
+  }
+
+  createSmoke(){
+    const smoke=document.createElement('div'); 
+    smoke.classList.add('smoke'); 
+    spaceObjectsContainer.appendChild(smoke);
+    const centerX = this.x + this.size/2;
+    const centerY = this.y + this.size/2;
+    const angle = Math.atan2(this.speedY, this.speedX);
+    const offset = 20;
+    const smokeX = centerX - Math.cos(angle) * offset;
+    const smokeY = centerY - Math.sin(angle) * offset;
+    smoke.style.left = smokeX - 7 + 'px';
+    smoke.style.top = smokeY - 7 + 'px';
+    let opacity = 0.35 + Math.random()*0.25;
+    let scale = 0.4 + Math.random()*0.3;
+    let frame = 0;
+    const lifetime = 60 + Math.floor(Math.random()*20);
+    const speed = 0.12 + Math.random()*0.05;
+    const animateSmoke = ()=>{
+      if(frame>=lifetime){smoke.remove(); return;}
+      const moveX = -Math.sin(angle) * frame * speed;
+      const moveY = Math.cos(angle) * frame * speed;
+      smoke.style.transform = `translate(${moveX}px,${moveY}px) scale(${scale})`;
+      smoke.style.opacity = opacity;
+      opacity -= 0.006;
+      scale += 0.004;
+      frame++;
+      requestAnimationFrame(animateSmoke);
+    }
+    animateSmoke();
+  }
+
+  update(){
+    this.x += this.speedX;
+    this.y += this.speedY;
+
+    if(this.type==='planet'){
+      this.rotation += this.rotationSpeed;
+      if(this.rotation>360)this.rotation-=360;
+    } else if(this.type==='asteroid'){
+      this.rotation += this.rotationSpeed;
+      if(this.rotation>360)this.rotation-=360;
+      else if(this.rotation<0)this.rotation+=360;
+    } else if(this.type==='rocket'){
+      if(this.x<-100||this.x>width+100||this.y<-100||this.y>height+100){
+        this.el.remove();
+        return false;
+      }
+      this.rotation = Math.atan2(this.speedY, this.speedX) * 180 / Math.PI + 90;
+      if(Math.random()<0.3) this.createSmoke();
+    }
+
+    this.updatePosition();
+    return true;
+  }
+}
+
+const spaceObjects = [];
+for(let i=0;i<6;i++) spaceObjects.push(new SpaceObject('planet'));
+for(let i=0;i<5;i++) spaceObjects.push(new SpaceObject('asteroid'));
+for(let i=0;i<4;i++) spaceObjects.push(new SpaceObject('rocket'));
+
+function animateSpaceObjects(){
+  for(let i=spaceObjects.length-1;i>=0;i--){
+    const alive = spaceObjects[i].update();
+    if(alive === false){
+      const type = spaceObjects[i]?.type || 'rocket';
+      spaceObjects.splice(i,1);
+      spaceObjects.push(new SpaceObject(type));
+    }
+  }
+  requestAnimationFrame(animateSpaceObjects);
+}
+animateSpaceObjects();
+
+// === FACT GENERATOR ===
+const facts=[
+  "The largest volcano in our solar system is on Mars, Olympus Mons.",
+  "Jupiter has the shortest day of all planets, completing a rotation in about 10 hours.",
+  "Saturn’s rings are made mostly of ice particles with a smaller amount of rocky debris.",
+  "Venus spins backward compared to most planets, meaning the Sun rises in the west there.",
+  "A day on Mercury lasts longer than its year!",
+  "Neutron stars can spin 600 times per second.",
+  "Space is not completely empty, it has tiny particles and radiation.",
+  "The hottest planet is not the closest to the Sun, but Venus due to its thick atmosphere.",
+  "Pluto is classified as a dwarf planet, not a full sized planet.",
+  "There are thousands of exoplanets discovered beyond our solar system."
+];
+const factDisplay=document.getElementById('factDisplay');
+const factButton=document.getElementById('factButton');
+const copyButton=document.getElementById('copyButton');
+const copyFeedback=document.getElementById('copyFeedback');
+
+factButton.addEventListener('click',()=>{
+  const randomFact=facts[Math.floor(Math.random()*facts.length)];
+  factDisplay.textContent=randomFact;
+  factDisplay.classList.add('show');
+  copyButton.style.display='inline-block';
+  copyFeedback.style.display='none';
 });
 
-function animate() {
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-    // Rockets
-    rockets.forEach(r => {
-        r.x += r.vx;
-        r.y += r.vy;
-        if (r.x > width + 40) r.x = -40;
-        if (r.x < -40) r.x = width + 40;
-        if (r.y > height + 40) r.y = -40;
-        if (r.y < -40) r.y = height + 40;
-        // Angle to rotate rocket (image oriented up):contentReference[oaicite:5]{index=5}
-        let angle = Math.atan2(r.vy, r.vx) * 180/Math.PI + 90;
-        r.elem.style.transform = `translate3d(${r.x}px, ${r.y}px, 0) rotate(${angle}deg)`;
-        // Spawn smoke puffs every few frames
-        r.frame++;
-        if (r.frame > 10) {
-            r.frame = 0;
-            // Position at rocket's engine (bottom center):contentReference[oaicite:6]{index=6}
-            let rad = (angle - 90) * Math.PI/180;
-            let ex = r.x - 20 * Math.sin(rad);
-            let ey = r.y + 20 * Math.cos(rad);
-            let smoke = { x: ex, y: ey, vx: -r.vx*0.5 + (Math.random()-0.5)*0.4, vy: -r.vy*0.5 + (Math.random()-0.5)*0.4, scale: 1, alpha: 1 };
-            let el = document.createElement('div');
-            el.className = 'smoke';
-            document.body.appendChild(el);
-            smoke.elem = el;
-            smokes.push(smoke);
-        }
-    });
-    // Asteroids
-    asteroids.forEach(a => {
-        a.x += a.vx;
-        a.y += a.vy;
-        if (a.x > width + 30) a.x = -30;
-        if (a.x < -30) a.x = width + 30;
-        if (a.y > height + 30) a.y = -30;
-        if (a.y < -30) a.y = height + 30;
-        a.elem.style.transform = `translate3d(${a.x}px, ${a.y}px, 0)`;
-    });
-    // Smoke particles (fade out, expand):contentReference[oaicite:7]{index=7}
-    for (let i = smokes.length - 1; i >= 0; i--) {
-        let s = smokes[i];
-        s.x += s.vx;
-        s.y += s.vy;
-        s.scale += 0.03;
-        s.alpha -= 0.01;
-        if (s.alpha <= 0) {
-            document.body.removeChild(s.elem);
-            smokes.splice(i, 1);
-            continue;
-        }
-        s.elem.style.width = `${10 * s.scale}px`;
-        s.elem.style.height = `${10 * s.scale}px`;
-        s.elem.style.left = `${s.x - 5 * s.scale}px`;
-        s.elem.style.top = `${s.y - 5 * s.scale}px`;
-        s.elem.style.opacity = s.alpha;
-    }
-    requestAnimationFrame(animate);
-}
-animate();
+copyButton.addEventListener('click',()=>{
+  navigator.clipboard.writeText(factDisplay.textContent).then(()=>{
+    copyFeedback.style.display='inline';
+    setTimeout(()=>{copyFeedback.style.display='none';},2000);
+  });
+});
+
+const muteToggle=document.getElementById('muteToggle');
+let muted=false;
+muteToggle.addEventListener('click',()=>{muted=!muted;muteToggle.textContent=muted?'🔇':'🔊';});
 </script>
 </body>
 </html>
