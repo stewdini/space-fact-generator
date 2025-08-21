@@ -30,7 +30,6 @@
     pointer-events: none;
   }
 
-  /* Space objects base style */
   .space-object {
     position: fixed;
     pointer-events: none;
@@ -41,7 +40,6 @@
     background-position: center;
   }
 
-  /* PLANETS */
   .planet {
     border-radius: 50%;
     box-shadow: 0 0 8px 1px rgba(100,150,255,0.3);
@@ -191,14 +189,14 @@
 
   .smoke {
     position: fixed;
-    width: 14px;
-    height: 14px;
-    background: rgba(180,180,180,0.3);
+    width: 12px;
+    height: 12px;
+    background: rgba(180,180,180,0.25);
     border-radius: 50%;
     filter: blur(3px);
     pointer-events: none;
     z-index: 0;
-    will-change: opacity, transform;
+    will-change: transform, opacity;
     transform-origin: center center;
   }
 </style>
@@ -270,13 +268,15 @@ class SpaceObject{
       this.el.style.height='40px';
       this.el.style.backgroundImage=`url(${rocketImages[0]})`;
       const edge=Math.floor(Math.random()*4);
+      const speed=1.0+Math.random()*0.5; // faster rockets
       switch(edge){
-        case 0:this.x=Math.random()*window.innerWidth; this.y=-50; this.vx=(Math.random()-0.5)*0.1; this.vy=0.4+Math.random()*0.1; break;
-        case 1:this.x=window.innerWidth+50; this.y=Math.random()*window.innerHeight; this.vx=-(0.4+Math.random()*0.1); this.vy=(Math.random()-0.5)*0.1; break;
-        case 2:this.x=Math.random()*window.innerWidth; this.y=window.innerHeight+50; this.vx=(Math.random()-0.5)*0.1; this.vy=-(0.4+Math.random()*0.1); break;
-        case 3:this.x=-50; this.y=Math.random()*window.innerHeight; this.vx=0.4+Math.random()*0.1; this.vy=(Math.random()-0.5)*0.1; break;
+        case 0:this.x=Math.random()*window.innerWidth; this.y=-50; this.vx=(Math.random()-0.5)*0.2; this.vy=speed; break;
+        case 1:this.x=window.innerWidth+50; this.y=Math.random()*window.innerHeight; this.vx=-speed; this.vy=(Math.random()-0.5)*0.2; break;
+        case 2:this.x=Math.random()*window.innerWidth; this.y=window.innerHeight+50; this.vx=(Math.random()-0.5)*0.2; this.vy=-speed; break;
+        case 3:this.x=-50; this.y=Math.random()*window.innerHeight; this.vx=speed; this.vy=(Math.random()-0.5)*0.2; break;
       }
       this.rotation=0;
+      this.smokeTrail=[];
     }
 
     spaceObjectsContainer.appendChild(this.el);
@@ -295,7 +295,6 @@ class SpaceObject{
   update(){
     if(this.type==='asteroid' || this.type==='rocket'){
       if(this.type==='asteroid'){
-        // Easing toward target velocity
         this.vx += (this.targetVX - this.vx)*0.02;
         this.vy += (this.targetVY - this.vy)*0.02;
       }
@@ -313,8 +312,9 @@ class SpaceObject{
 
       if(this.type==='rocket'){
         this.rotation=Math.atan2(this.vy,this.vx)*180/Math.PI+90;
-        if(Math.random()<0.35) this.createSmokeParticle(this.x+this.size/2,this.y+32);
+        this.addSmoke(this.x+this.size/2,this.y+32);
         if(this.x<-100||this.x>window.innerWidth+100||this.y<-100||this.y>window.innerHeight+100){
+          this.smokeTrail.forEach(s=>s.el.remove());
           this.el.remove();
           return false;
         }
@@ -325,37 +325,42 @@ class SpaceObject{
     return true;
   }
 
-  createSmokeParticle(x,y){
+  addSmoke(x,y){
     const smoke=document.createElement('div');
     smoke.classList.add('smoke');
     smoke.style.left=x+'px';
     smoke.style.top=y+'px';
     spaceObjectsContainer.appendChild(smoke);
-    let opacity=0.4+Math.random()*0.3, scale=0.5+Math.random()*0.5, rise=0, frame=0, lifetime=50+Math.random()*20;
-    function animateSmoke(){
-      if(frame>=lifetime){smoke.remove();return;}
-      rise+=0.2;
-      opacity-=0.007;
-      scale+=0.003;
-      smoke.style.transform=`translate(${0}px,${-rise}px) scale(${scale})`;
-      smoke.style.opacity=opacity;
-      frame++;
-      requestAnimationFrame(animateSmoke);
-    }
-    animateSmoke();
+    const particle={el:smoke, x, y, life:50+Math.random()*20};
+    this.smokeTrail.push(particle);
+  }
+
+  animateSmoke(){
+    this.smokeTrail.forEach((p,i)=>{
+      p.y-=0.3; 
+      p.life-=1;
+      p.el.style.transform=`translate(${0}px,${p.y-this.y}px) scale(${1 - p.life/70})`;
+      p.el.style.opacity=p.life/70;
+      if(p.life<=0){
+        p.el.remove();
+        this.smokeTrail.splice(i,1);
+      }
+    });
   }
 }
 
 const spaceObjects=[];
 function spawnObjects(){
-  if(spaceObjects.length<6) spaceObjects.push(new SpaceObject('planet'));
-  if(spaceObjects.length<12) spaceObjects.push(new SpaceObject('asteroid'));
+  if(spaceObjects.filter(o=>o.type==='planet').length<6) spaceObjects.push(new SpaceObject('planet'));
+  if(spaceObjects.filter(o=>o.type==='asteroid').length<12) spaceObjects.push(new SpaceObject('asteroid'));
   if(Math.random()<0.02) spaceObjects.push(new SpaceObject('rocket'));
 }
+
 function animateSpaceObjects(){
   spawnObjects();
   for(let i=spaceObjects.length-1;i>=0;i--){
     if(!spaceObjects[i].update()) spaceObjects.splice(i,1);
+    if(spaceObjects[i] && spaceObjects[i].type==='rocket') spaceObjects[i].animateSmoke();
   }
   requestAnimationFrame(animateSpaceObjects);
 }
