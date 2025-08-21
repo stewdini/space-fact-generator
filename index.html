@@ -38,7 +38,7 @@ canvas#starfield {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  transition: transform 0.05s linear;
+  /* removed transition to fix jitter */
 }
 
 .planet {
@@ -233,7 +233,8 @@ class SpaceObject{
       this.el.style.backgroundImage=`url(${asteroidImages[Math.floor(Math.random()*asteroidImages.length)]})`;
       this.el.style.width=this.size+'px';this.el.style.height=this.size+'px';
       this.x=Math.random()*window.innerWidth;this.y=Math.random()*window.innerHeight;
-      this.speedX=(Math.random()-0.5)*0.2;this.speedY=(Math.random()-0.5)*0.2;
+      this.speedX=(Math.random()-0.5)*0.5;  // slightly faster and smooth
+      this.speedY=(Math.random()-0.5)*0.5;
       this.rotation=Math.random()*360;
       this.rotationSpeed=(Math.random()-0.5)*0.2;
       this.el.style.transformOrigin='50% 50%';
@@ -242,10 +243,10 @@ class SpaceObject{
       this.el.style.backgroundImage=`url(${rocketImages[0]})`;
       const edge=Math.floor(Math.random()*4);
       switch(edge){
-        case 0:this.x=Math.random()*width;this.y=-50;this.speedX=(Math.random()-0.5)*0.5;this.speedY=1.5+Math.random()*0.5;break;
-        case 1:this.x=width+50;this.y=Math.random()*height;this.speedX=-(1.5+Math.random()*0.5);this.speedY=(Math.random()-0.5)*0.5;break;
-        case 2:this.x=Math.random()*width;this.y=height+50;this.speedX=(Math.random()-0.5)*0.5;this.speedY=-(1.5+Math.random()*0.5);break;
-        case 3:this.x=-50;this.y=Math.random()*height;this.speedX=1.5+Math.random()*0.5;this.speedY=(Math.random()-0.5)*0.5;break;
+        case 0:this.x=Math.random()*width;this.y=-50;this.speedX=(Math.random()-0.5)*0.5;this.speedY=2+Math.random()*0.5;break; // faster
+        case 1:this.x=width+50;this.y=Math.random()*height;this.speedX=-(2+Math.random()*0.5);this.speedY=(Math.random()-0.5)*0.5;break;
+        case 2:this.x=Math.random()*width;this.y=height+50;this.speedX=(Math.random()-0.5)*0.5;this.speedY=-(2+Math.random()*0.5);break;
+        case 3:this.x=-50;this.y=Math.random()*height;this.speedX=2+Math.random()*0.5;this.speedY=(Math.random()-0.5)*0.5;break;
       }
       this.rotation=0;this.rotationSpeed=0;
       this.el.style.transformOrigin='50% 50%';
