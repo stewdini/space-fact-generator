@@ -5,109 +5,176 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Random Space Fact Generator | Space Simplified</title>
 <style>
-  body {
-    margin: 0;
-    height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #e0e0e0;
-    background: #000010;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 1rem;
-    position: relative;
-  }
+body {
+  margin: 0;
+  height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #e0e0e0;
+  background: #000010;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 1rem;
+  position: relative;
+}
 
-  canvas#starfield {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    pointer-events: none;
-  }
+canvas#starfield {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
 
-  .space-object {
-    position: fixed;
-    pointer-events: none;
-    z-index: 0;
-    will-change: transform;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-  }
+.space-object {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  transition: transform 0.05s linear;
+}
 
-  /* Planets */
-  .planet {
-    border-radius: 50%;
-    box-shadow: 0 0 8px 1px rgba(100,150,255,0.3);
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-  }
-  .planet.red { background-color: #b0413e; }
-  .planet.blue { background-color: #4b7dad; }
-  .planet.green { background-color: #4ca36c; }
-  .planet.orange { background-color: #d17f3c; }
-  .planet.purple { background-color: #7855b8; }
+.planet {
+  border-radius: 50%;
+  box-shadow: 0 0 8px 1px rgba(100,150,255,0.3);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
 
-  h1 {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    position: relative;
-    z-index: 10;
-    text-shadow: 0 0 8px #66fcf1;
-  }
+.planet.red { background-color: #b0413e; }
+.planet.blue { background-color: #4b7dad; }
+.planet.green { background-color: #4ca36c; }
+.planet.orange { background-color: #d17f3c; }
+.planet.purple { background-color: #7855b8; }
 
-  .sparkle {
-    display: inline-block;
-    animation: sparkleAnim 2s linear infinite;
-    font-size: 2.2rem;
-    color: #66fcf1;
-    margin-left: 0.3em;
-    position: relative;
-    top: 5px;
-  }
+h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 10;
+  text-shadow: 0 0 8px #66fcf1;
+}
 
-  @keyframes sparkleAnim {
-    0%, 100% { opacity: 1; transform: rotate(0deg) scale(1); }
-    50% { opacity: 0.5; transform: rotate(20deg) scale(1.3); }
-  }
+.sparkle {
+  display: inline-block;
+  animation: sparkleAnim 2s linear infinite;
+  font-size: 2.2rem;
+  color: #66fcf1;
+  margin-left: 0.3em;
+  position: relative;
+  top: 5px;
+}
 
-  #factWrapper { position: relative; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; max-width: 700px; z-index: 10; }
-  #factDisplay { font-size: 1.4rem; margin: 2rem 0; line-height: 1.6; position: relative; opacity: 0; animation: fadeIn 1s forwards; text-shadow: 0 0 6px #45a29eaa; max-width: 600px; word-wrap: break-word; }
-  #factDisplay.show { animation: fadeIn 1s forwards; opacity: 1; }
+@keyframes sparkleAnim {
+  0%, 100% { opacity: 1; transform: rotate(0deg) scale(1); }
+  50% { opacity: 0.5; transform: rotate(20deg) scale(1.3); }
+}
 
-  #copyButton { background: none; border: none; cursor: pointer; padding: 0; margin-left: 4px; display: none; color: #ccc; transition: color 0.2s ease, transform 0.2s ease; width: 24px; height: 24px; flex-shrink: 0; }
-  #copyButton:hover { color: #fff; transform: scale(1.2); }
+#factWrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  max-width: 700px;
+  z-index: 10;
+}
 
-  #copyFeedback { font-size: 1.5rem; color: #66fcf1; margin-left: 8px; user-select: none; display: none; align-self: center; }
+#factDisplay {
+  font-size: 1.4rem;
+  margin: 2rem 0;
+  line-height: 1.6;
+  position: relative;
+  opacity: 0;
+  animation: fadeIn 1s forwards;
+  text-shadow: 0 0 6px #45a29eaa;
+  max-width: 600px;
+  word-wrap: break-word;
+}
 
-  .buttons-container { display: inline-flex; align-items: center; gap: 8px; margin-top: 1rem; position: relative; z-index: 10; }
-  #factButton { padding: 14px 35px; font-size: 1.3rem; border: none; border-radius: 10px; background-color: #1f2833; color: #66fcf1; cursor: pointer; transition: background-color 0.4s ease, box-shadow 0.4s ease, transform 0.2s ease; box-shadow: 0 0 12px #45a29e99; animation: pulseGlow 2.5s ease-in-out infinite; }
-  #factButton:disabled { cursor: not-allowed; opacity: 0.5; animation: none; box-shadow: none; background-color: #0a141b; color: #444; }
-  @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 12px #45a29e99, 0 0 20px #66fcf1cc; } 50% { box-shadow: 0 0 20px #45a29ecc, 0 0 30px #66fcf1ff; } }
-  #factButton:hover:not(:disabled) { background-color: #45a29e; box-shadow: 0 0 30px #66fcf1ff; transform: scale(1.05); animation: none; }
-  #factButton:active:not(:disabled) { transform: scale(0.95); box-shadow: 0 0 10px #45a29e99; }
+#factDisplay.show { animation: fadeIn 1s forwards; opacity: 1; }
 
-  #muteToggle { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #66fcf1; padding: 0; margin: 0 0 0 12px; line-height: 1; user-select: none; transition: transform 0.2s ease; }
-  #muteToggle:hover { transform: scale(1.2); }
+#copyButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 4px;
+  display: none;
+  color: #ccc;
+  transition: color 0.2s ease, transform 0.2s ease;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
 
-  .smoke {
-    position: fixed;
-    width: 14px;
-    height: 14px;
-    background: rgba(180,180,180,0.3);
-    border-radius: 50%;
-    filter: blur(3px);
-    pointer-events: none;
-    z-index: 0;
-    will-change: opacity, transform;
-    transform-origin: center center;
-  }
+#copyButton:hover { color: #fff; transform: scale(1.2); }
+
+#copyFeedback {
+  font-size: 1.5rem;
+  color: #66fcf1;
+  margin-left: 8px;
+  user-select: none;
+  display: none;
+  align-self: center;
+}
+
+.buttons-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 1rem;
+  position: relative;
+  z-index: 10;
+}
+
+#factButton {
+  padding: 14px 35px;
+  font-size: 1.3rem;
+  border: none;
+  border-radius: 10px;
+  background-color: #1f2833;
+  color: #66fcf1;
+  cursor: pointer;
+  transition: background-color 0.4s ease, box-shadow 0.4s ease, transform 0.2s ease;
+  box-shadow: 0 0 12px #45a29e99;
+  animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+#factButton:disabled { cursor: not-allowed; opacity: 0.5; animation: none; box-shadow: none; background-color: #0a141b; color: #444; }
+
+@keyframes pulseGlow {
+  0%,100%{ box-shadow:0 0 12px #45a29e99,0 0 20px #66fcf1cc; }
+  50%{ box-shadow:0 0 20px #45a29ecc,0 0 30px #66fcf1ff; }
+}
+
+#factButton:hover:not(:disabled) { background-color:#45a29e; box-shadow:0 0 30px #66fcf1ff; transform: scale(1.05); animation:none; }
+#factButton:active:not(:disabled) { transform: scale(0.95); box-shadow:0 0 10px #45a29e99; }
+
+#muteToggle { background:none; border:none; font-size:1.4rem; cursor:pointer; color:#66fcf1; padding:0; margin:0 0 0 12px; line-height:1; user-select:none; transition: transform 0.2s ease; }
+#muteToggle:hover { transform: scale(1.2); }
+
+.smoke {
+  position: fixed;
+  width: 14px;
+  height: 14px;
+  background: rgba(180,180,180,0.3);
+  border-radius: 50%;
+  filter: blur(3px);
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform, opacity;
+  transform-origin: center center;
+}
 </style>
 </head>
 <body>
@@ -116,152 +183,139 @@
 <h1>🔭 Random Space Fact Generator<span class="sparkle">✨</span></h1>
 <div id="factWrapper">
   <p id="factDisplay">Click the button below to learn a cool space fact!</p>
-  <button id="copyButton" title="Copy to clipboard">📋</button>
+  <button id="copyButton">Copy</button>
   <span id="copyFeedback">✅</span>
 </div>
 <div class="buttons-container">
   <button id="factButton">Show Me a Random Fact</button>
-  <button id="muteToggle" title="Toggle sound">🔊</button>
+  <button id="muteToggle">🔊</button>
 </div>
-
 <script>
-const canvas = document.getElementById('starfield');
-const ctx = canvas.getContext('2d');
-let width, height, mouseX=0, mouseY=0;
+// Starfield setup
+const canvas=document.getElementById('starfield'),ctx=canvas.getContext('2d');
+let stars=[],width,height,mouseX=0,mouseY=0;
+const starCount=150;
+function initStars(){stars=[];for(let i=0;i<starCount;i++){stars.push({x:Math.random()*width,y:Math.random()*height,radius:Math.random()*1.3+0.3});}}
+function resize(){width=window.innerWidth;height=window.innerHeight;canvas.width=width;canvas.height=height;initStars();}
+function drawStars(){ctx.clearRect(0,0,width,height);ctx.fillStyle='white';stars.forEach(star=>{let parallaxX=star.x+(mouseX-width/2)*0.02*star.radius;let parallaxY=star.y+(mouseY-height/2)*0.02*star.radius;ctx.beginPath();ctx.arc(parallaxX,parallaxY,star.radius,0,2*Math.PI);ctx.fill();});}
+window.addEventListener('resize',resize);
+window.addEventListener('mousemove',e=>{mouseX=e.clientX;mouseY=e.clientY;});
+function animateStarfield(){drawStars();requestAnimationFrame(animateStarfield);}
+resize();animateStarfield();
 
-function resize() {
-  width = window.innerWidth;
-  height = window.innerHeight;
-  canvas.width = width;
-  canvas.height = height;
-}
-window.addEventListener('resize', resize);
-window.addEventListener('mousemove', e=>{mouseX=e.clientX; mouseY=e.clientY;});
-resize();
-
-let stars=[];
-function initStars(){
-  stars=[];
-  for(let i=0;i<150;i++){
-    stars.push({x:Math.random()*width,y:Math.random()*height,radius:Math.random()*1.3+0.3});
-  }
-}
-function drawStars(){
-  ctx.clearRect(0,0,width,height);
-  ctx.fillStyle='white';
-  stars.forEach(s=>{
-    let parallaxX=s.x+(mouseX-width/2)*0.02*s.radius;
-    let parallaxY=s.y+(mouseY-height/2)*0.02*s.radius;
-    ctx.beginPath();ctx.arc(parallaxX,parallaxY,s.radius,0,2*Math.PI);ctx.fill();
-  });
-}
-function animateStarfield(){ drawStars(); requestAnimationFrame(animateStarfield); }
-initStars(); animateStarfield();
-
-const rocketImages=['https://stewdini.github.io/space-fact-generator/images/rocket1.png','https://stewdini.github.io/space-fact-generator/images/rocket2.png'];
+// Images
+const rocketImages=[
+  'https://stewdini.github.io/space-fact-generator/images/rocket1.png',
+  'https://stewdini.github.io/space-fact-generator/images/rocket2.png'
+];
 const asteroidImages=[
   'https://stewdini.github.io/space-fact-generator/images/asteroid1.png',
   'https://stewdini.github.io/space-fact-generator/images/asteroid2.png',
   'https://stewdini.github.io/space-fact-generator/images/asteroid3.png'
 ];
+const spaceObjectsContainer=document.getElementById('spaceObjectsContainer');
 
-const container=document.getElementById('spaceObjectsContainer');
-
-class SpaceObject {
+class SpaceObject{
   constructor(type){
-    this.type=type; this.el=document.createElement('div'); this.el.classList.add('space-object');
+    this.type=type;
+    this.el=document.createElement('div');
+    this.el.classList.add('space-object');
     if(type==='planet'){
-      this.size=40+Math.random()*35; this.el.classList.add('planet'); const colors=['red','blue','green','orange','purple']; this.el.classList.add(colors[Math.floor(Math.random()*colors.length)]);
-      do{this.x=Math.random()*width; this.y=Math.random()*height;}while(this.x>width/2-150&&this.x<width/2+150&&this.y>height/2-150&&this.y<height/2+150);
-      this.speedX=0; this.speedY=0; this.rotation=Math.random()*360; this.rotationSpeed=0;
-      this.el.style.width=this.size+'px'; this.el.style.height=this.size+'px'; this.el.style.transformOrigin='50% 50%';
-    } else if(type==='asteroid'){
-      this.size=30+Math.random()*20; this.el.style.backgroundImage=`url(${asteroidImages[Math.floor(Math.random()*asteroidImages.length)]})`;
-      this.el.style.width=this.size+'px'; this.el.style.height=this.size+'px';
-      this.x=Math.random()*width; this.y=Math.random()*height;
-      this.speedX=(Math.random()-0.5)*0.3; this.speedY=(Math.random()-0.5)*0.3;
-      this.rotation=Math.random()*360; this.rotationSpeed=(Math.random()-0.5)*0.2;
+      this.size=40+Math.random()*35;
+      this.el.classList.add('planet');
+      const colors=['red','blue','green','orange','purple'];
+      this.el.classList.add(colors[Math.floor(Math.random()*colors.length)]);
+      do{this.x=Math.random()*window.innerWidth;this.y=Math.random()*window.innerHeight;}while(this.x>width/2-150 && this.x<width/2+150 && this.y>height/2-150 && this.y<height/2+150);
+      this.speedX=0;this.speedY=0;this.rotation=0;this.rotationSpeed=0;
+      this.el.style.width=this.size+'px';this.el.style.height=this.size+'px';this.el.style.transformOrigin='50% 50%';
+    }else if(type==='asteroid'){
+      this.size=30+Math.random()*20;
+      this.el.style.backgroundImage=`url(${asteroidImages[Math.floor(Math.random()*asteroidImages.length)]})`;
+      this.el.style.width=this.size+'px';this.el.style.height=this.size+'px';
+      this.x=Math.random()*window.innerWidth;this.y=Math.random()*window.innerHeight;
+      this.speedX=(Math.random()-0.5)*0.2;this.speedY=(Math.random()-0.5)*0.2;
+      this.rotation=Math.random()*360;
+      this.rotationSpeed=(Math.random()-0.5)*0.2;
       this.el.style.transformOrigin='50% 50%';
-    } else if(type==='rocket'){
-      this.size=40; this.el.style.width=this.size+'px'; this.el.style.height='40px';
+    }else if(type==='rocket'){
+      this.size=40; this.el.style.width='40px'; this.el.style.height='40px';
       this.el.style.backgroundImage=`url(${rocketImages[0]})`;
       const edge=Math.floor(Math.random()*4);
-      const speedBase=1.2;
       switch(edge){
-        case 0: this.x=Math.random()*width; this.y=-50; this.speedX=(Math.random()-0.5)*0.5; this.speedY=speedBase+Math.random()*0.5; break;
-        case 1: this.x=width+50; this.y=Math.random()*height; this.speedX=-(speedBase+Math.random()*0.5); this.speedY=(Math.random()-0.5)*0.5; break;
-        case 2: this.x=Math.random()*width; this.y=height+50; this.speedX=(Math.random()-0.5)*0.5; this.speedY=-(speedBase+Math.random()*0.5); break;
-        case 3: this.x=-50; this.y=Math.random()*height; this.speedX=speedBase+Math.random()*0.5; this.speedY=(Math.random()-0.5)*0.5; break;
+        case 0:this.x=Math.random()*width;this.y=-50;this.speedX=(Math.random()-0.5)*0.5;this.speedY=1.5+Math.random()*0.5;break;
+        case 1:this.x=width+50;this.y=Math.random()*height;this.speedX=-(1.5+Math.random()*0.5);this.speedY=(Math.random()-0.5)*0.5;break;
+        case 2:this.x=Math.random()*width;this.y=height+50;this.speedX=(Math.random()-0.5)*0.5;this.speedY=-(1.5+Math.random()*0.5);break;
+        case 3:this.x=-50;this.y=Math.random()*height;this.speedX=1.5+Math.random()*0.5;this.speedY=(Math.random()-0.5)*0.5;break;
       }
-      this.rotation=0; this.smokeTrail=[];
+      this.rotation=0;this.rotationSpeed=0;
+      this.el.style.transformOrigin='50% 50%';
     }
-    container.appendChild(this.el);
+    this.updatePosition();
+    spaceObjectsContainer.appendChild(this.el);
+  }
+
+  updatePosition(){this.el.style.left=this.x+'px';this.el.style.top=this.y+'px';}
+
+  createSmoke(){
+    const smoke=document.createElement('div');smoke.classList.add('smoke');spaceObjectsContainer.appendChild(smoke);
+    const centerX=this.x+20,centerY=this.y+20,offsetX=0,offsetY=20;
+    const rad=this.rotation*Math.PI/180;
+    const rotatedX=offsetX*Math.cos(rad)-offsetY*Math.sin(rad);
+    const rotatedY=offsetX*Math.sin(rad)+offsetY*Math.cos(rad);
+    smoke.style.left=centerX+rotatedX-7+'px';
+    smoke.style.top=centerY+rotatedY-7+'px';
+    let opacity=0.35+Math.random()*0.25,scale=0.4+Math.random()*0.3,frame=0,lifetime=60+Math.floor(Math.random()*20),speed=0.12+Math.random()*0.05,curve=Math.random()*0.4-0.2;
+    function animateSmoke(){
+      if(frame>=lifetime){smoke.remove();return;}
+      const moveX=-Math.sin(rad)*frame*speed+curve*frame;
+      const moveY=Math.cos(rad)*frame*speed;
+      smoke.style.transform=`rotate(${rad}rad) translate(${moveX}px,${moveY}px) scale(${scale})`;
+      smoke.style.opacity=opacity;
+      opacity-=0.006;scale+=0.004;frame++;
+      requestAnimationFrame(animateSmoke);
+    }
+    animateSmoke();
   }
 
   update(){
-    this.x+=this.speedX; this.y+=this.speedY;
-    if(this.type==='planet') { this.el.style.transform=`rotate(${this.rotation}deg)`; }
-    else if(this.type==='asteroid'){
-      this.rotation+=this.rotationSpeed; if(this.rotation>360) this.rotation-=360; else if(this.rotation<0)this.rotation+=360;
-      this.el.style.transform=`rotate(${this.rotation}deg)`;
-    } else if(this.type==='rocket'){
-      if(this.x<-100||this.x>width+100||this.y<-100||this.y>height+100){ this.el.remove(); return false; }
-      this.rotation=Math.atan2(this.speedY,this.speedX)*180/Math.PI+90;
-      this.el.style.transform=`rotate(${this.rotation}deg) translate(0,0)`;
-      if(Math.random()<0.3){ 
-        const smokeX=this.x+this.size/2;
-        const smokeY=this.y+this.size;
-        this.createSmoke(smokeX,smokeY,this.rotation);
-      }
+    this.x+=this.speedX;this.y+=this.speedY;
+    if(this.type==='planet'){this.rotation+=0.02;if(this.rotation>360)this.rotation-=360;this.el.style.transform=`rotate(${this.rotation}deg)`;}
+    else if(this.type==='asteroid'){this.rotation+=this.rotationSpeed;if(this.rotation>360)this.rotation-=360;else if(this.rotation<0)this.rotation+=360;this.el.style.transform=`rotate(${this.rotation}deg)`;}
+    else if(this.type==='rocket'){
+      if(this.x<-100||this.x>width+100||this.y<-100||this.y>height+100){this.el.remove();return false;}
+      this.rotation=Math.atan2(this.speedY,this.speedX)*180/Math.PI+90;this.el.style.transform=`rotate(${this.rotation}deg)`;
+      if(Math.random()<0.3)this.createSmoke();
     }
-    this.el.style.left=this.x+'px'; this.el.style.top=this.y+'px';
-    return true;
-  }
-
-  createSmoke(x,y,rot){
-    const s=document.createElement('div'); s.classList.add('smoke'); container.appendChild(s);
-    let opacity=0.4+Math.random()*0.3; let scale=0.5+Math.random()*0.5; let rise=0; let frame=0; let lifetime=40+Math.random()*20;
-    function animate(){ 
-      if(frame>=lifetime){ s.remove(); return; }
-      rise+=0.3; opacity-=0.01; scale+=0.005;
-      s.style.transform=`translate(-50%,-50%) rotate(${rot}deg) translateY(${-rise}px) scale(${scale})`;
-      s.style.left=x+'px'; s.style.top=y+'px'; s.style.opacity=opacity;
-      frame++; requestAnimationFrame(animate);
-    }
-    animate();
+    this.updatePosition();return true;
   }
 }
 
-const objects=[];
-for(let i=0;i<6;i++) objects.push(new SpaceObject('planet'));
-for(let i=0;i<5;i++) objects.push(new SpaceObject('asteroid'));
-for(let i=0;i<4;i++) objects.push(new SpaceObject('rocket'));
+const spaceObjects=[];
+for(let i=0;i<6;i++)spaceObjects.push(new SpaceObject('planet'));
+for(let i=0;i<5;i++)spaceObjects.push(new SpaceObject('asteroid'));
+for(let i=0;i<4;i++)spaceObjects.push(new SpaceObject('rocket'));
 
-function animateAll(){
-  for(let i=objects.length-1;i>=0;i--){
-    const alive=objects[i].update();
-    if(!alive){
-      const type=objects[i]?.type || 'rocket';
-      objects.splice(i,1);
-      objects.push(new SpaceObject(type));
-    }
+function animateSpaceObjects(){
+  for(let i=spaceObjects.length-1;i>=0;i--){
+    const alive=spaceObjects[i].update();
+    if(alive===false){const type=spaceObjects[i]?.type||'rocket';spaceObjects.splice(i,1);spaceObjects.push(new SpaceObject(type));}
   }
-  requestAnimationFrame(animateAll);
+  requestAnimationFrame(animateSpaceObjects);
 }
-animateAll();
+animateSpaceObjects();
 
-// Facts
+// Fact generator
 const facts=[
-  "The largest volcano in our solar system is on Mars, Olympus Mons.",
-  "Jupiter has the shortest day of all planets, completing a rotation in about 10 hours.",
-  "Saturn’s rings are made mostly of ice particles with a smaller amount of rocky debris.",
-  "Venus spins backward compared to most planets, meaning the Sun rises in the west there.",
-  "A day on Mercury lasts longer than its year!",
-  "Neutron stars can spin 600 times per second.",
-  "Space is not completely empty, it has tiny particles and radiation.",
-  "The hottest planet is not the closest to the Sun, but Venus due to its thick atmosphere.",
-  "Pluto is classified as a dwarf planet, not a full sized planet.",
-  "There are thousands of exoplanets discovered beyond our solar system."
+"The largest volcano in our solar system is on Mars, Olympus Mons.",
+"Jupiter has the shortest day of all planets, completing a rotation in about 10 hours.",
+"Saturn’s rings are made mostly of ice particles with a smaller amount of rocky debris.",
+"Venus spins backward compared to most planets, meaning the Sun rises in the west there.",
+"A day on Mercury lasts longer than its year!",
+"Neutron stars can spin 600 times per second.",
+"Space is not completely empty, it has tiny particles and radiation.",
+"The hottest planet is not the closest to the Sun, but Venus due to its thick atmosphere.",
+"Pluto is classified as a dwarf planet, not a full sized planet.",
+"There are thousands of exoplanets discovered beyond our solar system."
 ];
 
 const factDisplay=document.getElementById('factDisplay');
@@ -270,17 +324,22 @@ const copyButton=document.getElementById('copyButton');
 const copyFeedback=document.getElementById('copyFeedback');
 
 factButton.addEventListener('click',()=>{
-  const f=facts[Math.floor(Math.random()*facts.length)];
-  factDisplay.textContent=f;
-  factDisplay.classList.add('show'); copyButton.style.display='inline-block'; copyFeedback.style.display='none';
+  const randomFact=facts[Math.floor(Math.random()*facts.length)];
+  factDisplay.textContent=randomFact;
+  factDisplay.classList.add('show');
+  copyButton.style.display='inline-block';copyFeedback.style.display='none';
 });
 
 copyButton.addEventListener('click',()=>{
-  navigator.clipboard.writeText(factDisplay.textContent).then(()=>{ copyFeedback.style.display='inline'; setTimeout(()=>{copyFeedback.style.display='none';},2000); });
+  navigator.clipboard.writeText(factDisplay.textContent).then(()=>{
+    copyFeedback.style.display='inline';
+    setTimeout(()=>{copyFeedback.style.display='none';},2000);
+  });
 });
 
-const muteToggle=document.getElementById('muteToggle'); let muted=false;
-muteToggle.addEventListener('click',()=>{muted=!muted; muteToggle.textContent=muted?'🔇':'🔊';});
+const muteToggle=document.getElementById('muteToggle');
+let muted=false;
+muteToggle.addEventListener('click',()=>{muted=!muted;muteToggle.textContent=muted?'🔇':'🔊';});
 </script>
 </body>
 </html>
