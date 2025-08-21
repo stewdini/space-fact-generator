@@ -38,7 +38,6 @@ canvas#starfield {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  transition: transform 0.05s linear;
 }
 
 .planet {
@@ -280,8 +279,11 @@ class SpaceObject{
 
   update(){
     this.x+=this.speedX; this.y+=this.speedY;
-    const smooth=0.08;
-    this.displayX+=(this.x-this.displayX)*smooth; this.displayY+=(this.y-this.displayY)*smooth;
+
+    // Smooth movement interpolation
+    const smooth=0.12; // increased slightly for smoother motion
+    this.displayX += (this.x - this.displayX) * smooth;
+    this.displayY += (this.y - this.displayY) * smooth;
 
     if(this.type==='planet'){this.rotation+=0.02;if(this.rotation>360)this.rotation-=360;this.el.style.transform=`rotate(${this.rotation}deg)`;}
     else if(this.type==='asteroid'){this.rotation+=this.rotationSpeed;if(this.rotation>360)this.rotation-=360;else if(this.rotation<0)this.rotation+=360;this.el.style.transform=`rotate(${this.rotation}deg)`;}
