@@ -377,280 +377,226 @@
   // Tweak if your rockets look 90° off. Try 0, 90, -90, or 180.
   const ROCKET_HEADING_OFFSET_DEG = 0;
 
-  class SpaceObject {
-    constructor(type) {
-      this.type = type;
-      this.el = document.createElement('div');
-      this.el.classList.add('space-object');
+  // ---------------------------
+// SpaceObject class (updated)
+// ---------------------------
+class SpaceObject {
+  constructor(type) {
+    this.type = type;
+    this.el = document.createElement('div');
+    this.el.classList.add('space-object');
 
-      if (type === 'planet') {
-        this.size = 40 + Math.random() * 35;
-        this.el.classList.add('planet');
-        const planetColors = ['red', 'blue', 'green', 'orange', 'purple'];
-        const color = planetColors[Math.floor(Math.random() * planetColors.length)];
-        this.el.classList.add(color);
+    if (type === 'planet') {
+      // Same as before
+      this.size = 40 + Math.random() * 35;
+      this.el.classList.add('planet');
+      const planetColors = ['red', 'blue', 'green', 'orange', 'purple'];
+      this.el.classList.add(planetColors[Math.floor(Math.random() * planetColors.length)]);
 
-        // Position randomly but not in center 300x300 area (avoid text)
-        do {
-          this.x = Math.random() * window.innerWidth;
-          this.y = Math.random() * window.innerHeight;
-        } while(
-          this.x > window.innerWidth/2 - 150 && this.x < window.innerWidth/2 + 150 &&
-          this.y > window.innerHeight/2 - 150 && this.y < window.innerHeight/2 + 150
-        );
-
-        this.speedX = 0;
-        this.speedY = 0;
-        this.rotation = 0;
-
-        this.el.style.width = this.size + 'px';
-        this.el.style.height = this.size + 'px';
-        this.el.style.transformOrigin = '50% 50%';
-        this.updatePosition(true); // set initial
-      }
-      else if (type === 'asteroid') {
-        this.size = 30 + Math.random() * 20;
-        this.el.style.backgroundImage = `url(${asteroidImages[Math.floor(Math.random() * asteroidImages.length)]})`;
-        this.el.style.width = this.size + 'px';
-        this.el.style.height = this.size + 'px';
-
+      do {
         this.x = Math.random() * window.innerWidth;
         this.y = Math.random() * window.innerHeight;
-        this.speedX = (Math.random() - 0.5) * 0.35; // a bit quicker for smoothness
-        this.speedY = (Math.random() - 0.5) * 0.35;
+      } while(
+        this.x > window.innerWidth/2 - 150 && this.x < window.innerWidth/2 + 150 &&
+        this.y > window.innerHeight/2 - 150 && this.y < window.innerHeight/2 + 150
+      );
 
-        this.rotation = Math.random() * 360;
-        this.rotationSpeed = (Math.random() - 0.5) * 0.4;
+      this.speedX = 0;
+      this.speedY = 0;
+      this.rotation = 0;
+      this.el.style.width = this.size + 'px';
+      this.el.style.height = this.size + 'px';
+      this.el.style.transformOrigin = '50% 50%';
+      this.updatePosition(true);
+    }
+    else if (type === 'asteroid') {
+      this.size = 30 + Math.random() * 20;
+      this.el.style.backgroundImage = `url(${asteroidImages[Math.floor(Math.random() * asteroidImages.length)]})`;
+      this.el.style.width = this.size + 'px';
+      this.el.style.height = this.size + 'px';
+      this.x = Math.random() * window.innerWidth;
+      this.y = Math.random() * window.innerHeight;
+      this.speedX = (Math.random() - 0.5) * 1.2; // faster & smoother
+      this.speedY = (Math.random() - 0.5) * 1.2;
+      this.rotation = Math.random() * 360;
+      this.rotationSpeed = (Math.random() - 0.5) * 1; // faster rotation
+      this.el.style.transformOrigin = '50% 50%';
+      this.updatePosition(true);
+    }
+    else if (type === 'rocket') {
+      this.w = 30;
+      this.h = 40;
+      this.el.style.backgroundImage = `url(${rocketImages[Math.floor(Math.random() * rocketImages.length)]})`;
+      this.el.style.width = this.w + 'px';
+      this.el.style.height = this.h + 'px';
 
-        this.el.style.transformOrigin = '50% 50%';
-        this.updatePosition(true);
+      // Spawn from random edges
+      const edge = Math.floor(Math.random() * 4);
+      const baseSpeed = 1.5; // higher for smooth movement
+      switch(edge) {
+        case 0: // top
+          this.x = Math.random() * window.innerWidth;
+          this.y = -60;
+          this.speedX = (Math.random() - 0.5) * baseSpeed;
+          this.speedY = baseSpeed + Math.random() * 0.5;
+          break;
+        case 1: // right
+          this.x = window.innerWidth + 60;
+          this.y = Math.random() * window.innerHeight;
+          this.speedX = -(baseSpeed + Math.random() * 0.5);
+          this.speedY = (Math.random() - 0.5) * baseSpeed;
+          break;
+        case 2: // bottom
+          this.x = Math.random() * window.innerWidth;
+          this.y = window.innerHeight + 60;
+          this.speedX = (Math.random() - 0.5) * baseSpeed;
+          this.speedY = -(baseSpeed + Math.random() * 0.5);
+          break;
+        case 3: // left
+          this.x = -60;
+          this.y = Math.random() * window.innerHeight;
+          this.speedX = baseSpeed + Math.random() * 0.5;
+          this.speedY = (Math.random() - 0.5) * baseSpeed;
+          break;
       }
-      else if (type === 'rocket') {
-        // Visible rocket size (tweak to your images)
-        this.w = 30;
-        this.h = 40;
 
-        // Use rocket1/rocket2 (PNG with flame baked in)
-        this.el.style.backgroundImage = `url(${rocketImages[Math.floor(Math.random() * rocketImages.length)]})`;
-        this.el.style.width = this.w + 'px';
-        this.el.style.height = this.h + 'px';
-
-        // Spawn from screen edges with a slightly higher base speed
-        const edge = Math.floor(Math.random() * 4);
-        const base = 0.9, extra = 0.5; // increase speed a touch
-        switch(edge) {
-          case 0: // top -> going down
-            this.x = Math.random() * window.innerWidth;
-            this.y = -60;
-            this.speedX = (Math.random() - 0.5) * (base + extra * 0.5);
-            this.speedY = base + Math.random() * extra;
-            break;
-          case 1: // right -> going left
-            this.x = window.innerWidth + 60;
-            this.y = Math.random() * window.innerHeight;
-            this.speedX = -(base + Math.random() * extra);
-            this.speedY = (Math.random() - 0.5) * (base + extra * 0.5);
-            break;
-          case 2: // bottom -> going up
-            this.x = Math.random() * window.innerWidth;
-            this.y = window.innerHeight + 60;
-            this.speedX = (Math.random() - 0.5) * (base + extra * 0.5);
-            this.speedY = -(base + Math.random() * extra);
-            break;
-          case 3: // left -> going right
-            this.x = -60;
-            this.y = Math.random() * window.innerHeight;
-            this.speedX = base + Math.random() * extra;
-            this.speedY = (Math.random() - 0.5) * (base + extra * 0.5);
-            break;
-        }
-
-        this.rotation = 0;
-        this.smokeTrail = [];
-        this.el.style.transformOrigin = '50% 50%'; // rotate around center
-        this.updatePosition(true);
-      }
-
-      spaceObjectsContainer.appendChild(this.el);
+      this.rotation = 0;
+      this.smokeTrail = [];
+      this.el.style.transformOrigin = '50% 50%';
+      this.updatePosition(true);
     }
 
-    updatePosition(initial=false) {
-      // left/top for layout, rotate via transform (fast + accurate)
-      this.el.style.left = this.x + 'px';
-      this.el.style.top = this.y + 'px';
-      if (this.type === 'planet') {
-        if (initial) this.el.style.transform = 'rotate(0deg)';
-      } else if (this.type === 'asteroid') {
-        this.el.style.transform = `rotate(${this.rotation}deg)`;
-      } else if (this.type === 'rocket') {
-        // angle from velocity
-        const angleRad = Math.atan2(this.speedY, this.speedX);
-        const angleDeg = angleRad * 180 / Math.PI + ROCKET_HEADING_OFFSET_DEG;
-        this.rotation = angleDeg;
-        this.el.style.transform = `rotate(${this.rotation}deg)`;
-      }
+    spaceObjectsContainer.appendChild(this.el);
+  }
+
+  updatePosition(initial=false) {
+    this.el.style.left = this.x + 'px';
+    this.el.style.top = this.y + 'px';
+    if (this.type === 'planet' && initial) this.el.style.transform = 'rotate(0deg)';
+    if (this.type === 'asteroid') this.el.style.transform = `rotate(${this.rotation}deg)`;
+    if (this.type === 'rocket') {
+      const angleRad = Math.atan2(this.speedY, this.speedX);
+      this.rotation = angleRad * 180 / Math.PI + ROCKET_HEADING_OFFSET_DEG;
+      this.el.style.transform = `rotate(${this.rotation}deg)`;
     }
+  }
 
-    update() {
-      this.x += this.speedX;
-      this.y += this.speedY;
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
 
-      // Wrap around edges with buffer for asteroids; rockets will respawn instead
-      if (this.type === 'asteroid') {
-        if (this.x < -120) this.x = window.innerWidth + 120;
-        else if (this.x > window.innerWidth + 120) this.x = -120;
-        if (this.y < -120) this.y = window.innerHeight + 120;
-        else if (this.y > window.innerHeight + 120) this.y = -120;
+    if (this.type === 'asteroid') {
+      if (this.x < -120) this.x = window.innerWidth + 120;
+      else if (this.x > window.innerWidth + 120) this.x = -120;
+      if (this.y < -120) this.y = window.innerHeight + 120;
+      else if (this.y > window.innerHeight + 120) this.y = -120;
 
-        this.rotation += this.rotationSpeed;
-        this.updatePosition();
-        return true;
-      }
-
-      if (this.type === 'planet') {
-        // planets stay still (by request)
-        return true;
-      }
-
-      if (this.type === 'rocket') {
-        // If rocket left the stage, remove and signal replacement
-        if (
-          this.x < -150 || this.x > window.innerWidth + 150 ||
-          this.y < -150 || this.y > window.innerHeight + 150
-        ) {
-          this.el.remove();
-          // cleanup smoke nodes left alive
-          this.smokeTrail.forEach(s => s.el.remove());
-          this.smokeTrail.length = 0;
-          return false;
-        }
-
-        // Update rotation straight from velocity
-        const angleRad = Math.atan2(this.speedY, this.speedX);
-        const angleDeg = angleRad * 180 / Math.PI + ROCKET_HEADING_OFFSET_DEG;
-        this.rotation = angleDeg;
-
-        // Update element transform + pos
-        this.updatePosition();
-
-        // Spawn smoke at bottom-middle of the rocket PNG, respecting rotation
-        if (Math.random() < 0.45) { // emission rate
-          this.spawnSmokeAtNozzle(angleRad);
-        }
-
-        // Update existing smoke particles
-        for (let i = this.smokeTrail.length - 1; i >= 0; i--) {
-          const s = this.smokeTrail[i];
-          s.life -= 1;
-          s.x += s.vx;
-          s.y += s.vy;
-          s.scale += 0.004;
-          s.opacity -= 0.015;
-          if (s.opacity < 0) s.opacity = 0;
-
-          s.el.style.left = s.x + 'px';
-          s.el.style.top = s.y + 'px';
-          s.el.style.opacity = s.opacity;
-          s.el.style.transform = `scale(${s.scale})`;
-
-          if (s.life <= 0 || s.opacity <= 0) {
-            s.el.remove();
-            this.smokeTrail.splice(i, 1);
-          }
-        }
-
-        return true;
-      }
-
+      this.rotation += this.rotationSpeed;
+      this.updatePosition();
       return true;
     }
 
-    spawnSmokeAtNozzle(angleRad) {
-      // Compute the rocket center
-      const cx = this.x + (this.w || this.size || 30) / 2;
-      const cy = this.y + (this.h || this.size || 40) / 2;
+    if (this.type === 'planet') return true;
 
-      // Distance from center to bottom-middle (nozzle) in the rocket's local coords
-      const halfH = (this.h || 40) / 2;
-      const nozzleOffset = halfH - 2; // tiny inset so it doesn't clip
-
-      // Include the same heading offset the image uses
-      const theta = angleRad + (ROCKET_HEADING_OFFSET_DEG * Math.PI / 180);
-
-      // Rotate local (0, +nozzleOffset) by theta
-      const dx = -nozzleOffset * Math.sin(theta);
-      const dy =  nozzleOffset * Math.cos(theta);
-
-      const smokeX = cx + dx;
-      const smokeY = cy + dy;
-
-      // Velocity opposite rocket direction + slight randomness
-      const mag = Math.hypot(this.speedX, this.speedY) || 1;
-      const ux = this.speedX / mag;
-      const uy = this.speedY / mag;
-
-      const vx = -ux * 0.25 + (Math.random() - 0.5) * 0.15;
-      const vy = -uy * 0.25 + (Math.random() - 0.5) * 0.15;
-
-      const smoke = document.createElement('div');
-      smoke.classList.add('smoke');
-      smoke.style.left = smokeX + 'px';
-      smoke.style.top = smokeY + 'px';
-
-      spaceObjectsContainer.appendChild(smoke);
-
-      this.smokeTrail.push({
-        el: smoke,
-        x: smokeX,
-        y: smokeY,
-        vx, vy,
-        life: 45 + Math.floor(Math.random() * 15),
-        opacity: 0.45 + Math.random() * 0.25,
-        scale: 0.8 + Math.random() * 0.3
-      });
-
-      // Cap total smoke nodes per rocket to avoid DOM bloat
-      if (this.smokeTrail.length > 80) {
-        const old = this.smokeTrail.shift();
-        old.el.remove();
+    if (this.type === 'rocket') {
+      if (this.x < -150 || this.x > window.innerWidth + 150 ||
+          this.y < -150 || this.y > window.innerHeight + 150) {
+        this.el.remove();
+        this.smokeTrail.forEach(s => s.el.remove());
+        this.smokeTrail.length = 0;
+        return false;
       }
+
+      const angleRad = Math.atan2(this.speedY, this.speedX);
+      this.rotation = angleRad * 180 / Math.PI + ROCKET_HEADING_OFFSET_DEG;
+      this.updatePosition();
+
+      // spawn smoke
+      if (Math.random() < 0.45) this.spawnSmoke(angleRad);
+
+      // update smoke
+      for (let i = this.smokeTrail.length - 1; i >= 0; i--) {
+        const s = this.smokeTrail[i];
+        s.life--;
+        s.x += s.vx;
+        s.y += s.vy;
+        s.opacity -= 0.015;
+        s.scale += 0.004;
+        s.el.style.left = s.x + 'px';
+        s.el.style.top = s.y + 'px';
+        s.el.style.opacity = s.opacity;
+        s.el.style.transform = `scale(${s.scale})`;
+        if (s.life <= 0 || s.opacity <= 0) {
+          s.el.remove();
+          this.smokeTrail.splice(i, 1);
+        }
+      }
+      return true;
+    }
+
+    return true;
+  }
+
+  spawnSmoke(angleRad) {
+    const cx = this.x + this.w / 2;
+    const cy = this.y + this.h / 2;
+    const halfH = this.h / 2;
+    const nozzleOffset = halfH - 2;
+    const dx = -nozzleOffset * Math.sin(angleRad);
+    const dy =  nozzleOffset * Math.cos(angleRad);
+    const smokeX = cx + dx;
+    const smokeY = cy + dy;
+
+    const mag = Math.hypot(this.speedX, this.speedY) || 1;
+    const ux = this.speedX / mag;
+    const uy = this.speedY / mag;
+    const vx = -ux * 0.25 + (Math.random() - 0.5) * 0.15;
+    const vy = -uy * 0.25 + (Math.random() - 0.5) * 0.15;
+
+    const smoke = document.createElement('div');
+    smoke.classList.add('smoke');
+    smoke.style.left = smokeX + 'px';
+    smoke.style.top = smokeY + 'px';
+    spaceObjectsContainer.appendChild(smoke);
+
+    this.smokeTrail.push({
+      el: smoke,
+      x: smokeX,
+      y: smokeY,
+      vx, vy,
+      life: 45 + Math.floor(Math.random() * 15),
+      opacity: 0.45 + Math.random() * 0.25,
+      scale: 0.8 + Math.random() * 0.3
+    });
+
+    if (this.smokeTrail.length > 80) {
+      const old = this.smokeTrail.shift();
+      old.el.remove();
     }
   }
+}
 
-  // ---------------------------
-  // Create space objects
-  // ---------------------------
-  const spaceObjects = [];
+// ---------------------------
+// Create space objects & animate
+// ---------------------------
+const spaceObjects = [];
+for (let i = 0; i < 6; i++) spaceObjects.push(new SpaceObject('planet'));
+for (let i = 0; i < 7; i++) spaceObjects.push(new SpaceObject('asteroid'));
+for (let i = 0; i < 4; i++) spaceObjects.push(new SpaceObject('rocket'));
 
-  // Planets (still)
-  for (let i = 0; i < 6; i++) {
-    spaceObjects.push(new SpaceObject('planet'));
-  }
-  // Asteroids (moving + rotating)
-  for (let i = 0; i < 7; i++) {
-    spaceObjects.push(new SpaceObject('asteroid'));
-  }
-  // Rockets (moving + smoke)
-  for (let i = 0; i < 4; i++) {
-    spaceObjects.push(new SpaceObject('rocket'));
-  }
-
-  // ---------------------------
-  // Animation loop for objects
-  // ---------------------------
-  function animateSpaceObjects() {
-    for (let i = spaceObjects.length - 1; i >= 0; i--) {
-      const obj = spaceObjects[i];
-      const alive = obj.update();
-      if (alive === false) {
-        const deadType = obj.type; // capture before splice
-        spaceObjects.splice(i, 1);
-        spaceObjects.push(new SpaceObject(deadType));
-      }
+function animateSpaceObjects() {
+  for (let i = spaceObjects.length - 1; i >= 0; i--) {
+    const alive = spaceObjects[i].update();
+    if (!alive) {
+      const type = spaceObjects[i].type;
+      spaceObjects.splice(i, 1);
+      spaceObjects.push(new SpaceObject(type));
     }
-    requestAnimationFrame(animateSpaceObjects);
   }
-  animateSpaceObjects();
+  requestAnimationFrame(animateSpaceObjects);
+}
+animateSpaceObjects();
+
 
   // ---------------------------
   // Space facts list & UI
@@ -710,3 +656,4 @@
 </script>
 </body>
 </html>
+
