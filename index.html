@@ -38,6 +38,7 @@ canvas#starfield {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
+  transition: transform 0.05s linear;
 }
 
 .planet {
@@ -219,9 +220,7 @@ class SpaceObject{
     this.type=type;
     this.el=document.createElement('div');
     this.el.classList.add('space-object');
-
-    this.displayX=0;
-    this.displayY=0;
+    this.displayX=0; this.displayY=0;
 
     if(type==='planet'){
       this.size=40+Math.random()*35;
@@ -229,19 +228,17 @@ class SpaceObject{
       const colors=['red','blue','green','orange','purple'];
       this.el.classList.add(colors[Math.floor(Math.random()*colors.length)]);
       do{this.x=Math.random()*window.innerWidth;this.y=Math.random()*window.innerHeight;}while(this.x>width/2-150 && this.x<width/2+150 && this.y>height/2-150 && this.y<height/2+150);
-      this.speedX=0;this.speedY=0;this.rotation=0;this.rotationSpeed=0;
-      this.el.style.width=this.size+'px';this.el.style.height=this.size+'px';this.el.style.transformOrigin='50% 50%';
+      this.speedX=0; this.speedY=0; this.rotation=0; this.rotationSpeed=0;
+      this.el.style.width=this.size+'px'; this.el.style.height=this.size+'px'; this.el.style.transformOrigin='50% 50%';
     }else if(type==='asteroid'){
       this.size=30+Math.random()*20;
       this.el.style.backgroundImage=`url(${asteroidImages[Math.floor(Math.random()*asteroidImages.length)]})`;
-      this.el.style.width=this.size+'px';this.el.style.height=this.size+'px';
-      this.x=Math.random()*window.innerWidth;this.y=Math.random()*window.innerHeight;
-      this.speedX=(Math.random()-0.5)*0.5;this.speedY=(Math.random()-0.5)*0.5;
-      this.rotation=Math.random()*360;
-      this.rotationSpeed=(Math.random()-0.5)*0.3;
+      this.el.style.width=this.size+'px'; this.el.style.height=this.size+'px';
+      this.x=Math.random()*window.innerWidth; this.y=Math.random()*window.innerHeight;
+      this.speedX=(Math.random()-0.5)*0.5; this.speedY=(Math.random()-0.5)*0.5;
+      this.rotation=Math.random()*360; this.rotationSpeed=(Math.random()-0.5)*0.3;
       this.el.style.transformOrigin='50% 50%';
-      this.displayX=this.x;
-      this.displayY=this.y;
+      this.displayX=this.x; this.displayY=this.y;
     }else if(type==='rocket'){
       this.size=40; this.el.style.width='40px'; this.el.style.height='40px';
       this.el.style.backgroundImage=`url(${rocketImages[0]})`;
@@ -252,36 +249,30 @@ class SpaceObject{
         case 2:this.x=Math.random()*width;this.y=height+50;this.speedX=(Math.random()-0.5)*0.5;this.speedY=-(1.7+Math.random()*0.5);break;
         case 3:this.x=-50;this.y=Math.random()*height;this.speedX=1.7+Math.random()*0.5;this.speedY=(Math.random()-0.5)*0.5;break;
       }
-      this.rotation=0;this.rotationSpeed=0;
+      this.rotation=0; this.rotationSpeed=0;
       this.el.style.transformOrigin='50% 50%';
-      this.displayX=this.x;
-      this.displayY=this.y;
+      this.displayX=this.x; this.displayY=this.y;
     }
     this.updatePosition();
     spaceObjectsContainer.appendChild(this.el);
   }
 
-  updatePosition(){
-    this.el.style.left=this.displayX+'px';
-    this.el.style.top=this.displayY+'px';
-  }
+  updatePosition(){this.el.style.left=this.displayX+'px'; this.el.style.top=this.displayY+'px';}
 
   createSmoke(){
-    const smoke=document.createElement('div');smoke.classList.add('smoke');spaceObjectsContainer.appendChild(smoke);
-    const centerX=this.displayX+20,centerY=this.displayY+20,offsetX=0,offsetY=20;
+    const smoke=document.createElement('div'); smoke.classList.add('smoke'); spaceObjectsContainer.appendChild(smoke);
+    const centerX=this.displayX+20, centerY=this.displayY+20, offsetX=0, offsetY=20;
     const rad=this.rotation*Math.PI/180;
     const rotatedX=offsetX*Math.cos(rad)-offsetY*Math.sin(rad);
     const rotatedY=offsetX*Math.sin(rad)+offsetY*Math.cos(rad);
-    smoke.style.left=centerX+rotatedX-7+'px';
-    smoke.style.top=centerY+rotatedY-7+'px';
-    let opacity=0.35+Math.random()*0.25,scale=0.4+Math.random()*0.3,frame=0,lifetime=60+Math.floor(Math.random()*20),speed=0.12+Math.random()*0.05,curve=Math.random()*0.4-0.2;
+    smoke.style.left=centerX+rotatedX-7+'px'; smoke.style.top=centerY+rotatedY-7+'px';
+    let opacity=0.35+Math.random()*0.25, scale=0.4+Math.random()*0.3, frame=0, lifetime=60+Math.floor(Math.random()*20), speed=0.12+Math.random()*0.05, curve=Math.random()*0.4-0.2;
     function animateSmoke(){
-      if(frame>=lifetime){smoke.remove();return;}
+      if(frame>=lifetime){smoke.remove(); return;}
       const moveX=-Math.sin(rad)*frame*speed+curve*frame;
       const moveY=Math.cos(rad)*frame*speed;
       smoke.style.transform=`rotate(${rad}rad) translate(${moveX}px,${moveY}px) scale(${scale})`;
-      smoke.style.opacity=opacity;
-      opacity-=0.006;scale+=0.004;frame++;
+      smoke.style.opacity=opacity; opacity-=0.006; scale+=0.004; frame++;
       requestAnimationFrame(animateSmoke);
     }
     animateSmoke();
@@ -289,28 +280,17 @@ class SpaceObject{
 
   update(){
     this.x+=this.speedX; this.y+=this.speedY;
-
-    // Smooth display interpolation
     const smooth=0.08;
-    this.displayX+=(this.x-this.displayX)*smooth;
-    this.displayY+=(this.y-this.displayY)*smooth;
+    this.displayX+=(this.x-this.displayX)*smooth; this.displayY+=(this.y-this.displayY)*smooth;
 
-    if(this.type==='planet'){
-      this.rotation+=0.02;if(this.rotation>360)this.rotation-=360;
-      this.el.style.transform=`rotate(${this.rotation}deg)`;
-    }
-    else if(this.type==='asteroid'){
-      this.rotation+=this.rotationSpeed;
-      if(this.rotation>360)this.rotation-=360; else if(this.rotation<0)this.rotation+=360;
-      this.el.style.transform=`rotate(${this.rotation}deg)`;
-    }
+    if(this.type==='planet'){this.rotation+=0.02;if(this.rotation>360)this.rotation-=360;this.el.style.transform=`rotate(${this.rotation}deg)`;}
+    else if(this.type==='asteroid'){this.rotation+=this.rotationSpeed;if(this.rotation>360)this.rotation-=360;else if(this.rotation<0)this.rotation+=360;this.el.style.transform=`rotate(${this.rotation}deg)`;}
     else if(this.type==='rocket'){
       if(this.x<-100||this.x>width+100||this.y<-100||this.y>height+100){this.el.remove();return false;}
       this.rotation=Math.atan2(this.speedY,this.speedX)*180/Math.PI+90;
       this.el.style.transform=`rotate(${this.rotation}deg)`;
       if(Math.random()<0.3)this.createSmoke();
     }
-
     this.updatePosition(); return true;
   }
 }
