@@ -118,6 +118,7 @@ window.addEventListener('mousemove',e=>{mouseX=e.clientX;mouseY=e.clientY;});
 function animateStarfield(){drawStars();requestAnimationFrame(animateStarfield);}
 resize();animateStarfield();
 
+// Space Objects
 const rocketImages=[
   'https://stewdini.github.io/space-fact-generator/images/rocket1.png',
   'https://stewdini.github.io/space-fact-generator/images/rocket2.png'
@@ -134,39 +135,103 @@ class SpaceObject{
     this.type=type;
     this.el=document.createElement('div');
     this.el.classList.add('space-object');
-    if(type==='planet'){/*planet setup*/this.size=40+Math.random()*35;this.el.classList.add('planet');const planetColors=['red','blue','green','orange','purple'];this.el.classList.add(planetColors[Math.floor(Math.random()*planetColors.length)]);do{this.x=Math.random()*window.innerWidth;this.y=Math.random()*window.innerHeight;}while(this.x>window.innerWidth/2-150&&this.x<window.innerWidth/2+150&&this.y>window.innerHeight/2-150&&this.y<window.innerHeight/2+150);this.speedX=0;this.speedY=0;this.rotation=Math.random()*360;this.rotationSpeed=0;this.el.style.width=this.size+'px';this.el.style.height=this.size+'px';this.el.style.transformOrigin='50% 50%';}
-    else if(type==='asteroid'){/*asteroid setup*/this.size=30+Math.random()*20;this.el.style.backgroundImage=`url(${asteroidImages[Math.floor(Math.random()*asteroidImages.length)]})`;this.el.style.width=this.size+'px';this.el.style.height=this.size+'px';this.x=Math.random()*window.innerWidth;this.y=Math.random()*window.innerHeight;this.speedX=(Math.random()-0.5)*0.25;this.speedY=(Math.random()-0.5)*0.25;this.rotation=Math.random()*360;this.rotationSpeed=(Math.random()-0.5)*0.3;this.el.style.transformOrigin='50% 50%';}
-    else if(type==='rocket'){/*rocket setup*/this.size=30;this.el.style.backgroundImage=`url(${rocketImages[0]})`;this.el.style.width=this.size+'px';this.el.style.height='40px';const edge=Math.floor(Math.random()*4);switch(edge){case 0:this.x=Math.random()*window.innerWidth;this.y=-50;this.speedX=(Math.random()-0.5)*0.35;this.speedY=0.8+Math.random()*0.3;break;case 1:this.x=window.innerWidth+50;this.y=Math.random()*window.innerHeight;this.speedX=-(0.8+Math.random()*0.3);this.speedY=(Math.random()-0.5)*0.35;break;case 2:this.x=Math.random()*window.innerWidth;this.y=window.innerHeight+50;this.speedX=(Math.random()-0.5)*0.35;this.speedY=-(0.8+Math.random()*0.3);break;case 3:this.x=-50;this.y=Math.random()*window.innerHeight;this.speedX=0.8+Math.random()*0.3;this.speedY=(Math.random()-0.5)*0.35;break;}this.rotation=0;this.rotationSpeed=0;this.smokeTrail=[];this.el.style.transformOrigin='50% 80%';}
+    this.oscillator=Math.random()*Math.PI*2; // for subtle oscillation
+
+    if(type==='planet'){
+      this.size=40+Math.random()*35;
+      this.el.classList.add('planet');
+      const colors=['red','blue','green','orange','purple'];
+      this.el.classList.add(colors[Math.floor(Math.random()*colors.length)]);
+      do{this.x=Math.random()*window.innerWidth;this.y=Math.random()*window.innerHeight;}while(this.x>window.innerWidth/2-150&&this.x<window.innerWidth/2+150&&this.y>window.innerHeight/2-150&&this.y<window.innerHeight/2+150);
+      this.speedX=0;this.speedY=0;
+      this.rotation=Math.random()*360;
+      this.rotationSpeed=0.01+Math.random()*0.015;
+      this.el.style.width=this.size+'px';
+      this.el.style.height=this.size+'px';
+      this.el.style.transformOrigin='50% 50%';
+    }
+    else if(type==='asteroid'){
+      this.size=30+Math.random()*20;
+      this.el.style.backgroundImage=`url(${asteroidImages[Math.floor(Math.random()*asteroidImages.length)]})`;
+      this.el.style.width=this.size+'px';
+      this.el.style.height=this.size+'px';
+      this.x=Math.random()*window.innerWidth;
+      this.y=Math.random()*window.innerHeight;
+      this.baseSpeedX=(Math.random()-0.5)*0.15; // slower for smoother drift
+      this.baseSpeedY=(Math.random()-0.5)*0.15;
+      this.rotation=Math.random()*360;
+      this.rotationSpeed=(Math.random()-0.5)*0.1; // slower rotation
+      this.el.style.transformOrigin='50% 50%';
+    }
+    else if(type==='rocket'){
+      this.size=30;
+      this.el.style.backgroundImage=`url(${rocketImages[0]})`;
+      this.el.style.width=this.size+'px';
+      this.el.style.height='40px';
+      const edge=Math.floor(Math.random()*4);
+      switch(edge){
+        case 0:this.x=Math.random()*window.innerWidth;this.y=-50;this.targetSpeedX=(Math.random()-0.5)*0.25;this.targetSpeedY=0.6+Math.random()*0.2;break;
+        case 1:this.x=window.innerWidth+50;this.y=Math.random()*window.innerHeight;this.targetSpeedX=-(0.6+Math.random()*0.2);this.targetSpeedY=(Math.random()-0.5)*0.25;break;
+        case 2:this.x=Math.random()*window.innerWidth;this.y=window.innerHeight+50;this.targetSpeedX=(Math.random()-0.5)*0.25;this.targetSpeedY=-(0.6+Math.random()*0.2);break;
+        case 3:this.x=-50;this.y=Math.random()*window.innerHeight;this.targetSpeedX=0.6+Math.random()*0.2;this.targetSpeedY=(Math.random()-0.5)*0.25;break;
+      }
+      this.speedX=0; this.speedY=0; // start slow
+      this.rotation=0; this.rotationSpeed=0;
+      this.smokeTrail=[];
+      this.el.style.transformOrigin='50% 80%';
+    }
     this.updatePosition();
     spaceObjectsContainer.appendChild(this.el);
   }
+
   updatePosition(){this.el.style.left=this.x+'px';this.el.style.top=this.y+'px';}
+
   update(){
-    this.x+=this.speedX;this.y+=this.speedY;
-    if(this.type==='planet'){this.rotation+=0.02;if(this.rotation>360)this.rotation-=360;this.el.style.transform=`rotate(${this.rotation}deg)`;}
-    else if(this.type==='asteroid'){this.rotation+=this.rotationSpeed;if(this.rotation>360)this.rotation-=360;else if(this.rotation<0)this.rotation+=360;this.el.style.transform=`rotate(${this.rotation}deg) translate(0,0)`;}
+    if(this.type==='planet'){
+      this.rotation+=this.rotationSpeed;
+      this.x += Math.sin(this.oscillator)*0.1;
+      this.y += Math.cos(this.oscillator)*0.1;
+      this.oscillator+=0.01;
+      this.el.style.transform=`rotate(${this.rotation}deg)`;
+    }
+    else if(this.type==='asteroid'){
+      this.rotation+=this.rotationSpeed;
+      this.x += this.baseSpeedX + Math.sin(this.oscillator)*0.1;
+      this.y += this.baseSpeedY + Math.cos(this.oscillator)*0.1;
+      this.oscillator+=0.01;
+      this.el.style.transform=`rotate(${this.rotation}deg)`;
+      if(this.x<-50)this.x=window.innerWidth+50;if(this.x>window.innerWidth+50)this.x=-50;
+      if(this.y<-50)this.y=window.innerHeight+50;if(this.y>window.innerHeight+50)this.y=-50;
+    }
     else if(this.type==='rocket'){
-      if(this.x<-100||this.x>window.innerWidth+100||this.y<-100||this.y>window.innerHeight+100){this.el.remove();return false;}
+      // easing toward target speed
+      this.speedX += (this.targetSpeedX - this.speedX)*0.02;
+      this.speedY += (this.targetSpeedY - this.speedY)*0.02;
+      this.x += this.speedX;
+      this.y += this.speedY;
       this.rotation=Math.atan2(this.speedY,this.speedX)*180/Math.PI+90;
       this.el.style.transform=`rotate(${this.rotation}deg)`;
-      // Smooth smoke placement
-      if(Math.random()<0.4){this.createSmokeParticle(this.x+this.size/2,this.y+32);}
+      if(Math.random()<0.35)this.createSmokeParticle(this.x+this.size/2,this.y+32);
+      if(this.x<-100||this.x>window.innerWidth+100||this.y<-100||this.y>window.innerHeight+100){
+        this.el.remove();return false;
+      }
     }
     this.updatePosition();
     return true;
   }
+
   createSmokeParticle(x,y){
     const smoke=document.createElement('div');smoke.classList.add('smoke');smoke.style.left=x+'px';smoke.style.top=y+'px';spaceObjectsContainer.appendChild(smoke);
-    let opacity=0.4+Math.random()*0.3;let scale=0.5+Math.random()*0.5;let rise=0;let lifetime=40+Math.random()*20;let frame=0;
-    function animateSmoke(){if(frame>=lifetime){smoke.remove();return;}rise+=0.25;opacity-=0.008;scale+=0.004;smoke.style.transform=`translateY(${-rise}px) scale(${scale})`;smoke.style.opacity=opacity;frame++;requestAnimationFrame(animateSmoke);}
+    let opacity=0.4+Math.random()*0.3;let scale=0.5+Math.random()*0.5;let rise=0;let lifetime=50+Math.random()*20;let frame=0;
+    function animateSmoke(){if(frame>=lifetime){smoke.remove();return;}rise+=0.2;opacity-=0.007;scale+=0.003;smoke.style.transform=`translateY(${-rise}px) scale(${scale})`;smoke.style.opacity=opacity;frame++;requestAnimationFrame(animateSmoke);}
     animateSmoke();
   }
 }
 
 const spaceObjects=[];
-for(let i=0;i<6;i++){spaceObjects.push(new SpaceObject('planet'));}
-for(let i=0;i<5;i++){spaceObjects.push(new SpaceObject('asteroid'));}
-for(let i=0;i<4;i++){spaceObjects.push(new SpaceObject('rocket'));}
+for(let i=0;i<6;i++)spaceObjects.push(new SpaceObject('planet'));
+for(let i=0;i<5;i++)spaceObjects.push(new SpaceObject('asteroid'));
+for(let i=0;i<4;i++)spaceObjects.push(new SpaceObject('rocket'));
 
 function animateSpaceObjects(){
   for(let i=spaceObjects.length-1;i>=0;i--){
@@ -181,44 +246,13 @@ function animateSpaceObjects(){
 }
 animateSpaceObjects();
 
-const facts=[
-"The largest volcano in our solar system is on Mars, Olympus Mons.",
-"Jupiter has the shortest day of all planets, completing a rotation in about 10 hours.",
-"Saturn’s rings are made mostly of ice particles with a smaller amount of rocky debris.",
-"Venus spins backward compared to most planets, meaning the Sun rises in the west there.",
-"A day on Mercury lasts longer than its year!",
-"Neutron stars can spin 600 times per second.",
-"Space is not completely empty, it has tiny particles and radiation.",
-"The hottest planet is not the closest to the Sun, but Venus due to its thick atmosphere.",
-"Pluto is classified as a dwarf planet, not a full sized planet.",
-"There are thousands of exoplanets discovered beyond our solar system."
-];
-const factDisplay=document.getElementById('factDisplay');
-const factButton=document.getElementById('factButton');
-const copyButton=document.getElementById('copyButton');
-const copyFeedback=document.getElementById('copyFeedback');
-
-factButton.addEventListener('click',()=>{
-  const randomFact=facts[Math.floor(Math.random()*facts.length)];
-  factDisplay.textContent=randomFact;
-  factDisplay.classList.add('show');
-  copyButton.style.display='inline-block';
-  copyFeedback.style.display='none';
-});
-
-copyButton.addEventListener('click',()=>{
-  navigator.clipboard.writeText(factDisplay.textContent).then(()=>{
-    copyFeedback.style.display='inline';
-    setTimeout(()=>{copyFeedback.style.display='none';},2000);
-  });
-});
-
-const muteToggle=document.getElementById('muteToggle');
-let muted=false;
-muteToggle.addEventListener('click',()=>{
-  muted=!muted;
-  muteToggle.textContent=muted?'🔇':'🔊';
-});
+// Facts and buttons (unchanged)
+const facts=["The largest volcano in our solar system is on Mars, Olympus Mons.","Jupiter has the shortest day of all planets, completing a rotation in about 10 hours.","Saturn’s rings are made mostly of ice particles with a smaller amount of rocky debris.","Venus spins backward compared to most planets, meaning the Sun rises in the west there.","A day on Mercury lasts longer than its year!","Neutron stars can spin 600 times per second.","Space is not completely empty, it has tiny particles and radiation.","The hottest planet is not the closest to the Sun, but Venus due to its thick atmosphere.","Pluto is classified as a dwarf planet, not a full sized planet.","There are thousands of exoplanets discovered beyond our solar system."];
+const factDisplay=document.getElementById('factDisplay');const factButton=document.getElementById('factButton');const copyButton=document.getElementById('copyButton');const copyFeedback=document.getElementById('copyFeedback');
+factButton.addEventListener('click',()=>{const randomFact=facts[Math.floor(Math.random()*facts.length)];factDisplay.textContent=randomFact;factDisplay.classList.add('show');copyButton.style.display='inline-block';copyFeedback.style.display='none';});
+copyButton.addEventListener('click',()=>{navigator.clipboard.writeText(factDisplay.textContent).then(()=>{copyFeedback.style.display='inline';setTimeout(()=>{copyFeedback.style.display='none';},2000);});});
+const muteToggle=document.getElementById('muteToggle');let muted=false;muteToggle.addEventListener('click',()=>{muted=!muted;muteToggle.textContent=muted?'🔇':'🔊';});
 </script>
 </body>
 </html>
+
