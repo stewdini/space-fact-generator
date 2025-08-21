@@ -192,7 +192,7 @@ h1 {
 </div>
 
 <script>
-// === STARFIELD ===
+// Starfield
 const canvas=document.getElementById('starfield'), ctx=canvas.getContext('2d');
 let stars=[], width, height, mouseX=0, mouseY=0;
 const starCount=150;
@@ -204,8 +204,8 @@ window.addEventListener('mousemove',e=>{mouseX=e.clientX;mouseY=e.clientY;});
 function animateStarfield(){drawStars();requestAnimationFrame(animateStarfield);}
 resize();animateStarfield();
 
-// === SPACE OBJECTS WITH ROCKETS + SMOKE ===
-const rocketImages=['https://stewdini.github.io/space-fact-generator/images/rocket1.png'];
+// Images
+const rocketImages=['https://stewdini.github.io/space-fact-generator/images/rocket1.png','https://stewdini.github.io/space-fact-generator/images/rocket2.png'];
 const asteroidImages=['https://stewdini.github.io/space-fact-generator/images/asteroid1.png','https://stewdini.github.io/space-fact-generator/images/asteroid2.png','https://stewdini.github.io/space-fact-generator/images/asteroid3.png'];
 const spaceObjectsContainer=document.getElementById('spaceObjectsContainer');
 
@@ -253,24 +253,23 @@ class SpaceObject{
     const smoke=document.createElement('div'); 
     smoke.classList.add('smoke'); 
     spaceObjectsContainer.appendChild(smoke);
-    const centerX = this.x + this.size/2;
-    const centerY = this.y + this.size/2;
-    const angle = Math.atan2(this.speedY, this.speedX);
-    const offset = 20;
-    const smokeX = centerX - Math.cos(angle) * offset;
-    const smokeY = centerY - Math.sin(angle) * offset;
-    smoke.style.left = smokeX - 7 + 'px';
-    smoke.style.top = smokeY - 7 + 'px';
+
+    // Dynamic position under rocket
+    const smokeX = this.x + this.size/2 - 7;
+    const smokeY = this.y + this.size - 5;
+
+    smoke.style.left = smokeX + 'px';
+    smoke.style.top = smokeY + 'px';
+
     let opacity = 0.35 + Math.random()*0.25;
     let scale = 0.4 + Math.random()*0.3;
     let frame = 0;
     const lifetime = 60 + Math.floor(Math.random()*20);
     const speed = 0.12 + Math.random()*0.05;
-    const animateSmoke = ()=>{
+
+    function animateSmoke(){
       if(frame>=lifetime){smoke.remove(); return;}
-      const moveX = -Math.sin(angle) * frame * speed;
-      const moveY = Math.cos(angle) * frame * speed;
-      smoke.style.transform = `translate(${moveX}px,${moveY}px) scale(${scale})`;
+      smoke.style.transform = `translateY(-${frame * speed * 10}px) scale(${scale})`;
       smoke.style.opacity = opacity;
       opacity -= 0.006;
       scale += 0.004;
@@ -323,7 +322,7 @@ function animateSpaceObjects(){
 }
 animateSpaceObjects();
 
-// === FACT GENERATOR ===
+// Fact generator
 const facts=[
   "The largest volcano in our solar system is on Mars, Olympus Mons.",
   "Jupiter has the shortest day of all planets, completing a rotation in about 10 hours.",
@@ -336,6 +335,7 @@ const facts=[
   "Pluto is classified as a dwarf planet, not a full sized planet.",
   "There are thousands of exoplanets discovered beyond our solar system."
 ];
+
 const factDisplay=document.getElementById('factDisplay');
 const factButton=document.getElementById('factButton');
 const copyButton=document.getElementById('copyButton');
