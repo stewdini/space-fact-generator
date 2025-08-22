@@ -1,165 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Space Fact Generator</title>
-  <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Random Space Fact Generator | Space Simplified</title>
+<style>
     body {
-      margin: 0;
-      overflow: hidden;
-      background: black;
-      color: white;
-      font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+        color: white;
+        font-family: Arial, sans-serif;
     }
 
-    #spaceCanvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: -1;
+    .background-object {
+        position: absolute;
+        will-change: transform;
     }
 
-    #factBox {
-      position: relative;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0,0,0,0.6);
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center;
-      max-width: 600px;
+    .rocket {
+        width: 60px;
+        height: auto;
+        position: absolute;
     }
 
-    button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      border: none;
-      background: #1e90ff;
-      color: white;
-      font-size: 16px;
-      border-radius: 8px;
-      cursor: pointer;
+    .asteroid {
+        width: 80px;
+        height: auto;
+        position: absolute;
     }
-    button:hover {
-      background: #4682b4;
+
+    .planet {
+        width: 120px;
+        height: auto;
+        position: absolute;
     }
-  </style>
+
+    /* Smoke styling */
+    .smoke {
+        position: absolute;
+        width: 15px;
+        height: 15px;
+        background: rgba(200, 200, 200, 0.4);
+        border-radius: 50%;
+        pointer-events: none;
+        animation: fadeOut 1.2s forwards;
+    }
+
+    @keyframes fadeOut {
+        from { opacity: 0.6; transform: scale(1); }
+        to { opacity: 0; transform: scale(2); }
+    }
+</style>
 </head>
 <body>
-  <canvas id="spaceCanvas"></canvas>
+    <div id="space-container"></div>
 
-  <div id="factBox">
-    <h1>Random Space Fact</h1>
-    <p id="fact">Click the button to generate a space fact!</p>
-    <button onclick="generateFact()">New Fact</button>
-  </div>
+    <script>
+        const container = document.getElementById("space-container");
 
-  <script>
-    const canvas = document.getElementById("spaceCanvas");
-    const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+        const rockets = [
+            "🚀", // replace with rocketship image URL if needed
+            "🚀"
+        ];
+        const asteroids = ["🪨", "☄️"];
+        const planets = ["🪐", "🌍", "🌑"];
 
-    window.addEventListener("resize", () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    });
-
-    class SmokeParticle {
-      constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.size = Math.random() * 4 + 2;
-        this.alpha = 1;
-        this.speedY = Math.random() * 0.5 + 0.5;
-      }
-
-      update() {
-        this.y += this.speedY;
-        this.alpha -= 0.02;
-      }
-
-      draw(ctx) {
-        ctx.fillStyle = `rgba(200,200,200,${this.alpha})`;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      isDead() {
-        return this.alpha <= 0;
-      }
-    }
-
-    class Rocket {
-      constructor(x, y, speed) {
-        this.x = x;
-        this.y = y;
-        this.speed = speed;
-        this.smoke = [];
-      }
-
-      update() {
-        this.y -= this.speed;
-
-        // Add new smoke particle behind rocket
-        this.smoke.push(new SmokeParticle(this.x, this.y + 20));
-
-        // Update smoke
-        this.smoke.forEach(s => s.update());
-        this.smoke = this.smoke.filter(s => !s.isDead());
-
-        // Reset rocket if it goes off-screen
-        if (this.y < -50) {
-          this.y = canvas.height + 50;
-          this.x = Math.random() * canvas.width;
+        function createObject(type, content) {
+            const el = document.createElement("div");
+            el.classList.add("background-object", type);
+            el.innerHTML = content;
+            el.style.top = Math.random() * window.innerHeight + "px";
+            el.style.left = Math.random() * window.innerWidth + "px";
+            container.appendChild(el);
+            return el;
         }
-      }
 
-      draw(ctx) {
-        // Draw rocket
-        ctx.fillStyle = "red";
-        ctx.fillRect(this.x - 5, this.y - 20, 10, 20);
+        function animateObject(el, speed, isRocket = false) {
+            let x = parseFloat(el.style.left);
+            let y = parseFloat(el.style.top);
 
-        // Draw smoke
-        this.smoke.forEach(s => s.draw(ctx));
-      }
-    }
+            function move() {
+                x -= speed;
+                if (x < -100) {
+                    x = window.innerWidth + 100;
+                    y = Math.random() * window.innerHeight;
+                }
+                el.style.transform = `translate(${x}px, ${y}px)`;
 
-    let rockets = [];
-    for (let i = 0; i < 5; i++) {
-      rockets.push(new Rocket(Math.random() * canvas.width, canvas.height - Math.random() * 200, 2));
-    }
+                // Smoke effect if rocket
+                if (isRocket) {
+                    createSmoke(x, y + 40); // spawn smoke just below rocket
+                }
 
-    function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+                requestAnimationFrame(move);
+            }
+            move();
+        }
 
-      rockets.forEach(r => {
-        r.update();
-        r.draw(ctx);
-      });
+        function createSmoke(x, y) {
+            const smoke = document.createElement("div");
+            smoke.classList.add("smoke");
+            smoke.style.left = x + "px";
+            smoke.style.top = y + "px";
+            container.appendChild(smoke);
 
-      requestAnimationFrame(animate);
-    }
+            setTimeout(() => {
+                smoke.remove();
+            }, 1200);
+        }
 
-    animate();
+        // Create objects
+        rockets.forEach(r => {
+            const el = createObject("rocket", r);
+            animateObject(el, 1.5, true);
+        });
 
-    const facts = [
-      "Jupiter is so big that all the other planets in our solar system could fit inside it.",
-      "Neutron stars can spin at a rate of 600 rotations per second.",
-      "One day on Venus is longer than one year on Venus.",
-      "Saturn could float in water because it is mostly made of gas.",
-      "There are more stars in the universe than grains of sand on Earth."
-    ];
+        asteroids.forEach(a => {
+            const el = createObject("asteroid", a);
+            animateObject(el, 1);
+        });
 
-    function generateFact() {
-      const fact = facts[Math.floor(Math.random() * facts.length)];
-      document.getElementById("fact").innerText = fact;
-    }
-  </script>
+        planets.forEach(p => {
+            const el = createObject("planet", p);
+            animateObject(el, 0.3);
+        });
+    </script>
 </body>
 </html>
