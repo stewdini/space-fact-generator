@@ -1,174 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Random Space Fact Generator | Space Simplified</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Space Fact Generator</title>
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
-      color: #fff;
       overflow: hidden;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      background: black;
+      color: white;
+      font-family: Arial, sans-serif;
     }
 
-    .background {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
+    #spaceCanvas {
+      position: fixed;
       top: 0;
       left: 0;
+      width: 100vw;
+      height: 100vh;
       z-index: -1;
     }
 
-    .space-object {
-      position: absolute;
-      will-change: transform;
-      pointer-events: none;
-    }
-
-    .rocket {
-      width: 60px;
-      height: auto;
-    }
-
-    .smoke {
-      position: absolute;
-      width: 40px;
-      height: 40px;
-      background: radial-gradient(circle, rgba(200,200,200,0.8) 0%, rgba(200,200,200,0) 70%);
-      border-radius: 50%;
-      pointer-events: none;
-      opacity: 0.6;
-      will-change: transform;
-    }
-
-    .fact-box {
-      background: rgba(0, 0, 0, 0.7);
+    #factBox {
+      position: relative;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.6);
       padding: 20px;
-      border-radius: 10px;
+      border-radius: 12px;
       text-align: center;
-      max-width: 500px;
-      z-index: 2;
+      max-width: 600px;
     }
 
     button {
-      margin-top: 20px;
+      margin-top: 10px;
       padding: 10px 20px;
       border: none;
-      border-radius: 5px;
-      background: #ff9800;
+      background: #1e90ff;
       color: white;
       font-size: 16px;
+      border-radius: 8px;
       cursor: pointer;
     }
-
     button:hover {
-      background: #e68900;
+      background: #4682b4;
     }
   </style>
 </head>
 <body>
-  <div class="background" id="background"></div>
+  <canvas id="spaceCanvas"></canvas>
 
-  <div class="fact-box">
+  <div id="factBox">
     <h1>Random Space Fact</h1>
-    <p id="fact">Click the button to learn something cool about space!</p>
+    <p id="fact">Click the button to generate a space fact!</p>
     <button onclick="generateFact()">New Fact</button>
   </div>
 
   <script>
+    const canvas = document.getElementById("spaceCanvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    window.addEventListener("resize", () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+    class SmokeParticle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.size = Math.random() * 4 + 2;
+        this.alpha = 1;
+        this.speedY = Math.random() * 0.5 + 0.5;
+      }
+
+      update() {
+        this.y += this.speedY;
+        this.alpha -= 0.02;
+      }
+
+      draw(ctx) {
+        ctx.fillStyle = `rgba(200,200,200,${this.alpha})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      isDead() {
+        return this.alpha <= 0;
+      }
+    }
+
+    class Rocket {
+      constructor(x, y, speed) {
+        this.x = x;
+        this.y = y;
+        this.speed = speed;
+        this.smoke = [];
+      }
+
+      update() {
+        this.y -= this.speed;
+
+        // Add new smoke particle behind rocket
+        this.smoke.push(new SmokeParticle(this.x, this.y + 20));
+
+        // Update smoke
+        this.smoke.forEach(s => s.update());
+        this.smoke = this.smoke.filter(s => !s.isDead());
+
+        // Reset rocket if it goes off-screen
+        if (this.y < -50) {
+          this.y = canvas.height + 50;
+          this.x = Math.random() * canvas.width;
+        }
+      }
+
+      draw(ctx) {
+        // Draw rocket
+        ctx.fillStyle = "red";
+        ctx.fillRect(this.x - 5, this.y - 20, 10, 20);
+
+        // Draw smoke
+        this.smoke.forEach(s => s.draw(ctx));
+      }
+    }
+
+    let rockets = [];
+    for (let i = 0; i < 5; i++) {
+      rockets.push(new Rocket(Math.random() * canvas.width, canvas.height - Math.random() * 200, 2));
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      rockets.forEach(r => {
+        r.update();
+        r.draw(ctx);
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+
     const facts = [
-      "A day on Venus is longer than a year on Venus.",
-      "Neutron stars can spin 600 times per second.",
-      "There are more stars in space than grains of sand on Earth.",
-      "One million Earths could fit inside the Sun.",
-      "Black holes can slow down time.",
-      "Saturn could float in water because it’s mostly gas.",
-      "The footprints on the Moon will stay for millions of years.",
-      "Space is completely silent — sound needs a medium to travel."
+      "Jupiter is so big that all the other planets in our solar system could fit inside it.",
+      "Neutron stars can spin at a rate of 600 rotations per second.",
+      "One day on Venus is longer than one year on Venus.",
+      "Saturn could float in water because it is mostly made of gas.",
+      "There are more stars in the universe than grains of sand on Earth."
     ];
 
     function generateFact() {
       const fact = facts[Math.floor(Math.random() * facts.length)];
-      document.getElementById("fact").textContent = fact;
+      document.getElementById("fact").innerText = fact;
     }
-
-    const background = document.getElementById("background");
-
-    function createRocket() {
-      const rocket = document.createElement("img");
-      rocket.src = "images/rocket.png"; // keep your original rocket image
-      rocket.className = "space-object rocket";
-      rocket.style.top = window.innerHeight + "px";
-      rocket.style.left = Math.random() * (window.innerWidth - 60) + "px";
-      background.appendChild(rocket);
-
-      const smokeTrail = [];
-      let y = window.innerHeight;
-      const speed = 1 + Math.random() * 1.5;
-
-      function moveRocket() {
-        y -= speed;
-        rocket.style.transform = `translateY(${y - window.innerHeight}px)`;
-
-        // Add smoke puffs directly behind rocket
-        if (Math.random() < 0.3) {
-          const smoke = document.createElement("div");
-          smoke.className = "smoke";
-          const rocketRect = rocket.getBoundingClientRect();
-          smoke.style.left = rocketRect.left + rocketRect.width / 2 - 20 + "px";
-          smoke.style.top = rocketRect.bottom - 10 + "px";
-          background.appendChild(smoke);
-
-          setTimeout(() => {
-            smoke.remove();
-          }, 2000);
-        }
-
-        if (y > -100) {
-          requestAnimationFrame(moveRocket);
-        } else {
-          rocket.remove();
-        }
-      }
-      requestAnimationFrame(moveRocket);
-    }
-
-    function createAsteroid() {
-      const asteroid = document.createElement("img");
-      asteroid.src = "images/asteroid.png"; // keep your asteroid
-      asteroid.className = "space-object";
-      asteroid.style.width = "50px";
-      asteroid.style.top = -100 + "px";
-      asteroid.style.left = Math.random() * (window.innerWidth - 50) + "px";
-      background.appendChild(asteroid);
-
-      let y = -100;
-      const speed = 0.5 + Math.random() * 1.2;
-
-      function moveAsteroid() {
-        y += speed;
-        asteroid.style.transform = `translateY(${y}px)`;
-
-        if (y < window.innerHeight + 100) {
-          requestAnimationFrame(moveAsteroid);
-        } else {
-          asteroid.remove();
-        }
-      }
-      requestAnimationFrame(moveAsteroid);
-    }
-
-    // Spawning
-    setInterval(createRocket, 4000);
-    setInterval(createAsteroid, 3000);
   </script>
 </body>
 </html>
