@@ -126,28 +126,27 @@ class SpaceObject{
 
     let opacity = 0.35 + Math.random() * 0.25;
     let scale = 0.4 + Math.random() * 0.3;
+    let lifetime = 60 + Math.floor(Math.random() * 20);
     let frame = 0;
-    const lifetime = 60 + Math.floor(Math.random() * 20);
-    const speed = 0.12 + Math.random() * 0.05;
     const angle = Math.atan2(this.speedY, this.speedX);
 
     const animateSmoke = () => {
-        if (frame >= lifetime) {
+        if(frame >= lifetime){
             smoke.remove();
             return;
         }
 
-        // Always spawn relative to the rocket's current position
-        const centerX = this.x + this.size / 2;
-        const centerY = this.y + this.size / 2;
+        // Make smoke follow the rocket
+        const rocketCenterX = this.x + this.size / 2;
+        const rocketCenterY = this.y + this.size / 2;
 
-        const offsetX = -Math.sin(angle) * frame * speed;
-        const offsetY = Math.cos(angle) * frame * speed;
+        const offsetX = -Math.sin(angle) * frame * 0.12;
+        const offsetY = Math.cos(angle) * frame * 0.12;
 
-        smoke.style.left = `${centerX - 7 + offsetX}px`;
-        smoke.style.top = `${centerY - 7 + offsetY}px`;
-        smoke.style.transform = `scale(${scale})`;
+        smoke.style.left = `${rocketCenterX - 7 + offsetX}px`;
+        smoke.style.top = `${rocketCenterY - 7 + offsetY}px`;
         smoke.style.opacity = opacity;
+        smoke.style.transform = `scale(${scale})`;
 
         opacity -= 0.006;
         scale += 0.004;
@@ -231,3 +230,4 @@ muteToggle.addEventListener('click',()=>{ muted=!muted; muteToggle.textContent=m
 </script>
 </body>
 </html>
+
