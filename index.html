@@ -122,7 +122,7 @@ class SpaceObject{
     createSmoke() {
     const smoke = document.createElement('div');
     smoke.classList.add('smoke');
-    this.el.appendChild(smoke); // attach to rocket
+    spaceObjectsContainer.appendChild(smoke); // keep it in the container
 
     let opacity = 0.35 + Math.random() * 0.25;
     let scale = 0.4 + Math.random() * 0.3;
@@ -138,18 +138,18 @@ class SpaceObject{
             return;
         }
 
-        // Smoke starts at the back of the rocket
-        const backX = this.size / 2 - Math.cos(angle) * this.size / 2;
-        const backY = this.size / 2 - Math.sin(angle) * this.size / 2;
+        // Engine is at bottom middle of the rocket
+        const engineX = this.x + this.size / 2;
+        const engineY = this.y + this.size; // bottom edge
 
-        // Trail offset along the rocket's backward direction
+        // Trail offset opposite rocket's movement
         const offsetX = -Math.cos(angle) * frame * 0.6 + (Math.random() - 0.5) * 2;
         const offsetY = -Math.sin(angle) * frame * 0.6 + (Math.random() - 0.5) * 2;
 
-        smoke.style.left = `${backX + offsetX}px`;
-        smoke.style.top = `${backY + offsetY}px`;
+        smoke.style.left = `${engineX + offsetX - 7}px`;
+        smoke.style.top = `${engineY + offsetY - 7}px`;
         smoke.style.opacity = opacity;
-        smoke.style.transform = `scale(${scale}) rotate(${angle + Math.PI}rad)`; // rotate smoke opposite rocket
+        smoke.style.transform = `scale(${scale}) rotate(${angle + Math.PI}rad)`; // rotate opposite rocket
 
         opacity -= 0.006;
         scale += 0.004;
@@ -234,4 +234,5 @@ muteToggle.addEventListener('click',()=>{ muted=!muted; muteToggle.textContent=m
 </script>
 </body>
 </html>
+
 
