@@ -122,20 +122,12 @@ class SpaceObject{
     createSmoke() {
     const smoke = document.createElement('div');
     smoke.classList.add('smoke');
-    spaceObjectsContainer.appendChild(smoke);
+    this.el.appendChild(smoke); // attach to rocket
 
     let opacity = 0.35 + Math.random() * 0.25;
     let scale = 0.4 + Math.random() * 0.3;
     let frame = 0;
     const lifetime = 60 + Math.floor(Math.random() * 20);
-
-    // Rocket engine is at bottom middle of the PNG
-    const getEnginePosition = () => ({
-        x: this.x + this.size / 2, // horizontal center
-        y: this.y + this.size      // bottom edge
-    });
-
-    const angle = Math.atan2(this.speedY, this.speedX); // direction of rocket
 
     const animateSmoke = () => {
         if (frame >= lifetime) {
@@ -143,14 +135,17 @@ class SpaceObject{
             return;
         }
 
-        const enginePos = getEnginePosition();
+        // Bottom middle of rocket
+        const centerX = this.size / 2;
+        const centerY = this.size; // bottom edge
 
-        // Smoke drifts slightly opposite the rocket direction
-        const driftX = -Math.cos(angle) * frame * 0.6 + (Math.random() - 0.5) * 2;
-        const driftY = -Math.sin(angle) * frame * 0.6 + (Math.random() - 0.5) * 2;
+        // Drift slightly opposite rocket's facing direction
+        const angle = Math.atan2(this.speedY, this.speedX);
+        const driftX = -Math.cos(angle) * frame * 0.5 + (Math.random() - 0.5) * 2;
+        const driftY = -Math.sin(angle) * frame * 0.5 + (Math.random() - 0.5) * 2;
 
-        smoke.style.left = `${enginePos.x + driftX - 7}px`;
-        smoke.style.top = `${enginePos.y + driftY - 7}px`;
+        smoke.style.left = `${centerX + driftX - 7}px`;
+        smoke.style.top = `${centerY + driftY - 7}px`;
         smoke.style.opacity = opacity;
         smoke.style.transform = `scale(${scale})`;
 
@@ -237,6 +232,7 @@ muteToggle.addEventListener('click',()=>{ muted=!muted; muteToggle.textContent=m
 </script>
 </body>
 </html>
+
 
 
 
