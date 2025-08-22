@@ -135,22 +135,21 @@ class SpaceObject{
             return;
         }
 
-        // Bottom middle of rocket
-        const centerX = this.size / 2;
-        const centerY = this.size; // bottom edge
+        // Offset from rocket center to bottom middle
+        const offsetX = 0; // no horizontal offset
+        const offsetY = this.size / 2; // half size downward to reach bottom
 
-        // Drift slightly opposite rocket's facing direction
+        // Drift smoke slightly opposite to rocket direction
         const angle = Math.atan2(this.speedY, this.speedX);
-        const driftX = -Math.cos(angle) * frame * 0.5 + (Math.random() - 0.5) * 2;
-        const driftY = -Math.sin(angle) * frame * 0.5 + (Math.random() - 0.5) * 2;
+        const drift = frame * 0.5;
+        const driftX = -Math.cos(angle) * drift + (Math.random() - 0.5) * 2;
+        const driftY = -Math.sin(angle) * drift + (Math.random() - 0.5) * 2;
 
-        smoke.style.left = `${centerX + driftX - 7}px`;
-        smoke.style.top = `${centerY + driftY - 7}px`;
+        // Set smoke position relative to rocket's rotated frame
+        smoke.style.left = `${this.size/2 - 7 + offsetX + driftX}px`;
+        smoke.style.top = `${this.size - 7 + offsetY + driftY}px`;
         smoke.style.opacity = opacity;
-
-        // Rotate smoke to match rocket direction
-        const smokeAngle = angle * 180 / Math.PI + 90; // same as rocket rotation
-        smoke.style.transform = `scale(${scale}) rotate(${smokeAngle}deg)`;
+        smoke.style.transform = `scale(${scale}) rotate(0deg)`; // no extra rotation; inherits rocket rotation
 
         opacity -= 0.006;
         scale += 0.004;
@@ -235,6 +234,7 @@ muteToggle.addEventListener('click',()=>{ muted=!muted; muteToggle.textContent=m
 </script>
 </body>
 </html>
+
 
 
 
