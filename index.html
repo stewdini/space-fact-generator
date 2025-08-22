@@ -1,397 +1,216 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Random Space Fact Generator | Space Simplified</title>
-<style>
-body {
-  margin: 0;
-  height: 100vh;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #e0e0e0;
-  background: #000010;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  padding: 1rem;
-  position: relative;
-}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Random Space Fact Generator | Space Simplified</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(ellipse at bottom, #0d1b2a, #000);
+      color: white;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
 
-canvas#starfield {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
-}
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
 
-.space-object {
-  position: fixed;
-  pointer-events: none;
-  z-index: 0;
-  will-change: transform;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  transform: translate3d(0,0,0);
-}
+    button {
+      background: #1b263b;
+      border: 2px solid #778da9;
+      color: #fff;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      transition: background 0.3s;
+      z-index: 10;
+    }
 
-.planet {
-  border-radius: 50%;
-  box-shadow: 0 0 8px 1px rgba(100,150,255,0.3);
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
-}
+    button:hover {
+      background: #415a77;
+    }
 
-.planet.red { background-color: #b0413e; }
-.planet.blue { background-color: #4b7dad; }
-.planet.green { background-color: #4ca36c; }
-.planet.orange { background-color: #d17f3c; }
-.planet.purple { background-color: #7855b8; }
+    .fact {
+      margin-top: 20px;
+      font-size: 1.5rem;
+      text-align: center;
+      max-width: 600px;
+      z-index: 10;
+      position: relative;
+    }
 
-h1 {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  position: relative;
-  z-index: 10;
-  text-shadow: 0 0 8px #66fcf1;
-}
+    /* Background elements */
+    .background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+    }
 
-.sparkle {
-  display: inline-block;
-  animation: sparkleAnim 2s linear infinite;
-  font-size: 2.2rem;
-  color: #66fcf1;
-  margin-left: 0.3em;
-  position: relative;
-  top: 5px;
-}
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.8;
+    }
 
-@keyframes sparkleAnim {
-  0%, 100% { opacity: 1; transform: rotate(0deg) scale(1); }
-  50% { opacity: 0.5; transform: rotate(20deg) scale(1.3); }
-}
+    .planet {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.9;
+    }
 
-#factWrapper {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  max-width: 700px;
-  z-index: 10;
-}
+    /* Rocket + Smoke container */
+    .rocket-container {
+      position: absolute;
+      width: 40px;
+      height: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: none;
+    }
 
-#factDisplay {
-  font-size: 1.4rem;
-  margin: 2rem 0;
-  line-height: 1.6;
-  position: relative;
-  opacity: 0;
-  animation: fadeIn 1s forwards;
-  text-shadow: 0 0 6px #45a29eaa;
-  max-width: 600px;
-  word-wrap: break-word;
-}
+    .rocket {
+      width: 20px;
+      height: 40px;
+      background: linear-gradient(to top, #ff4d4d, #ff1a1a);
+      border-radius: 10px 10px 0 0;
+      position: relative;
+      z-index: 2;
+    }
 
-#factDisplay.show { animation: fadeIn 1s forwards; opacity: 1; }
+    .rocket::after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 10px;
+      height: 15px;
+      background: yellow;
+      border-radius: 50%;
+    }
 
-#copyButton {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  margin-left: 4px;
-  display: none;
-  color: #ccc;
-  transition: color 0.2s ease, transform 0.2s ease;
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-}
+    /* Smoke directly under rocket */
+    .smoke {
+      position: absolute;
+      top: 100%;
+      width: 10px;
+      height: 10px;
+      background: rgba(200,200,200,0.6);
+      border-radius: 50%;
+      animation: smoke 1s infinite;
+      z-index: 1;
+    }
 
-#copyButton:hover { color: #fff; transform: scale(1.2); }
+    @keyframes smoke {
+      0% { transform: scale(0.5) translateY(0); opacity: 0.8; }
+      100% { transform: scale(1.5) translateY(20px); opacity: 0; }
+    }
 
-#copyFeedback {
-  font-size: 1.5rem;
-  color: #66fcf1;
-  margin-left: 8px;
-  user-select: none;
-  display: none;
-  align-self: center;
-}
-
-.buttons-container {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 1rem;
-  position: relative;
-  z-index: 10;
-}
-
-#factButton {
-  padding: 14px 35px;
-  font-size: 1.3rem;
-  border: none;
-  border-radius: 10px;
-  background-color: #1f2833;
-  color: #66fcf1;
-  cursor: pointer;
-  transition: background-color 0.4s ease, box-shadow 0.4s ease, transform 0.2s ease;
-  box-shadow: 0 0 12px #45a29e99;
-  animation: pulseGlow 2.5s ease-in-out infinite;
-}
-
-#factButton:disabled { cursor: not-allowed; opacity: 0.5; animation: none; box-shadow: none; background-color: #0a141b; color: #444; }
-
-@keyframes pulseGlow {
-  0%,100%{ box-shadow:0 0 12px #45a29e99,0 0 20px #66fcf1cc; }
-  50%{ box-shadow:0 0 20px #45a29ecc,0 0 30px #66fcf1ff; }
-}
-
-#factButton:hover:not(:disabled) { background-color:#45a29e; box-shadow:0 0 30px #66fcf1ff; transform: scale(1.05); animation:none; }
-#factButton:active:not(:disabled) { transform: scale(0.95); box-shadow:0 0 10px #45a29e99; }
-
-#muteToggle { background:none; border:none; font-size:1.4rem; cursor:pointer; color:#66fcf1; padding:0; margin:0 0 0 12px; line-height:1; user-select:none; transition: transform 0.2s ease; }
-#muteToggle:hover { transform: scale(1.2); }
-
-.smoke {
-  position: fixed;
-  width: 14px;
-  height: 14px;
-  background: rgba(180,180,180,0.3);
-  border-radius: 50%;
-  filter: blur(3px);
-  pointer-events: none;
-  z-index: -1;
-  will-change: transform, opacity;
-  transform-origin: center center;
-}
-</style>
+    /* Smooth floating animation */
+    @keyframes float {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+      100% { transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
-<canvas id="starfield"></canvas>
-<div id="spaceObjectsContainer"></div>
-<h1>🔭 Random Space Fact Generator<span class="sparkle">✨</span></h1>
-<div id="factWrapper">
-  <p id="factDisplay">Click the button below to learn a cool space fact!</p>
-  <button id="copyButton">Copy</button>
-  <span id="copyFeedback">✅</span>
-</div>
-<div class="buttons-container">
-  <button id="factButton">Show Me a Random Fact</button>
-  <button id="muteToggle">🔊</button>
-</div>
+  <h1>Random Space Fact Generator</h1>
+  <button onclick="generateFact()">Get a Space Fact</button>
+  <div class="fact" id="fact">Click the button to see a space fact!</div>
 
-<script>
-// Starfield
-const canvas = document.getElementById('starfield');
-const ctx = canvas.getContext('2d');
-let stars = [], width, height, mouseX = 0, mouseY = 0;
-const starCount = 150;
+  <div class="background" id="background"></div>
 
-function initStars() {
-  stars = [];
-  for (let i = 0; i < starCount; i++) {
-    stars.push({x: Math.random()*width, y: Math.random()*height, radius: Math.random()*1.3+0.3});
-  }
-}
+  <script>
+    const facts = [
+      "A day on Venus is longer than a year on Venus.",
+      "Neutron stars can spin at a rate of 600 rotations per second.",
+      "One million Earths could fit inside the Sun.",
+      "There may be a planet made of diamonds twice the size of Earth.",
+      "A spoonful of a neutron star weighs about a billion tons.",
+      "Saturn's rings are mostly made of ice particles.",
+      "There are more trees on Earth than stars in the Milky Way.",
+      "The footprints on the Moon will remain for millions of years."
+    ];
 
-function resize() {
-  width = window.innerWidth;
-  height = window.innerHeight;
-  canvas.width = width;
-  canvas.height = height;
-  initStars();
-}
-
-function drawStars() {
-  ctx.clearRect(0, 0, width, height);
-  ctx.fillStyle = 'white';
-  stars.forEach(star => {
-    let parallaxX = star.x + (mouseX - width/2) * 0.02 * star.radius;
-    let parallaxY = star.y + (mouseY - height/2) * 0.02 * star.radius;
-    ctx.beginPath();
-    ctx.arc(parallaxX, parallaxY, star.radius, 0, 2*Math.PI);
-    ctx.fill();
-  });
-}
-
-window.addEventListener('resize', resize);
-window.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
-
-function animateStarfield() { drawStars(); requestAnimationFrame(animateStarfield); }
-resize(); animateStarfield();
-
-// Space Objects
-const rocketImages = [
-  'https://stewdini.github.io/space-fact-generator/images/rocket1.png',
-  'https://stewdini.github.io/space-fact-generator/images/rocket2.png'
-];
-const asteroidImages = [
-  'https://stewdini.github.io/space-fact-generator/images/asteroid1.png',
-  'https://stewdini.github.io/space-fact-generator/images/asteroid2.png',
-  'https://stewdini.github.io/space-fact-generator/images/asteroid3.png'
-];
-const spaceObjectsContainer = document.getElementById('spaceObjectsContainer');
-
-class SpaceObject {
-  constructor(type) {
-    this.type = type;
-    this.el = document.createElement('div');
-    this.el.classList.add('space-object');
-    
-    if(type === 'planet') {
-      this.size = 40 + Math.random()*35;
-      this.el.classList.add('planet');
-      const colors = ['red','blue','green','orange','purple'];
-      this.el.classList.add(colors[Math.floor(Math.random()*colors.length)]);
-      do { this.x = Math.random()*width; this.y = Math.random()*height; } 
-      while(this.x>width/2-150 && this.x<width/2+150 && this.y>height/2-150 && this.y<height/2+150);
-      this.speedX = this.speedY = 0; this.rotation = 0; this.rotationSpeed = 0.02;
-      this.el.style.width = this.el.style.height = this.size+'px';
+    function generateFact() {
+      const fact = facts[Math.floor(Math.random() * facts.length)];
+      document.getElementById("fact").textContent = fact;
     }
-    else if(type === 'asteroid') {
-      this.size = 30+Math.random()*20;
-      this.el.style.backgroundImage = `url(${asteroidImages[Math.floor(Math.random()*asteroidImages.length)]})`;
-      this.el.style.width = this.el.style.height = this.size+'px';
-      this.x = Math.random()*width; this.y = Math.random()*height;
-      this.speedX = (Math.random()-0.5)*1; this.speedY = (Math.random()-0.5)*1;
-      this.rotation = Math.random()*360; this.rotationSpeed = (Math.random()-0.5)*0.3;
-    }
-    else if(type === 'rocket') {
-      this.size = 40; this.el.style.width = this.el.style.height = '40px';
-      this.el.style.backgroundImage = `url(${rocketImages[0]})`;
-      const edge = Math.floor(Math.random()*4);
-      switch(edge){
-        case 0: this.x=Math.random()*width; this.y=-50; this.speedX=(Math.random()-0.5)*0.5; this.speedY=1.7+Math.random()*0.5; break;
-        case 1: this.x=width+50; this.y=Math.random()*height; this.speedX=-(1.7+Math.random()*0.5); this.speedY=(Math.random()-0.5)*0.5; break;
-        case 2: this.x=Math.random()*width; this.y=height+50; this.speedX=(Math.random()-0.5)*0.5; this.speedY=-(1.7+Math.random()*0.5); break;
-        case 3: this.x=-50; this.y=Math.random()*height; this.speedX=1.7+Math.random()*0.5; this.speedY=(Math.random()-0.5)*0.5; break;
-      }
-      this.rotation = 0;
-    }
-    
-    this.updatePosition();
-    spaceObjectsContainer.appendChild(this.el);
-  }
 
-  updatePosition() {
-    this.el.style.transform = `translate3d(${this.x}px,${this.y}px,0) rotate(${this.rotation}deg)`;
-  }
-
-  createSmoke() {
-    const smoke = document.createElement('div');
-    smoke.classList.add('smoke');
-    spaceObjectsContainer.appendChild(smoke);
-
-    const angle = Math.atan2(this.speedY, this.speedX);
-    const tipX = this.x + this.size/2 - Math.cos(angle) * this.size/2;
-    const tipY = this.y + this.size/2 - Math.sin(angle) * this.size/2;
-
-    smoke.style.left = tipX - 7 + 'px';
-    smoke.style.top = tipY - 7 + 'px';
-
-    let opacity = 0.35 + Math.random()*0.25;
-    let scale = 0.4 + Math.random()*0.3;
-    let frame = 0;
-    const lifetime = 60 + Math.floor(Math.random()*20);
-    const speed = 0.12 + Math.random()*0.05;
-
-    const animateSmoke = () => {
-      if(frame >= lifetime){ smoke.remove(); return; }
-      smoke.style.transform = `translate(${frame * Math.sin(angle) * -speed}px, ${frame * Math.cos(angle) * speed}px) scale(${scale})`;
-      smoke.style.opacity = opacity;
-      opacity -= 0.006; scale += 0.004; frame++;
-      requestAnimationFrame(animateSmoke);
-    };
-    animateSmoke();
-  }
-
-  update() {
-    this.x += this.speedX;
-    this.y += this.speedY;
-
-    if(this.type==='planet' || this.type==='asteroid') {
-      this.rotation += this.rotationSpeed;
-      if(this.rotation>360) this.rotation -=360;
-      if(this.rotation<0) this.rotation+=360;
-    } else if(this.type==='rocket') {
-      this.rotation = Math.atan2(this.speedY, this.speedX)*180/Math.PI+90;
-      if(Math.random()<0.3) this.createSmoke();
-      if(this.x<-100||this.x>width+100||this.y<-100||this.y>height+100){
-        this.el.remove(); return false;
+    function createStars() {
+      const background = document.getElementById("background");
+      for (let i = 0; i < 100; i++) {
+        const star = document.createElement("div");
+        star.className = "star";
+        const size = Math.random() * 3;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.left = `${Math.random() * 100}%`;
+        background.appendChild(star);
       }
     }
 
-    this.updatePosition();
-    return true;
-  }
-}
-
-const spaceObjects = [];
-for(let i=0;i<6;i++) spaceObjects.push(new SpaceObject('planet'));
-for(let i=0;i<5;i++) spaceObjects.push(new SpaceObject('asteroid'));
-for(let i=0;i<4;i++) spaceObjects.push(new SpaceObject('rocket'));
-
-function animateSpaceObjects(){
-  for(let i=spaceObjects.length-1;i>=0;i--){
-    const alive = spaceObjects[i].update();
-    if(!alive){
-      const type = spaceObjects[i]?.type || 'rocket';
-      spaceObjects.splice(i,1);
-      spaceObjects.push(new SpaceObject(type));
+    function createPlanets() {
+      const background = document.getElementById("background");
+      for (let i = 0; i < 5; i++) {
+        const planet = document.createElement("div");
+        planet.className = "planet";
+        const size = 40 + Math.random() * 60;
+        planet.style.width = `${size}px`;
+        planet.style.height = `${size}px`;
+        planet.style.top = `${Math.random() * 90}%`;
+        planet.style.left = `${Math.random() * 90}%`;
+        planet.style.background = `radial-gradient(circle, ${randomColor()} 0%, #000 70%)`;
+        background.appendChild(planet);
+      }
     }
-  }
-  requestAnimationFrame(animateSpaceObjects);
-}
-animateSpaceObjects();
 
-// Fact generator
-const facts=[
-  "The largest volcano in our solar system is on Mars, Olympus Mons.",
-  "Jupiter has the shortest day of all planets, completing a rotation in about 10 hours.",
-  "Saturn’s rings are made mostly of ice particles with a smaller amount of rocky debris.",
-  "Venus spins backward compared to most planets, meaning the Sun rises in the west there.",
-  "A day on Mercury lasts longer than its year!",
-  "Neutron stars can spin 600 times per second.",
-  "Space is not completely empty, it has tiny particles and radiation.",
-  "The hottest planet is not the closest to the Sun, but Venus due to its thick atmosphere.",
-  "Pluto is classified as a dwarf planet, not a full sized planet.",
-  "There are thousands of exoplanets discovered beyond our solar system."
-];
+    function createRockets() {
+      const background = document.getElementById("background");
+      for (let i = 0; i < 5; i++) {
+        const container = document.createElement("div");
+        container.className = "rocket-container";
+        container.style.top = `${Math.random() * 90}%`;
+        container.style.left = `${Math.random() * 90}%`;
+        container.style.animation = `float ${5 + Math.random() * 5}s ease-in-out infinite`;
 
-const factDisplay = document.getElementById('factDisplay');
-const factButton = document.getElementById('factButton');
-const copyButton = document.getElementById('copyButton');
-const copyFeedback = document.getElementById('copyFeedback');
+        const rocket = document.createElement("div");
+        rocket.className = "rocket";
 
-factButton.addEventListener('click', ()=>{
-  const randomFact = facts[Math.floor(Math.random()*facts.length)];
-  factDisplay.textContent = randomFact;
-  factDisplay.classList.add('show');
-  copyButton.style.display = 'inline-block';
-  copyFeedback.style.display = 'none';
-});
+        const smoke = document.createElement("div");
+        smoke.className = "smoke";
 
-copyButton.addEventListener('click', ()=>{
-  navigator.clipboard.writeText(factDisplay.textContent).then(()=>{
-    copyFeedback.style.display = 'inline';
-    setTimeout(()=>{copyFeedback.style.display='none';},2000);
-  });
-});
+        container.appendChild(rocket);
+        container.appendChild(smoke);
+        background.appendChild(container);
+      }
+    }
 
-const muteToggle = document.getElementById('muteToggle');
-let muted = false;
-muteToggle.addEventListener('click', ()=>{ muted = !muted; muteToggle.textContent = muted ? '🔇' : '🔊'; });
-</script>
+    function randomColor() {
+      const colors = ["#ff4500", "#1e90ff", "#32cd32", "#ff69b4", "#ffd700"];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    createStars();
+    createPlanets();
+    createRockets();
+  </script>
 </body>
 </html>
