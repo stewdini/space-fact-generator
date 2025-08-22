@@ -147,7 +147,10 @@ class SpaceObject{
         smoke.style.left = `${centerX + driftX - 7}px`;
         smoke.style.top = `${centerY + driftY - 7}px`;
         smoke.style.opacity = opacity;
-        smoke.style.transform = `scale(${scale})`;
+
+        // Rotate smoke to match rocket direction
+        const smokeAngle = angle * 180 / Math.PI + 90; // same as rocket rotation
+        smoke.style.transform = `scale(${scale}) rotate(${smokeAngle}deg)`;
 
         opacity -= 0.006;
         scale += 0.004;
@@ -232,6 +235,7 @@ muteToggle.addEventListener('click',()=>{ muted=!muted; muteToggle.textContent=m
 </script>
 </body>
 </html>
+
 
 
 
