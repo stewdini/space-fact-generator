@@ -122,14 +122,13 @@ class SpaceObject{
     createSmoke() {
     const smoke = document.createElement('div');
     smoke.classList.add('smoke');
-    spaceObjectsContainer.appendChild(smoke); // keep it in the container
+    spaceObjectsContainer.appendChild(smoke);
 
     let opacity = 0.35 + Math.random() * 0.25;
     let scale = 0.4 + Math.random() * 0.3;
     let frame = 0;
     const lifetime = 60 + Math.floor(Math.random() * 20);
 
-    // Rocket angle in radians
     const angle = Math.atan2(this.speedY, this.speedX);
 
     const animateSmoke = () => {
@@ -138,18 +137,18 @@ class SpaceObject{
             return;
         }
 
-        // Engine is at bottom middle of the rocket
+        // Engine bottom middle: top-left + half width, full height
         const engineX = this.x + this.size / 2;
         const engineY = this.y + this.size; // bottom edge
 
-        // Trail offset opposite rocket's movement
+        // Smoke moves slightly opposite the rocket direction with a small random spread
         const offsetX = -Math.cos(angle) * frame * 0.6 + (Math.random() - 0.5) * 2;
         const offsetY = -Math.sin(angle) * frame * 0.6 + (Math.random() - 0.5) * 2;
 
         smoke.style.left = `${engineX + offsetX - 7}px`;
         smoke.style.top = `${engineY + offsetY - 7}px`;
         smoke.style.opacity = opacity;
-        smoke.style.transform = `scale(${scale}) rotate(${angle + Math.PI}rad)`; // rotate opposite rocket
+        smoke.style.transform = `scale(${scale})`;
 
         opacity -= 0.006;
         scale += 0.004;
@@ -234,5 +233,6 @@ muteToggle.addEventListener('click',()=>{ muted=!muted; muteToggle.textContent=m
 </script>
 </body>
 </html>
+
 
 
