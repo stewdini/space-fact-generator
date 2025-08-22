@@ -119,35 +119,47 @@ class SpaceObject{
 
     updatePosition(){ this.el.style.transform=`translate3d(${this.x}px,${this.y}px,0) rotate(${this.rotation}deg)`; }
 
-    createSmoke(){
-        const smoke=document.createElement('div');
-        smoke.classList.add('smoke');
-        this.el.appendChild(smoke); // attach to rocket
+    createSmoke() {
+    const smoke = document.createElement('div');
+    smoke.classList.add('smoke');
+    this.el.appendChild(smoke); // attach to rocket
 
-        let opacity=0.35+Math.random()*0.25;
-        let scale=0.4+Math.random()*0.3;
-        let frame=0;
-        const lifetime=60+Math.floor(Math.random()*20);
-        const angle=Math.atan2(this.speedY,this.speedX);
+    let opacity = 0.35 + Math.random() * 0.25;
+    let scale = 0.4 + Math.random() * 0.3;
+    let frame = 0;
+    const lifetime = 60 + Math.floor(Math.random() * 20);
 
-        const animateSmoke=()=>{
-            if(frame>=lifetime){ smoke.remove(); return; }
+    // Rocket angle in radians
+    const angle = Math.atan2(this.speedY, this.speedX);
 
-            const offsetX = -Math.cos(angle)*frame*0.5 + (Math.random()-0.5)*2;
-            const offsetY = -Math.sin(angle)*frame*0.5 + (Math.random()-0.5)*2;
+    const animateSmoke = () => {
+        if (frame >= lifetime) {
+            smoke.remove();
+            return;
+        }
 
-            smoke.style.left = `${this.size/2 + offsetX - 7}px`;
-            smoke.style.top = `${this.size/2 + offsetY - 7}px`;
-            smoke.style.opacity = opacity;
-            smoke.style.transform = `scale(${scale})`;
+        // Smoke starts at the back of the rocket
+        const backX = this.size / 2 - Math.cos(angle) * this.size / 2;
+        const backY = this.size / 2 - Math.sin(angle) * this.size / 2;
 
-            opacity-=0.006;
-            scale+=0.004;
-            frame++;
-            requestAnimationFrame(animateSmoke);
-        };
-        animateSmoke();
-    }
+        // Trail offset along the rocket's backward direction
+        const offsetX = -Math.cos(angle) * frame * 0.6 + (Math.random() - 0.5) * 2;
+        const offsetY = -Math.sin(angle) * frame * 0.6 + (Math.random() - 0.5) * 2;
+
+        smoke.style.left = `${backX + offsetX}px`;
+        smoke.style.top = `${backY + offsetY}px`;
+        smoke.style.opacity = opacity;
+        smoke.style.transform = `scale(${scale}) rotate(${angle + Math.PI}rad)`; // rotate smoke opposite rocket
+
+        opacity -= 0.006;
+        scale += 0.004;
+        frame++;
+        requestAnimationFrame(animateSmoke);
+    };
+
+    animateSmoke();
+}
+
 
     update(){
         this.x+=this.speedX; this.y+=this.speedY;
@@ -222,3 +234,4 @@ muteToggle.addEventListener('click',()=>{ muted=!muted; muteToggle.textContent=m
 </script>
 </body>
 </html>
+
